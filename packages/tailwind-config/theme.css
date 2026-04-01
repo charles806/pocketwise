@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  /* Add your custom Tailwind variables here */
+  /* --color-primary: #007bff; */
+}
