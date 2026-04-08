@@ -16,6 +16,7 @@
     "@repo/tailwind-config": "*",
     "@repo/ui": "*",
     "@tailwindcss/postcss": "^4.2.2",
+    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.38.0",
     "gsap": "^3.14.2",
     "lucide-react": "^1.7.0",

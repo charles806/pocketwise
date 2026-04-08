@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "../components/Layout/Header";
@@ -65,6 +66,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Analytics />
         {/* Skip to content link for accessibility */}
         <a
           href="#main-content"
@@ -73,7 +75,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <Header />
-        <main id="main-content" className="pt-18">{children}</main>
+        <main id="main-content" className="pt-18">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

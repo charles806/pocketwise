@@ -4,7 +4,7 @@ import FeaturesSection from "../components/Sections/Features";
 import Hero from "../components/Sections/Hero";
 import HowItWorksSection from "../components/Sections/How-it-works";
 import WhySection from "../components/Sections/WhyPocketWise";
-import ScrollRevealInit from "../components/Sections/ScrollRevealInit"
+import ScrollRevealInit from "../components/Sections/ScrollRevealInit";
 
 const App = () => {
   return (
