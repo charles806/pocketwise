@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Header from "../components/Layout/Header";
+import Footer from "../components/Layout/Footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -11,34 +13,36 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
-  title: "Pocketwise — Smart Wallet for Nigerian Youth | Auto-Split Money, Save & Spend Wisely",
-  description: "Automatically split every deposit into Spend, Savings, Emergency, and Flex wallets using the Warren Buffett principle. Build financial discipline without willpower — designed for Nigerian students and young earners.",
-  keywords: "smart wallet, Nigerian youth finance, auto-save, Warren Buffett split, money management app, PiggyVest alternative, Cowrywise alternative, save money Nigeria, student finance, emergency fund, AI money coach",
+  title:
+    "Pocketwise — Smart Wallet for Nigerian Youth | Auto-Split Money, Save & Spend Wisely",
+  description:
+    "Automatically split every deposit into Spend, Savings, Emergency, and Flex wallets using the Warren Buffett principle. Build financial discipline without willpower — designed for Nigerian students and young earners.",
+  keywords:
+    "smart wallet, Nigerian youth finance, auto-save, Warren Buffett split, money management app, PiggyVest alternative, Cowrywise alternative, save money Nigeria, student finance, emergency fund, AI money coach",
   openGraph: {
     title: "Pocketwise: Your money, automatically sorted.",
-    description: "Stop struggling to save. Pocketwise automatically allocates your money into four purpose-driven wallets the moment it arrives. Built for Nigerian youth.",
+    description:
+      "Stop struggling to save. Pocketwise automatically allocates your money into four purpose-driven wallets the moment it arrives. Built for Nigerian youth.",
     url: "https://getpocketwise.app",
     siteName: "Pocketwise",
     locale: "en_NG",
     type: "website",
   },
   alternates: {
-    canonical: "https://pocketwise.app",
+    canonical: "https://getpocketwise.app",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  manifest: "https://pocketwise.app/manifest.json", // Optional: if you have a PWA manifest
+  manifest: "https://getpocketwise.app/manifest.json",
   authors: [{ name: "Pocketwise Team" }],
   category: "finance",
   applicationName: "Pocketwise",
   generator: "Next.js",
   referrer: "origin-when-cross-origin",
-  colorScheme: "light", // or "dark" if you support both
-  themeColor: "#5B4FCF", // Primary brand color
   appleWebApp: {
     title: "Pocketwise",
     statusBarStyle: "default",
@@ -61,7 +65,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        {/* Skip to content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          Skip to content
+        </a>
+        <Header />
+        <main id="main-content" className="pt-18">{children}</main>
+        <Footer />
       </body>
     </html>
   );

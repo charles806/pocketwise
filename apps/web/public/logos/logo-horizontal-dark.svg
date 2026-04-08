@@ -1,0 +1,10 @@
+<svg width="240" height="40" viewBox="0 0 240 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="240" height="40" rx="0" fill="#0F0F1A"/>
+  <rect width="40" height="40" rx="10" fill="#5B4FCF"/>
+  <rect x="9" y="14" width="22" height="15" rx="4" fill="none" stroke="white" stroke-width="1.8"/>
+  <rect x="9" y="11" width="9" height="5" rx="2" fill="white"/>
+  <circle cx="26" cy="21.5" r="2.2" fill="white"/>
+  <path d="M31 17 L35 21.5 L31 26" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M5 17 L1 21.5 L5 26" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="52" y="26" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="20" font-weight="700" fill="white" letter-spacing="-0.8">Pocket<tspan fill="#8B80F9">Wise</tspan></text>
+</svg>

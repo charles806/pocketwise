@@ -9,6 +9,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "prettier": "^3.7.4",
     "turbo": "^2.8.20"
   },

@@ -1,6 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  /* Add your custom Tailwind variables here */
-  /* --color-primary: #007bff; */
+  --font-jakarta: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #5b4fcf;
+  --color-primary-dark: #4840b0;
+  --color-primary-light: #ede9ff;
+  --color-background: #f9f9fb;
+  --color-surface: #ffffff;
+  --color-foreground: #0f0f1a;
+  --color-text-primary: #0f0f1a;
+  --color-text-secondary: #6b7280;
+  --color-secondary: #6b7280;
+  --color-spend: #f97316;
+  --color-savings: #22c55e;
+  --color-emergency: #ef4444;
+  --color-flex: #3b82f6;
+  --color-dark-bg: #0f0f1a;
+  --color-dark-surface: #1e1b4b;
+
+  --shadow-card:
+    0 4px 24px rgba(91, 79, 207, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
 }

@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "pocketwise-frontend",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -11,14 +11,21 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@repo/tailwind-config": "*",
     "@repo/ui": "*",
     "@tailwindcss/postcss": "^4.2.2",
+    "framer-motion": "^12.38.0",
+    "gsap": "^3.14.2",
+    "lucide-react": "^1.7.0",
     "next": "16.2.0",
     "postcss": "^8.4.31",
     "react": "^19.2.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.2.2",
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
