@@ -4,7 +4,7 @@
 :root {
   --primary: #5b4fcf;
   --primary-dark: #4840b0;
-  --primary-light: #ede9ff;
+  --primary-light: rgb(237, 233, 255);
   --background: #f9f9fb;
   --surface: #ffffff;
   --text-primary: #0f0f1a;
