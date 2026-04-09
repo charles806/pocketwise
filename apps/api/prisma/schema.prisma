@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Waitlist {
@@ -15,26 +16,25 @@ model Waitlist {
 }
 
 model User {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName               String
-  lastName                 String
-  userName                  String
-  email              String   @unique
-  phone              String?  @unique
-  passwordHash       String   @map("password_hash")
-  dateOfBirth        DateTime @map("date_of_birth")
-  kycTier            Int      @default(1) @map("kyc_tier")
-  isSimulationMode   Boolean  @default(false) @map("is_simulation_mode")
-  onboardingComplete Boolean  @default(false) @map("onboarding_complete")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
-
-  wallets      Wallet[]
-  transactions Transaction[]
-  savingsGoals SavingsGoal[]
-  aiInsights   AIInsight[]
-  kycRecords   KycRecord[]
-  referrals    Referral[]    @relation("ReferrerReferrals")
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String        @unique
+  phone              String?       @unique
+  passwordHash       String        @map("password_hash")
+  dateOfBirth        DateTime      @map("date_of_birth")
+  kycTier            Int           @default(1) @map("kyc_tier")
+  isSimulationMode   Boolean       @default(false) @map("is_simulation_mode")
+  onboardingComplete Boolean       @default(false) @map("onboarding_complete")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @default(now()) @updatedAt @map("updated_at")
+  firstName          String
+  lastName           String
+  userName           String
+  aiInsights         AIInsight[]
+  kycRecords         KycRecord[]
+  referrals          Referral[]    @relation("ReferrerReferrals")
+  savingsGoals       SavingsGoal[]
+  transactions       Transaction[]
+  wallets            Wallet[]
 
   @@map("users")
 }
@@ -47,10 +47,86 @@ model KycRecord {
   ninHash    String?   @map("nin_hash")
   verifiedAt DateTime? @map("verified_at")
   createdAt  DateTime  @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("kyc_records")
+}
+
+model Wallet {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  type         WalletType
+  balance      Decimal       @default(0.00) @db.Decimal(12, 2)
+  isLocked     Boolean       @default(false) @map("is_locked")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
+  transactions Transaction[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("wallets")
+}
+
+model Transaction {
+  id           String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String            @map("user_id") @db.Uuid
+  walletId     String            @map("wallet_id") @db.Uuid
+  type         TransactionType
+  amount       Decimal           @db.Decimal(12, 2)
+  reason       String?
+  anchorRef    String?           @map("anchor_ref")
+  splitGroupId String?           @map("split_group_id") @db.Uuid
+  status       TransactionStatus @default(pending)
+  createdAt    DateTime          @default(now()) @map("created_at")
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet       Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model SavingsGoal {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  title          String
+  targetAmount   Decimal   @map("target_amount") @db.Decimal(12, 2)
+  currentAmount  Decimal   @default(0.00) @map("current_amount") @db.Decimal(12, 2)
+  deadline       DateTime?
+  autoContribute Boolean   @default(false) @map("auto_contribute")
+  weeklyAmount   Decimal?  @map("weekly_amount") @db.Decimal(12, 2)
+  isCompleted    Boolean   @default(false) @map("is_completed")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("savings_goals")
+}
+
+model AIInsight {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  weekStart DateTime @map("week_start")
+  summary   String
+  tips      Json     @default("[]")
+  warnings  Json     @default("[]")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@map("ai_insights")
+}
+
+model Referral {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  referrerId   String         @map("referrer_id") @db.Uuid
+  refereeId    String?        @map("referee_id") @db.Uuid
+  refereeEmail String?        @map("referee_email")
+  creditAmount Decimal        @default(100.00) @map("credit_amount") @db.Decimal(12, 2)
+  status       ReferralStatus @default(pending)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  creditedAt   DateTime?      @map("credited_at")
+  referrer     User           @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  @@map("referrals")
 }
 
 enum WalletType {
@@ -58,22 +134,6 @@ enum WalletType {
   savings
   emergency
   flex
-}
-
-model Wallet {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String     @map("user_id") @db.Uuid
-  type      WalletType
-  balance   Decimal    @default(0.00) @db.Decimal(12, 2)
-  isLocked  Boolean    @default(false) @map("is_locked")
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
-
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-
-  @@unique([userId, type])
-  @@map("wallets")
 }
 
 enum TransactionType {
@@ -91,74 +151,8 @@ enum TransactionStatus {
   failed
 }
 
-model Transaction {
-  id           String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String            @map("user_id") @db.Uuid
-  walletId     String            @map("wallet_id") @db.Uuid
-  type         TransactionType
-  amount       Decimal           @db.Decimal(12, 2)
-  reason       String?
-  anchorRef    String?           @map("anchor_ref")
-  splitGroupId String?           @map("split_group_id") @db.Uuid
-  status       TransactionStatus @default(pending)
-  createdAt    DateTime          @default(now()) @map("created_at")
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
-
-  @@map("transactions")
-}
-
-model SavingsGoal {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId         String    @map("user_id") @db.Uuid
-  title          String
-  targetAmount   Decimal   @map("target_amount") @db.Decimal(12, 2)
-  currentAmount  Decimal   @default(0.00) @map("current_amount") @db.Decimal(12, 2)
-  deadline       DateTime?
-  autoContribute Boolean   @default(false) @map("auto_contribute")
-  weeklyAmount   Decimal?  @map("weekly_amount") @db.Decimal(12, 2)
-  isCompleted    Boolean   @default(false) @map("is_completed")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("savings_goals")
-}
-
-model AIInsight {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  weekStart DateTime @map("week_start")
-  summary   String
-  tips      Json     @default("[]")
-  warnings  Json     @default("[]")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, weekStart])
-  @@map("ai_insights")
-}
-
 enum ReferralStatus {
   pending
   credited
   expired
-}
-
-model Referral {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  referrerId   String         @map("referrer_id") @db.Uuid
-  refereeId    String?        @map("referee_id") @db.Uuid
-  refereeEmail String?        @map("referee_email")
-  creditAmount Decimal        @default(100.00) @map("credit_amount") @db.Decimal(12, 2)
-  status       ReferralStatus @default(pending)
-  createdAt    DateTime       @default(now()) @map("created_at")
-  creditedAt   DateTime?      @map("credited_at")
-
-  referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
-
-  @@map("referrals")
 }

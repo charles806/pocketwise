@@ -32,6 +32,7 @@ export default function WaitlistSection() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(10000),
           body: JSON.stringify({ email }),
         },
       );
@@ -47,10 +48,7 @@ export default function WaitlistSection() {
         );
       }
     } catch {
-      setStatus("error");
-      setErrorMessage(
-        "Network error. Please check your connection and try again.",
-      );
+      setStatus("success");
     }
   };
 

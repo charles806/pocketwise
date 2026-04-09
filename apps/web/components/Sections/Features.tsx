@@ -120,7 +120,6 @@ function InteractiveDepositCard() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.15 }}
                 className="flex items-center justify-between p-3 rounded-xl cursor-pointer"
-                style={{ background: split.bgLight }}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -235,7 +234,7 @@ function WalletSplitCard() {
           <div
             key={row.name}
             className="flex items-center justify-between p-3 rounded-xl cursor-pointer"
-            style={{ background: `${row.color}10` }}
+
           >
             <div className="flex items-center gap-3">
               <div
@@ -492,6 +491,24 @@ const features = [
     card: <WeeklySummaryCard />,
     textLeft: true,
   },
+  {
+    id: "manual-budgeting",
+    eyebrow: "Effortless Control",
+    title: "Break the manual budgeting cycle",
+    body: "No more tracking every naira on paper or complicated spreadsheets. PocketWise takes the manual labor out of financial planning. Your money manages itself the second it lands.",
+    card: (
+      <div className="bg-white cursor-pointer rounded-3xl shadow-card p-2 border border-gray-100 overflow-hidden">
+        <div className="relative w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
+          <img
+            src="/1.jpg"
+            alt="End manual budgeting"
+            className="w-full cursor-pointer max-h-[360px] object-cover object-center"
+          />
+        </div>
+      </div>
+    ),
+    textLeft: false,
+  },
 ];
 
 const containerVariants = {
@@ -526,11 +543,10 @@ function FeatureRow({ feature }: { feature: (typeof features)[0] }) {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
-      className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${
-        !feature.textLeft
+      className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${!feature.textLeft
           ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1"
           : ""
-      }`}
+        }`}
     >
       <motion.div variants={itemVariants} className="flex flex-col">
         <motion.span
