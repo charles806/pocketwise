@@ -21,7 +21,7 @@ app.use(
   }),
 );
 
-app.get("/api/v1", (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   try {
     sendSuccess(res, "Welcome to PocketWise API");
   } catch (error) {
@@ -42,6 +42,10 @@ app.use("/api/v1/waitlist", waitlistRouter);
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port http://localhost:${PORT}`);
+  });
+}
+
+export default app;
