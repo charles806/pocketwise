@@ -165,7 +165,7 @@ export default function WaitlistSection() {
                     }
                   }}
                   placeholder="Enter your email address"
-                  className="w-full pl-11 pr-4 py-4 text-sm font-medium text-black bg-white/10 border border-white/15 placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#5B4FCF]/60 focus:border-[#5B4FCF]/60 transition-all rounded-2xl"
+                  className="w-full pl-11 pr-4 py-4 text-sm font-medium text-white bg-white/10 border border-white/15 placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#5B4FCF]/60 focus:border-[#5B4FCF]/60 transition-all rounded-2xl"
                 />
               </div>
               <motion.button
