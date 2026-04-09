@@ -31,7 +31,7 @@ The **Warren Buffett 70/30 Split** — every deposit is automatically divided in
 
 | Wallet        | Allocation | Example (₦10,000) | Purpose                        |
 |---------------|------------|-------------------|--------------------------------|
-| 💸 **Spend**  | 70%        | ₦7,000            | Day-to-day expenses            |
+| 💸 **Spend**  | 50%        | ₦7,000            | Day-to-day expenses            |
 | 💰 **Savings**| 30%        | ₦3,000            | Long-term wealth building      |
 | 🚨 **Emergency** | 10%    | ₦1,000            | Safety net, locked by default  |
 | ✨ **Flex**   | 10%        | ₦1,000            | Guilt-free treats and extras   |
