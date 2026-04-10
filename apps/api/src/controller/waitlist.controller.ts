@@ -23,3 +23,13 @@ export const getWaitlistCount = async (req: Request, res: Response) => {
         sendError(res, message, 500)
     }
 }
+
+export const getAllWaitlist = async (req: Request, res: Response) => {
+    try {
+        const result = await waitListService.getAll()
+        sendSuccess(res, "Waitlist entries", result)
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Error getting waitlist"
+        sendError(res, message, 500)
+    }
+}

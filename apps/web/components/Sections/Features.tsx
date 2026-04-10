@@ -32,25 +32,25 @@ function InteractiveDepositCard() {
     {
       label: "Spend",
       pct: 50,
-      color: "#F97316",
-      bgLight: "#FED7AA",
+      color: "#5B4FCF",
+      bgLight: "#EEEFFC",
       icon: CreditCard,
     },
     {
       label: "Savings",
       pct: 30,
-      color: "#22C55E",
-      bgLight: "#BBF7D0",
+      color: "#10B981",
+      bgLight: "#E7F8F1",
       icon: PiggyBank,
     },
     {
       label: "Emergency",
       pct: 10,
-      color: "#EF4444",
-      bgLight: "#FECACA",
+      color: "#F59E0B",
+      bgLight: "#FFF4E0",
       icon: Lock,
     },
-    { label: "Flex", pct: 10, color: "#3B82F6", bgLight: "#BFDBFE", icon: Zap },
+    { label: "Flex", pct: 10, color: "#EC4899", bgLight: "#FDE7F2", icon: Zap },
   ];
 
   const handleDeposit = () => {
@@ -198,28 +198,28 @@ function WalletSplitCard() {
       name: "Spend",
       pct: "50%",
       purpose: "Day-to-day",
-      color: "#F97316",
+      color: "#5B4FCF",
       icon: CreditCard,
     },
     {
       name: "Savings",
       pct: "30%",
       purpose: "Long-term",
-      color: "#22C55E",
+      color: "#10B981",
       icon: PiggyBank,
     },
     {
       name: "Emergency",
       pct: "10%",
       purpose: "Safety net",
-      color: "#EF4444",
+      color: "#F59E0B",
       icon: Shield,
     },
     {
       name: "Flex",
       pct: "10%",
       purpose: "Treats",
-      color: "#3B82F6",
+      color: "#EC4899",
       icon: Zap,
     },
   ];
@@ -383,14 +383,14 @@ function WeeklySummaryCard() {
       label: "Spent",
       value: "₦12,400",
       sub: "49.6% of Spend wallet",
-      color: "#F97316",
+      color: "#5B4FCF",
       icon: TrendingDown,
     },
     {
       label: "Saved",
       value: "₦7,500",
       sub: "Toward MacBook goal",
-      color: "#22C55E",
+      color: "#10B981",
       icon: PiggyBank,
     },
     {
@@ -544,8 +544,8 @@ function FeatureRow({ feature }: { feature: (typeof features)[0] }) {
       whileInView="visible"
       viewport={{ once: true }}
       className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${!feature.textLeft
-          ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1"
-          : ""
+        ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1"
+        : ""
         }`}
     >
       <motion.div variants={itemVariants} className="flex flex-col">

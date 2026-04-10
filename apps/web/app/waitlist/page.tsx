@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
-  Wallet,
   Mail,
   Loader2,
   Check,
@@ -94,9 +94,13 @@ export default function WaitlistPage() {
             href="/"
             className="inline-flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="size-11 flex justify-center items-center bg-gradient-to-br from-[#5B4FCF] to-[#8B5CF6] rounded-xl group-hover:scale-105 transition-transform">
-              <Wallet className="size-5 text-white" />
-            </div>
+              <Image
+                src="/logo.png"
+                alt="PocketWise Logo"
+                width={44}
+                height={44}
+                className="rounded-xl group-hover:scale-105 transition-transform"
+              />
             <span className="text-xl font-bold text-gray-900 tracking-tight group-hover:text-[#5B4FCF] transition-colors">
               PocketWise
             </span>

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
-  Wallet,
   Menu,
   X,
   // ChevronDown,
@@ -48,9 +48,13 @@ export default function Header() {
           <div className="flex items-center justify-between h-16 sm:h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 group">
-              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/25">
-                <Wallet className="w-4 h-4" />
-              </span>
+              <Image
+                src="/logo.png"
+                alt="PocketWise Logo"
+                width={36}
+                height={36}
+                className="rounded-xl shadow-lg shadow-violet-600/25"
+              />
               <span className="font-jakarta font-bold text-lg text-gray-900 tracking-tight">
                 PocketWise
               </span>

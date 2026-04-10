@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { Wallet, Mail, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, ArrowRight, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 
 const footerLinks: Record<string, { title: string; href: string }[]> = {
@@ -114,9 +115,13 @@ export default function Footer() {
               href="/"
               className="flex items-center gap-2.5 w-fit group cursor-pointer"
             >
-              <div className="size-10 flex justify-center items-center bg-gradient-to-br from-[#5B4FCF] to-[#8B5CF6] rounded-xl group-hover:scale-105 transition-transform">
-                <Wallet className="size-5 text-white" />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="PocketWise Logo"
+                width={40}
+                height={40}
+                className="rounded-xl group-hover:scale-105 transition-transform"
+              />
               <span className="text-white font-bold text-xl tracking-tight">
                 PocketWise
               </span>

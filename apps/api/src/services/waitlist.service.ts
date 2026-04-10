@@ -27,6 +27,13 @@ export const waitListService = {
     async getCount() {
         const count = await prisma.waitlist.count()
         return { count }
+    },
+
+    async getAll() {
+        const waitlist = await prisma.waitlist.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+        return waitlist;
     }
 }
 
