@@ -78,7 +78,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <Header />
-        <main id="main-content" className="pt-18">
+        <main id="main-content" className="pt-18 mt-8 md:mt-0">
           {children}
         </main>
         <Footer />

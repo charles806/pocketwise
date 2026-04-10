@@ -2,24 +2,39 @@
 @import "../../../packages/tailwind-config/theme.css";
 
 :root {
-  --primary: #5b4fcf;
-  --primary-dark: #4840b0;
-  --primary-light: rgb(237, 233, 255);
-  --background: #f9f9fb;
+  /* --- PRIMARY PIVOT --- */
+  /* Shifting from "Vivid Purple" to "Deep Indigo/Blurple" */
+  /* This is the Stripe/Revolut sweet spot. */
+  --primary: #4f46e5;         /* Deeper, more stable Indigo */
+  --primary-dark: #3730a3;    /* Professional Navy-Purple */
+  --primary-light: #eef2ff;   /* Cleaner, cooler tint */
+
+  /* --- NEUTRALS (The "Clean" Factor) --- */
+  /* Replaced generic grays with "Slate" to look more technical */
+  --background: #f8fafc;      /* Brighter, more premium canvas */
   --surface: #ffffff;
-  --text-primary: #0f0f1a;
-  --text-secondary: #6b7280;
-  --spend: #5B4FCF;
-  --spend-bg-light: #EEEFFC;
-  --savings: #10B981;
-  --savings-bg-light: #E7F8F1;
-  --emergency: #F59E0B;
-  --emergency-bg-light: #FFF4E0;
-  --flex: #EC4899;
-  --flex-bg-light: #FDE7F2;
-  --dark-bg: #0f0f1a;
-  --dark-surface: #1e1b4b;
+  --text-primary: #0f172a;    /* Deep Slate (easier on eyes than pure black) */
+  --text-secondary: #475569;  /* Darker gray for better accessibility */
+
+  /* --- CATEGORY COLORS (Desaturated for Maturity) --- */
+  /* We kept the colors but moved them away from "Neon" */
+  --spend: #4f46e5;           /* Matches primary */
+  --spend-bg-light: #eef2ff;
+  
+  --savings: #059669;         /* "Bank Green" - deeper than your current one */
+  --savings-bg-light: #ecfdf5;
+  
+  --emergency: #d97706;       /* "Amber" instead of bright Yellow/Orange */
+  --emergency-bg-light: #fffbeb;
+  
+  --flex: #db2777;            /* "Deep Berry" instead of Hot Pink */
+  --flex-bg-light: #fdf2f8;
+
+  /* --- DARK MODE ANCHORS --- */
+  --dark-bg: #020617;         /* Deepest Navy (Professional "Midnight") */
+  --dark-surface: #0f172a;    /* Slate Navy */
 }
+
 
 html {
   scroll-behavior: smooth;
@@ -139,11 +154,11 @@ h6 {
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(91, 79, 207, 0.3);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.3);
   }
 
   50% {
-    box-shadow: 0 0 0 12px rgba(91, 79, 207, 0);
+    box-shadow: 0 0 0 12px rgba(79, 70, 229, 0);
   }
 }
 
@@ -267,15 +282,15 @@ h6 {
 .hero-mesh {
   background:
     radial-gradient(ellipse 80% 60% at 50% -10%,
-      rgba(91, 79, 207, 0.18) 0%,
+      rgba(79, 70, 229, 0.18) 0%,
       transparent 70%),
     radial-gradient(ellipse 50% 40% at 10% 60%,
-      rgba(91, 79, 207, 0.08) 0%,
+      rgba(79, 70, 229, 0.08) 0%,
       transparent 60%),
     radial-gradient(ellipse 40% 50% at 90% 80%,
       rgba(59, 130, 246, 0.06) 0%,
       transparent 60%),
-    #f9f9fb;
+    #f8fafc;
 }
 
 /* ── Glass cards ── */
@@ -336,7 +351,7 @@ h6 {
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow:
-    0 20px 40px rgba(91, 79, 207, 0.12),
+    0 20px 40px rgba(79, 70, 229, 0.12),
     0 8px 16px rgba(0, 0, 0, 0.06);
 }
 
@@ -353,7 +368,7 @@ h6 {
 .btn-primary:hover {
   background: var(--primary-dark);
   transform: scale(1.02);
-  box-shadow: 0 8px 24px rgba(91, 79, 207, 0.35);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
 }
 
 .btn-primary:active {
@@ -362,7 +377,7 @@ h6 {
 
 /* ── Ghost button ── */
 .btn-ghost {
-  border: 1.5px solid rgba(91, 79, 207, 0.3);
+  border: 1.5px solid rgba(79, 70, 229, 0.3);
   color: var(--primary);
   transition:
     background 0.2s ease,
@@ -392,7 +407,7 @@ h6 {
 
 /* ── Feature table ── */
 .feature-table tr:not(:last-child) td {
-  border-bottom: 1px solid rgba(91, 79, 207, 0.08);
+  border-bottom: 1px solid rgba(79, 70, 229, 0.08);
 }
 
 /* ── Noise texture overlay ── */
@@ -415,7 +430,7 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(91, 79, 207, 0.25);
+  background: rgba(79, 70, 229, 0.25);
   border-radius: 9999px;
 }
 

@@ -38,14 +38,14 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-[95%] md:w-[80%] max-w-[1200px] rounded-[24px] border border-white/40 bg-white/70 backdrop-blur-[12px] ${
           scrolled
-            ? "nav-scrolled bg-white/80 backdrop-blur-md border-b border-gray-200/50"
-            : "bg-transparent"
+            ? "shadow-[0_8px_30px_rgb(0,0,0,0.12)] bg-white/80"
+            : "shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/60"
         }`}
       >
-        <div className="max-w-6xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="w-full px-5 sm:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 group">
               <Image

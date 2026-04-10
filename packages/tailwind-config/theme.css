@@ -3,22 +3,22 @@
 @theme {
   --font-jakarta: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --color-primary: #5b4fcf;
-  --color-primary-dark: #4840b0;
-  --color-primary-light: #ede9ff;
-  --color-background: #f9f9fb;
+  --color-primary: #4f46e5;
+  --color-primary-dark: #3730a3;
+  --color-primary-light: #eef2ff;
+  --color-background: #f8fafc;
   --color-surface: #ffffff;
-  --color-foreground: #0f0f1a;
-  --color-text-primary: #0f0f1a;
-  --color-text-secondary: #6b7280;
-  --color-secondary: #6b7280;
-  --color-spend: #f97316;
-  --color-savings: #22c55e;
-  --color-emergency: #ef4444;
-  --color-flex: #3b82f6;
-  --color-dark-bg: #0f0f1a;
-  --color-dark-surface: #1e1b4b;
+  --color-foreground: #0f172a;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-secondary: #475569;
+  --color-spend: #4f46e5;
+  --color-savings: #059669;
+  --color-emergency: #d97706;
+  --color-flex: #db2777;
+  --color-dark-bg: #020617;
+  --color-dark-surface: #0f172a;
 
   --shadow-card:
-    0 4px 24px rgba(91, 79, 207, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    0 4px 24px rgba(79, 70, 229, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
