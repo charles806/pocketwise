@@ -27,11 +27,11 @@ PocketWise is a fintech application built for Nigerian youth aged 18–25 that a
 
 ## The Core Idea
 
-The **Warren Buffett 70/30 Split** — every deposit is automatically divided into four wallets the instant it lands:
+The **50/30/10/10 Split** — every deposit is automatically divided into four wallets the instant it lands:
 
 | Wallet        | Allocation | Example (₦10,000) | Purpose                        |
 |---------------|------------|-------------------|--------------------------------|
-| 💸 **Spend**  | 70%        | ₦7,000            | Day-to-day expenses            |
+| 💸 **Spend**  | 50%        | ₦5,000            | Day-to-day expenses            |
 | 💰 **Savings**| 30%        | ₦3,000            | Long-term wealth building      |
 | 🚨 **Emergency** | 10%    | ₦1,000            | Safety net, locked by default  |
 | ✨ **Flex**   | 10%        | ₦1,000            | Guilt-free treats and extras   |
