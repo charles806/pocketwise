@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Loader2, Users, Download, Lock, Key, ChevronRight } from "lucide-react";
 
@@ -156,9 +157,13 @@ export default function AdminDashboard() {
       <header className="border-b border-white/10 bg-[#0F0D23]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-              <Users className="text-indigo-400" size={20} />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="PocketWise Logo"
+              width={40}
+              height={40}
+              className="rounded-xl border border-white/10"
+            />
             <div>
               <h1 className="text-white font-bold text-lg">Waitlist Dashboard</h1>
               <p className="text-white/50 text-xs">PocketWise Admin Central</p>
