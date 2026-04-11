@@ -1,9 +1,15 @@
 import React from 'react'
 
-const RegisterPage = () => {
+const SignUp = () => {
   return (
-    <div>RegisterPage</div>
+    <main className='max-w-[1440px] min-h-screen mx-aut0'>
+      <section className='flex justify-center items-center'>
+        <div className="leftPart w-[50%] flex items-center justify-center">
+          
+        </div>
+      </section>
+    </main>
   )
 }
 
-export default RegisterPage
+export default SignUp
