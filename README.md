@@ -361,7 +361,7 @@ NODE_ENV=development
 ### Frontend (`.env.local`)
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_BACKEND_URL=http://localhost:1000
 NEXT_PUBLIC_SENTRY_DSN=
 ```
 

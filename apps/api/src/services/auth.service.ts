@@ -76,6 +76,18 @@ const authService = {
 
     sendWelcomeEmail(newUser.email, newUser.firstName).catch(console.error);
 
+    const accessToken = jwt.sign(
+      { id: newUser.id, email: newUser.email },
+      process.env.JWT_ACCESS_SECRET!,
+      { expiresIn: "15m" },
+    );
+
+    const refreshToken = jwt.sign(
+      { id: newUser.id, email: newUser.email },
+      process.env.JWT_REFRESH_SECRET!,
+      { expiresIn: "7d" },
+    );
+
     return {
       id: newUser.id,
       email: newUser.email,
@@ -83,6 +95,8 @@ const authService = {
       lastName: newUser.lastName,
       userName: newUser.userName,
       isSimulationMode: newUser.isSimulationMode,
+      accessToken,
+      refreshToken,
     };
   },
 

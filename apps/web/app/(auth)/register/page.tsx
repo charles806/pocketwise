@@ -1,24 +1,209 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import loginImage from "../../../public/walletuicard.png";
 import logo from "../../../public/logo.png";
-import TextField from '@mui/material/TextField';
+import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Eye, EyeOff, ChevronLeft } from "lucide-react";
+import { z } from "zod";
+import { useAuth } from "../../../context/AuthContext";
 
-const SignUp = () => {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+const API_BASE =
+  process.env.NEXT_PUBLIC_BACKEND_URL ;
+
+interface SignupResponse {
+  message: string;
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+  };
+}
+
+//Validation One
+const step1Schema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+//Final Validation
+
+const fullSignupSchema = z
+  .object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    userName: z.string().min(2, "Username must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export default function SignUp() {
+  const router = useRouter();
+  const { setAuth } = useAuth();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [userName, setUserName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  //Password Strength Calculation
+  const calculateStrength = (pass: string) => {
+    let score = 0;
+    if (!pass) return score;
+    if (pass.length >= 8) score += 1;
+    if (/[a-zA-Z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^a-zA-Z\d]/.test(pass)) score += 1;
+    return score;
+  };
+
+  //Password Strength
+  const strength = calculateStrength(password);
+
+  //Password Strength Color
+  const getStrengthColor = (index: number) => {
+    if (strength === 0) return "bg-slate-200";
+    if (strength < index + 1) return "bg-slate-200";
+    if (strength === 1) return "bg-red-500";
+    if (strength === 2) return "bg-yellow-500";
+    if (strength === 3) return "bg-blue-500";
+    return "bg-emerald-500";
+  };
+
+  //Validate Step 1
+  const validateStep1 = () => {
+    const result = step1Schema.safeParse({ email, password, confirmPassword });
+
+    if (result.success) {
+      setErrors({});
+      return true;
+    }
+
+    const outputErrors: Record<string, string> = {};
+    result.error.issues.forEach((issue) => {
+      const key = issue.path[0] as string;
+      outputErrors[key] = issue.message;
+    });
+    setErrors(outputErrors);
+    return false;
+  };
+
+  //Handle Step 1 Submit
+  const handleStep1Submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  }
+    if (validateStep1()) {
+      setStep(2);
+      setErrors({});
+    }
+  };
+
+  //Handle Step 2 Submit
+  const handleStep2Submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const fullData = {
+      email,
+      password,
+      confirmPassword,
+      firstName,
+      lastName,
+      userName,
+      dateOfBirth,
+    };
+    const result = fullSignupSchema.safeParse(fullData);
+
+    if (!result.success) {
+      const outputErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const key = issue.path[0] as string;
+        outputErrors[key] = issue.message;
+      });
+      setErrors(outputErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          confirmPassword,
+          firstName,
+          lastName,
+          userName,
+          dateOfBirth,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data.message || "Failed to create account";
+        if (errorMessage.toLowerCase().includes("email")) {
+          setErrors({ email: errorMessage });
+        } else if (errorMessage.toLowerCase().includes("password")) {
+          setErrors({ password: errorMessage });
+        } else {
+          setErrors({ general: errorMessage });
+        }
+        setLoading(false);
+        return;
+      }
+
+      const signupData = data.data as SignupResponse;
+      setAuth(signupData.accessToken, signupData.user);
+      router.push("/onboarding");
+    } catch {
+      setErrors({ general: "Network error. Please try again." });
+      setLoading(false);
+    }
+  };
+
+  //Handle Back
+  const handleBack = () => {
+    setStep(1);
+    setErrors({});
+  };
+
   return (
-    <main className="h-screen w-full flex items-center justify-center bg-slate-50 p-4 lg:p-8">
-
+    <main className="h-screen w-full absolute top-0 left-0 bg-slate-50 p-4 lg:p-8">
       <div className="w-full max-w-[1440px] h-[95vh] flex bg-white overflow-hidden rounded-[32px] border border-slate-200">
-        {/* Left Panel*/}
+        {/* Left Side */}
         <section className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-50 p-12 relative overflow-hidden border-r border-slate-200">
-
-          {/* Brand Header */}
           <div className="relative z-10">
             <Link href="/" className="flex items-center gap-3 w-fit group">
               <Image
@@ -34,18 +219,19 @@ const SignUp = () => {
             </Link>
           </div>
 
-          {/* Content */}
           <div className="relative z-10 max-w-2xl mt-4">
             <h1 className="text-5xl lg:text-6xl font-extrabold font-sans text-slate-900 tracking-tighter leading-[1.05] mb-8">
-              One deposit. Four wallets.<br />
+              One deposit. Four wallets.
+              <br />
               Zero effort.
             </h1>
             <p className="text-xl lg:text-2xl text-slate-600 font-medium tracking-tight mb-12 leading-relaxed max-w-[90%]">
-              Join PocketWise to automatically sort, save, and grow your money the exact second it lands in your account. No math or spreadsheets required.
+              Join PocketWise to automatically sort, save, and grow your money
+              the exact second it lands in your account. No math or spreadsheets
+              required.
             </p>
           </div>
 
-          {/* Visual/Mockup */}
           <div className="relative z-10 flex-1 flex items-end justify-center">
             <div className="relative w-full max-w-md aspect-square">
               <Image
@@ -59,63 +245,269 @@ const SignUp = () => {
           </div>
         </section>
 
-        {/* Right Panel */}
-        <section className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-          <div className="w-full max-w-md">
-            <div className="flex items-center justify-center flex-col gap-4 text-center">
-              <h1 className="text-4xl lg:text-5xl font-extrabold font-sans text-slate-900 tracking-tighter leading-tight">
-                Sign Up to Pocketwise
+        {/* Right Side */}
+        <section className="w-full lg:w-1/2 flex flex-col pt-12 pb-12 overflow-y-auto bg-white">
+          <div className="w-full max-w-md mx-auto my-auto px-6">
+            <div className="flex flex-col gap-2 text-center mb-8">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span
+                  className={`text-xs font-medium px-3 py-1 rounded-full ${step === 1 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+                >
+                  Step 1 of 2
+                </span>
+                {step === 2 && (
+                  <button
+                    onClick={handleBack}
+                    className="text-slate-500 hover:text-slate-700 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <h1 className="text-3xl font-bold font-sans text-slate-900 tracking-tight">
+                {step === 1 ? "Create your account" : "Tell us about yourself"}
               </h1>
-              <p className="text-slate-500 font-medium tracking-tight leading-relaxed max-w-[320px] text-sm lg:text-base">
-                Create your account and start managing your money smarter today.
+              <p className="text-slate-500 font-medium text-sm">
+                {step === 1
+                  ? "Start managing your money smarter in seconds."
+                  : "We need a few more details to set up your profile."}
               </p>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <TextField label="First Name" variant="outlined" className="w-full" />
-                  <TextField label="Last Name" variant="outlined" className="w-full" />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <TextField label="Username" variant="outlined" className="w-full" />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <TextField label="Email" variant="outlined" className="w-full" />
-                  <TextField label="Phone Number" variant="outlined" className="w-full" />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <TextField label="Date of Birth" variant="outlined" className="w-full" />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <TextField label="Password" variant="outlined" className="w-full" />
-                  <TextField label="Confirm Password" variant="outlined" className="w-full" />
+            </div>
+
+            {step === 1 ? (
+              <form
+                onSubmit={handleStep1Submit}
+                className="flex flex-col gap-5 w-full"
+              >
+                <TextField
+                  label="Email address"
+                  variant="outlined"
+                  className="w-full"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  type="email"
+                  disabled={loading}
+                />
+
+                <div className="w-full flex flex-col gap-1.5">
+                  <TextField
+                    label="Password"
+                    variant="outlined"
+                    className="w-full"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    error={!!errors.password}
+                    helperText={errors.password}
+                    disabled={loading}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="toggle password visibility"
+                              onClick={() => setShowPassword(!showPassword)}
+                              edge="end"
+                              size="small"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="w-5 h-5 text-slate-400" />
+                              ) : (
+                                <Eye className="w-5 h-5 text-slate-400" />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+
+                  {password && (
+                    <div className="flex items-center gap-1.5 mt-1 px-1">
+                      {[0, 1, 2, 3].map((index) => (
+                        <div
+                          key={index}
+                          className={`h-1.5 w-full rounded-full transition-colors duration-300 ${getStrengthColor(index)}`}
+                        />
+                      ))}
+                      <span className="text-[10px] text-slate-500 font-medium ml-2 w-16 text-right">
+                        {strength === 0 && "Weak"}
+                        {strength === 1 && "Weak"}
+                        {strength === 2 && "Fair"}
+                        {strength === 3 && "Good"}
+                        {strength === 4 && "Strong"}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-start gap-2 text-left mt-2">
+                <TextField
+                  label="Confirm password"
+                  variant="outlined"
+                  className="w-full"
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword}
+                  disabled={loading}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                            size="small"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="w-5 h-5 text-slate-400" />
+                            ) : (
+                              <Eye className="w-5 h-5 text-slate-400" />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+
+                <div className="flex items-start gap-2 text-left mt-1">
                   <input
                     type="checkbox"
                     id="terms"
                     required
+                    disabled={loading}
                     className="mt-1 size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                   />
-                  <label htmlFor="terms" className="text-xs lg:text-sm text-slate-500 font-medium leading-snug cursor-pointer select-none">
+                  <label
+                    htmlFor="terms"
+                    className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none"
+                  >
                     I confirm that I am at least 18 years old and I agree to the{" "}
-                    <Link href="/terms" className="text-slate-900 underline underline-offset-4 hover:text-slate-700 transition-colors">Terms of Service</Link>
-                    {" "}and{" "}
-                    <Link href="/privacy" className="text-slate-900 underline underline-offset-4 hover:text-slate-700 transition-colors">Privacy Policy</Link>.
+                    <Link
+                      href="/terms"
+                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
                   </label>
                 </div>
 
-                <Button type="submit" variant="contained" className="w-full rounded-lg shadow-sm bg-primary! hover:bg-primary-dark! transition-colors py-3 normal-case font-sans font-bold">
-                  Sign Up
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  disableElevation
+                  className="w-full rounded-lg shadow-sm !bg-slate-900 !hover:bg-slate-800 disabled:!bg-slate-200 disabled:!text-slate-400 !text-white transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
+                >
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Next"
+                  )}
                 </Button>
               </form>
+            ) : (
+              <form
+                onSubmit={handleStep2Submit}
+                className="flex flex-col gap-5 w-full"
+              >
+                {errors.general && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    {errors.general}
+                  </div>
+                )}
 
+                <TextField
+                  label="First name"
+                  variant="outlined"
+                  className="w-full"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  error={!!errors.firstName}
+                  helperText={errors.firstName}
+                  disabled={loading}
+                />
 
-            </div>
+                <TextField
+                  label="Last name"
+                  variant="outlined"
+                  className="w-full"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  error={!!errors.lastName}
+                  helperText={errors.lastName}
+                  disabled={loading}
+                />
+
+                <TextField
+                  label="Username"
+                  variant="outlined"
+                  className="w-full"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  error={!!errors.userName}
+                  helperText={errors.userName}
+                  disabled={loading}
+                />
+
+                <TextField
+                  label="Date of birth"
+                  variant="outlined"
+                  className="w-full"
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  error={!!errors.dateOfBirth}
+                  helperText={errors.dateOfBirth}
+                  disabled={loading}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  disableElevation
+                  className="w-full rounded-lg shadow-sm !bg-slate-900 !hover:bg-slate-800 disabled:!bg-slate-200 disabled:!text-slate-400 !text-white transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
+                >
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Continue"
+                  )}
+                </Button>
+              </form>
+            )}
+
+            <p className="mt-8 text-center text-sm font-medium text-slate-500">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-slate-900 hover:underline underline-offset-4 transition-colors"
+              >
+                Log in
+              </Link>
+            </p>
           </div>
         </section>
       </div>
     </main>
   );
-};
-
-export default SignUp;
+}

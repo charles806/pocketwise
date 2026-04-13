@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import localFont from "next/font/local";
-import Header from "../components/Layout/Header";
+import { AuthProvider } from "../context/AuthContext";
 import "./globals.css";
-
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,9 +22,7 @@ export const metadata: Metadata = {
   title:
     "Pocketwise — Smart Wallet for Nigerian Youth | Auto-Split Money, Save & Spend Wisely",
   icons: {
-    icon: [
-      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
-    ],
+    icon: [{ url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" }],
     shortcut: ["/favicon-32x32.png"],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
@@ -87,11 +84,11 @@ export default function RootLayout({
           Skip to content
         </a>
 
-        <Header />
-        <main id="main-content" className="pt-18 mt-8 md:mt-0">
-          {children}
-        </main>
-
+        <AuthProvider>
+          <main id="main-content" className="pt-18 mt-8 md:mt-0">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );
