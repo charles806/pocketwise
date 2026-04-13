@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import localFont from "next/font/local";
-import "./globals.css";
 import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
+import "./globals.css";
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,6 +22,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title:
     "Pocketwise — Smart Wallet for Nigerian Youth | Auto-Split Money, Save & Spend Wisely",
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+    ],
+    shortcut: ["/favicon-32x32.png"],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   description:
     "Automatically split every deposit into Spend, Savings, Emergency, and Flex wallets using the Warren Buffett principle. Build financial discipline without willpower — designed for Nigerian students and young earners.",
   keywords:
@@ -77,11 +86,12 @@ export default function RootLayout({
         >
           Skip to content
         </a>
+
         <Header />
         <main id="main-content" className="pt-18 mt-8 md:mt-0">
           {children}
         </main>
-        <Footer />
+
       </body>
     </html>
   );
