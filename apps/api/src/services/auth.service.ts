@@ -65,7 +65,7 @@ const authService = {
       await tx.wallet.createMany({
         data: [
           { userId: user.id, type: "spend" },
-          { userId: user.id, type: "savings" },
+          { userId: user.id, type: "savings", isLocked: true },
           { userId: user.id, type: "emergency", isLocked: true },
           { userId: user.id, type: "flex" },
         ],
