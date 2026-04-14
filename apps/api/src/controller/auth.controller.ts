@@ -9,7 +9,7 @@ const signUp = async (req: Request, res: Response) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -40,7 +40,7 @@ const login = async (req: Request, res: Response) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -60,7 +60,10 @@ const refresh = async (req: Request, res: Response) => {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      return sendError(res, "No refresh token provided", 401);
+      return res.status(200).json({
+        success: false,
+        message: "No refresh token provided",
+      });
     }
 
     const result = await authService.refresh(refreshToken);
@@ -77,7 +80,7 @@ const logout = async (_req: Request, res: Response) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
   });
   sendSuccess(res, "Logged out successfully");
 };

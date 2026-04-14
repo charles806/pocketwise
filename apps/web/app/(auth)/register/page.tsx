@@ -15,7 +15,7 @@ import { z } from "zod";
 import { useAuth } from "../../../context/AuthContext";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_BACKEND_URL ;
+  process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface SignupResponse {
   message: string;
@@ -69,7 +69,6 @@ export default function SignUp() {
   const [lastName, setLastName] = useState("");
   const [userName, setUserName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -109,7 +108,7 @@ export default function SignUp() {
     const outputErrors: Record<string, string> = {};
     result.error.issues.forEach((issue) => {
       const key = issue.path[0] as string;
-      outputErrors[key] = issue.message;
+      outputErrors[issue.path[0] as string] = issue.message;
     });
     setErrors(outputErrors);
     return false;
@@ -143,7 +142,7 @@ export default function SignUp() {
       const outputErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         const key = issue.path[0] as string;
-        outputErrors[key] = issue.message;
+        outputErrors[issue.path[0] as string] = issue.message;
       });
       setErrors(outputErrors);
       return;
@@ -375,35 +374,6 @@ export default function SignUp() {
                   }}
                 />
 
-                <div className="flex items-start gap-2 text-left mt-1">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    required
-                    disabled={loading}
-                    className="mt-1 size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none"
-                  >
-                    I confirm that I am at least 18 years old and I agree to the{" "}
-                    <Link
-                      href="/terms"
-                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
-                    >
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      href="/privacy"
-                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </label>
-                </div>
 
                 <Button
                   type="submit"
@@ -480,6 +450,36 @@ export default function SignUp() {
                   }}
                 />
 
+                <div className="flex items-start gap-2 text-left mt-1">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    required
+                    disabled={loading}
+                    className="mt-1 size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none"
+                  >
+                    I confirm that I am at least 16 years old and I agree to the{" "}
+                    <Link
+                      href="/terms"
+                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
+                  </label>
+                </div>
+
                 <Button
                   type="submit"
                   variant="contained"
@@ -511,3 +511,4 @@ export default function SignUp() {
     </main>
   );
 }
+

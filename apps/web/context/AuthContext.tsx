@@ -123,7 +123,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         }
       } catch {
-        // Silent fail - user will remain unauthenticated
       } finally {
         setIsLoading(false);
       }
