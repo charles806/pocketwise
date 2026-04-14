@@ -42,10 +42,15 @@ app.use("/api/v1/waitlist", waitlistRouter);
 
 app.use(errorMiddleware);
 
-if (process.env.NODE_ENV !== "development" && !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
-  });
-}
+// if (!process.env.VERCEL) {
+//   app.listen(PORT, () => {
+//     console.log(`Server is running on port http://localhost:${PORT}`);
+//   });
+// }
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port http://localhost:${PORT}`);
+});
+
 
 export default app;

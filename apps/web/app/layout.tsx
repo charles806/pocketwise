@@ -85,7 +85,7 @@ export default function RootLayout({
         </a>
 
         <AuthProvider>
-          <main id="main-content" className="pt-18 mt-8 md:mt-0">
+          <main id="main-content" className="">
             {children}
           </main>
         </AuthProvider>

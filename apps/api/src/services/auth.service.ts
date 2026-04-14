@@ -45,7 +45,7 @@ const authService = {
       age--;
     }
 
-    const isSimulationMode = age < 18;
+    const isSimulationMode = age < 16;
     const passwordHash = await bcrypt.hash(password, 12);
 
     const newUser = await prisma.$transaction(async (tx) => {
