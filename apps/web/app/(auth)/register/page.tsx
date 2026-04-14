@@ -108,7 +108,7 @@ export default function SignUp() {
     const outputErrors: Record<string, string> = {};
     result.error.issues.forEach((issue) => {
       const key = issue.path[0] as string;
-      outputErrors[key] = issue.message;
+      outputErrors[issue.path[0] as string] = issue.message;
     });
     setErrors(outputErrors);
     return false;
@@ -142,7 +142,7 @@ export default function SignUp() {
       const outputErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         const key = issue.path[0] as string;
-        outputErrors[key] = issue.message;
+        outputErrors[issue.path[0] as string] = issue.message;
       });
       setErrors(outputErrors);
       return;
@@ -511,3 +511,4 @@ export default function SignUp() {
     </main>
   );
 }
+
