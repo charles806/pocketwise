@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import loginImage from "../../../public/walletuicard.png";
+import signUp from "../../../public/walletuicard.png";
 import logo from "../../../public/logo.png";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -14,8 +14,7 @@ import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "../../../context/AuthContext";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_BACKEND_URL;
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface SignupResponse {
   message: string;
@@ -47,6 +46,7 @@ const fullSignupSchema = z
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
     userName: z.string().min(2, "Username must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
+    phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
     dateOfBirth: z.string().min(1, "Date of birth is required"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
@@ -68,6 +68,7 @@ export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [userName, setUserName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -107,7 +108,6 @@ export default function SignUp() {
 
     const outputErrors: Record<string, string> = {};
     result.error.issues.forEach((issue) => {
-      const key = issue.path[0] as string;
       outputErrors[issue.path[0] as string] = issue.message;
     });
     setErrors(outputErrors);
@@ -134,6 +134,7 @@ export default function SignUp() {
       firstName,
       lastName,
       userName,
+      phoneNumber,
       dateOfBirth,
     };
     const result = fullSignupSchema.safeParse(fullData);
@@ -141,7 +142,6 @@ export default function SignUp() {
     if (!result.success) {
       const outputErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
-        const key = issue.path[0] as string;
         outputErrors[issue.path[0] as string] = issue.message;
       });
       setErrors(outputErrors);
@@ -164,6 +164,7 @@ export default function SignUp() {
           firstName,
           lastName,
           userName,
+          phoneNumber,
           dateOfBirth,
         }),
       });
@@ -200,7 +201,7 @@ export default function SignUp() {
 
   return (
     <main className="h-screen w-full absolute top-0 left-0 bg-slate-50 p-4 lg:p-8">
-      <div className="w-full max-w-[1440px] h-[95vh] flex bg-white overflow-hidden rounded-[32px] border border-slate-200">
+      <div className="w-full max-w-360 h-[95vh] flex bg-white overflow-hidden rounded-4xl border border-slate-200">
         {/* Left Side */}
         <section className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-50 p-12 relative overflow-hidden border-r border-slate-200">
           <div className="relative z-10">
@@ -234,7 +235,7 @@ export default function SignUp() {
           <div className="relative z-10 flex-1 flex items-end justify-center">
             <div className="relative w-full max-w-md aspect-square">
               <Image
-                src={loginImage}
+                src={signUp}
                 alt="PocketWise App Interface"
                 fill
                 className="object-contain drop-shadow-2xl"
@@ -281,7 +282,7 @@ export default function SignUp() {
                 <TextField
                   label="Email address"
                   variant="outlined"
-                  className="w-full"
+                  className="w-full rounded-xl!"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   error={!!errors.email}
@@ -294,7 +295,7 @@ export default function SignUp() {
                   <TextField
                     label="Password"
                     variant="outlined"
-                    className="w-full"
+                    className="w-full rounded-xl!"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -345,7 +346,7 @@ export default function SignUp() {
                 <TextField
                   label="Confirm password"
                   variant="outlined"
-                  className="w-full"
+                  className="w-full rounded-xl!"
                   type={showPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -374,13 +375,12 @@ export default function SignUp() {
                   }}
                 />
 
-
                 <Button
                   type="submit"
                   variant="contained"
                   disabled={loading}
                   disableElevation
-                  className="w-full rounded-lg shadow-sm !bg-slate-900 !hover:bg-slate-800 disabled:!bg-slate-200 disabled:!text-slate-400 !text-white transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
+                  className="w-full rounded-xl shadow-sm bg-[#0f172a]! !hover:bg-slate-800 disabled:bg-slate-200! disabled:text-slate-400! text-white! transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
                 >
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
@@ -403,7 +403,7 @@ export default function SignUp() {
                 <TextField
                   label="First name"
                   variant="outlined"
-                  className="w-full"
+                  className="w-full rounded-xl!"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   error={!!errors.firstName}
@@ -414,7 +414,7 @@ export default function SignUp() {
                 <TextField
                   label="Last name"
                   variant="outlined"
-                  className="w-full"
+                  className="w-full rounded-xl!"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   error={!!errors.lastName}
@@ -425,7 +425,7 @@ export default function SignUp() {
                 <TextField
                   label="Username"
                   variant="outlined"
-                  className="w-full"
+                  className="w-full rounded-xl!"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   error={!!errors.userName}
@@ -434,9 +434,20 @@ export default function SignUp() {
                 />
 
                 <TextField
+                  label="Phone number"
+                  variant="outlined"
+                  className="w-full rounded-xl!"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber}
+                  disabled={loading}
+                />
+
+                <TextField
                   label="Date of birth"
                   variant="outlined"
-                  className="w-full"
+                  className="w-full rounded-xl!"
                   type="date"
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
@@ -485,7 +496,7 @@ export default function SignUp() {
                   variant="contained"
                   disabled={loading}
                   disableElevation
-                  className="w-full rounded-lg shadow-sm !bg-slate-900 !hover:bg-slate-800 disabled:!bg-slate-200 disabled:!text-slate-400 !text-white transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
+                  className="w-full rounded-xl shadow-sm bg-[#0f172a]! !hover:bg-slate-800 disabled:bg-slate-200! disabled:text-slate-400! text-white! transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
                 >
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
@@ -511,4 +522,3 @@ export default function SignUp() {
     </main>
   );
 }
-

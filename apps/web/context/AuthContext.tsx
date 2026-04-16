@@ -122,8 +122,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
           }
         }
-      } catch {
-      } finally {
+      } catch { /* empty */ } finally {
         setIsLoading(false);
       }
     };

@@ -27,6 +27,7 @@ Apply professional design principles using Tailwind's design system and shadcn/u
 ## Quick Start with shadcn/ui
 
 ### Installation (Next.js)
+
 ```bash
 npx shadcn@latest init
 npx shadcn@latest add button card input label
@@ -34,18 +35,18 @@ npx shadcn@latest add button card input label
 
 ### Core Components to Know
 
-| Component | Use for |
-|-----------|---------|
-| `Button` | Actions with built-in variants (default, secondary, outline, ghost, destructive) |
-| `Card` | Content containers with header, content, footer |
-| `Input` + `Label` | Form fields with consistent styling |
-| `Dialog` | Modals with accessible focus management |
-| `DropdownMenu` | Actions menus with keyboard navigation |
-| `Select` | Styled native-like selects |
-| `Tabs` | Content organization |
-| `Badge` | Status indicators, counts |
-| `Alert` | Feedback messages |
-| `Skeleton` | Loading states |
+| Component         | Use for                                                                          |
+| ----------------- | -------------------------------------------------------------------------------- |
+| `Button`          | Actions with built-in variants (default, secondary, outline, ghost, destructive) |
+| `Card`            | Content containers with header, content, footer                                  |
+| `Input` + `Label` | Form fields with consistent styling                                              |
+| `Dialog`          | Modals with accessible focus management                                          |
+| `DropdownMenu`    | Actions menus with keyboard navigation                                           |
+| `Select`          | Styled native-like selects                                                       |
+| `Tabs`            | Content organization                                                             |
+| `Badge`           | Status indicators, counts                                                        |
+| `Alert`           | Feedback messages                                                                |
+| `Skeleton`        | Loading states                                                                   |
 
 ## Button Hierarchy (shadcn)
 
@@ -72,15 +73,14 @@ npx shadcn@latest add button card input label
 ## Common Patterns
 
 ### Card with Hierarchy
+
 ```tsx
 <Card>
   <CardHeader>
     <CardTitle>Account Settings</CardTitle>
     <CardDescription>Manage your account preferences.</CardDescription>
   </CardHeader>
-  <CardContent className="space-y-4">
-    {/* Form fields */}
-  </CardContent>
+  <CardContent className="space-y-4">{/* Form fields */}</CardContent>
   <CardFooter className="flex justify-end gap-2">
     <Button variant="outline">Cancel</Button>
     <Button>Save</Button>
@@ -89,6 +89,7 @@ npx shadcn@latest add button card input label
 ```
 
 ### Form with Labels
+
 ```tsx
 <div className="space-y-4">
   <div className="space-y-2">
@@ -103,6 +104,7 @@ npx shadcn@latest add button card input label
 ```
 
 ### Alert Messages
+
 ```tsx
 <Alert>
   <InfoIcon className="h-4 w-4" />

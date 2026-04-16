@@ -48,20 +48,22 @@ python scripts/search.py "<keyword>" --stack <stack_name>
 
 ### 1. Professional UI Rules
 
-| Rule | Do | Don't |
-|------|----|----- |
-| **Icons** | Use SVG (Heroicons, Lucide, Simple Icons) | Use emojis like 🎨 🚀 ⚙️ as UI icons |
-| **Typography** | Beautiful, unique Google/Custom fonts | Inter, Roboto, Arial, System fonts |
-| **Hover** | Stable transitions (color/opacity/shadow) | Scale transforms that shift layout |
-| **Cursor** | Add `cursor-pointer` to all interactive items | Leave default cursor on buttons/cards |
-| **Contrast** | Minimum 4.5:1 for accessibility | Low-contrast "vibes" that are unreadable |
+| Rule           | Do                                            | Don't                                    |
+| -------------- | --------------------------------------------- | ---------------------------------------- |
+| **Icons**      | Use SVG (Heroicons, Lucide, Simple Icons)     | Use emojis like 🎨 🚀 ⚙️ as UI icons     |
+| **Typography** | Beautiful, unique Google/Custom fonts         | Inter, Roboto, Arial, System fonts       |
+| **Hover**      | Stable transitions (color/opacity/shadow)     | Scale transforms that shift layout       |
+| **Cursor**     | Add `cursor-pointer` to all interactive items | Leave default cursor on buttons/cards    |
+| **Contrast**   | Minimum 4.5:1 for accessibility               | Low-contrast "vibes" that are unreadable |
 
 ### 2. Motion & Animation
+
 - Prioritize CSS-only solutions where possible.
 - Focus on high-impact moments (staggered reveals on page load).
 - Use duration 150-300ms for micro-interactions.
 
 ### 3. Spatial Composition
+
 - Use asymmetry, overlap, or diagonal flow to break standard grids.
 - Balance generous negative space OR intentional density.
 
@@ -72,12 +74,14 @@ python scripts/search.py "<keyword>" --stack <stack_name>
 Before delivering code, verify every item:
 
 ### Visual Quality
+
 - [ ] No emojis used as icons (SVG only).
 - [ ] Typography is characterful and NOT "AI standard".
 - [ ] Color scheme is unique to the context (no generic gradients).
 - [ ] Hover states provide clear, stable visual feedback.
 
 ### UX & Accessibility
+
 - [ ] All interactive elements have `cursor-pointer`.
 - [ ] Form inputs have labels; images have alt text.
 - [ ] Text contrast meets 4.5:1 minimum (test Light/Dark modes).
@@ -97,4 +101,4 @@ Before delivering code, verify every item:
 - **Brutalist/Raw**: Monospace fonts, harsh contrasts, industrial.
 - **Art Deco**: Sharp angles, metallic accents, ornate borders.
 
-*Commit to ONE direction and execute it fully—no half measures.*
+_Commit to ONE direction and execute it fully—no half measures._
