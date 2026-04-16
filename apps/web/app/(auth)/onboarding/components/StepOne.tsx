@@ -3,14 +3,15 @@ import React, { useState } from "react";
 import logo from "../../../icon.png";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check, Shield, Zap, Gift, ArrowRight, Loader2 } from "lucide-react";
+import { Shield, Zap, Gift, ArrowRight, Loader2 } from "lucide-react";
 import { StepOneVisual } from "../StepOneVisual";
 
 interface StepOneProps {
   onNext: () => Promise<void> | void;
+  onSkip: () => void;
 }
 
-const StepOne = ({ onNext }: StepOneProps) => {
+const StepOne = ({ onNext, onSkip }: StepOneProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
@@ -26,13 +27,11 @@ const StepOne = ({ onNext }: StepOneProps) => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: shouldReduceMotion
-        ? { duration: 0.1 }
-        : { duration: 0.5, ease: [0.23, 1, 0.32, 1] },
+      transition: { duration: 0.5 },
     },
   };
 
@@ -71,7 +70,7 @@ const StepOne = ({ onNext }: StepOneProps) => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full max-w-7xl min-h-[600px] lg:min-h-[700px] bg-white lg:rounded-[32px] shadow-2xl overflow-hidden border border-slate-100 ring-1 ring-black/5">
+    <div className="flex flex-col lg:flex-row w-full max-w-7xl min-h-150 lg:min-h-175 bg-white lg:rounded-4xl shadow-2xl overflow-hidden border border-slate-100 ring-1 ring-black/5">
       {/* Left Side - Content */}
       <div className="flex flex-col w-full lg:w-[55%] p-8 lg:p-16 justify-between bg-white">
         <motion.div
@@ -80,7 +79,7 @@ const StepOne = ({ onNext }: StepOneProps) => {
           className="flex justify-between items-center mb-12 lg:mb-0"
         >
           <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="p-1.5 bg-white rounded-xl border cursor-pointer border-slate-200 shadow-sm">
               <Image
                 src={logo}
                 alt="PocketWise Logo"
@@ -95,7 +94,8 @@ const StepOne = ({ onNext }: StepOneProps) => {
           </div>
           <motion.button
             whileTap={shouldReduceMotion ? undefined : { scale: 0.95 }}
-            className="text-slate-500 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg font-medium text-sm transition-colors outline-none"
+            onClick={onSkip}
+            className="text-slate-500 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg font-medium text-sm transition-colors outline-none cursor-pointer"
           >
             Skip
           </motion.button>
@@ -123,7 +123,8 @@ const StepOne = ({ onNext }: StepOneProps) => {
               <span className="text-indigo-600">Automatically.</span>
             </h1>
             <p className="text-slate-500 font-sans text-lg lg:text-xl leading-relaxed">
-              PocketWise splits every deposit into your wallets the moment it arrives.
+              PocketWise splits every deposit into your wallets the moment it
+              arrives.
             </p>
           </motion.div>
 
@@ -164,7 +165,7 @@ const StepOne = ({ onNext }: StepOneProps) => {
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             onClick={handleNext}
             disabled={isLoading}
-            className="flex items-center bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white shadow-xl shadow-indigo-200 rounded-2xl px-8 py-4 gap-3 transition-colors group"
+            className="flex items-center bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white shadow-xl cursor-pointer shadow-indigo-200 rounded-2xl px-8 py-4 gap-3 transition-colors group"
             aria-label="Continue to next step"
           >
             {isLoading ? (
@@ -174,7 +175,7 @@ const StepOne = ({ onNext }: StepOneProps) => {
               </>
             ) : (
               <>
-                <span className="font-bold text-base">Next</span>
+                <span className="font-bold cursor-pointer text-base">Next</span>
                 <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
               </>
             )}

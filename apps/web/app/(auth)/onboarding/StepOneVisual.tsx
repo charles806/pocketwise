@@ -8,30 +8,44 @@ export const StepOneVisual = () => {
 
   // Animation configs that respect reduced motion preference
   const floatAnimation = shouldReduceMotion
-    ? {}
+    ? undefined
     : {
         y: [0, -12, 0],
-        transition: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+        transition: {
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut" as const,
+        },
       };
 
   const floatDownAnimation = shouldReduceMotion
-    ? {}
+    ? undefined
     : {
         y: [0, 15, 0],
-        transition: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
+        transition: {
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut" as const,
+          delay: 0.5,
+        },
       };
 
   const scaleMoveAnimation = shouldReduceMotion
-    ? {}
+    ? undefined
     : {
         scale: [1, 1.05, 1],
         x: [0, 10, 0],
-        transition: { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 },
+        transition: {
+          duration: 7,
+          repeat: Infinity,
+          ease: "easeInOut" as const,
+          delay: 1,
+        },
       };
 
   return (
     <div
-      className="hidden lg:flex relative w-[45%] bg-slate-50 lg:bg-[linear-gradient(135deg,_#f5f3ff_0%,_#ede9fe_100%)] items-center justify-center p-12 overflow-hidden"
+      className="hidden lg:flex relative w-[45%] bg-slate-50 lg:bg-[linear-gradient(135deg,#f5f3ff_0%,#ede9fe_100%)] items-center justify-center p-12 overflow-hidden"
       aria-hidden="true" // Decorative only
     >
       {/* Animated backgrounds - reduced motion safe */}
@@ -44,28 +58,33 @@ export const StepOneVisual = () => {
                 opacity: [0.3, 0.5, 0.3],
               }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-[10%] -right-[10%] size-[500px] bg-indigo-200/30 blur-[100px] rounded-full"
+              className="absolute -top-[10%] -right-[10%] size-125 bg-indigo-200/30 blur-[100px] rounded-full"
             />
             <motion.div
               animate={{
                 scale: [1, 1.1, 1],
                 opacity: [0.2, 0.4, 0.2],
               }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear", delay: 1 }}
-              className="absolute -bottom-[10%] -left-[10%] size-[400px] bg-blue-200/20 blur-[80px] rounded-full"
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "linear",
+                delay: 1,
+              }}
+              className="absolute -bottom-[10%] -left-[10%] size-100 bg-blue-200/20 blur-[80px] rounded-full"
             />
           </>
         )}
       </div>
 
       {/* Floating Cards */}
-      <div className="relative w-full h-full flex items-center justify-center scale-90 xxl:scale-100">
+      <div className="relative w-full h-full flex cursor-pointer items-center justify-center scale-90 xxl:scale-100">
         {/* Main Deposit Card */}
         <motion.div
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: shouldReduceMotion ? 0 : 0.4 }}
-          className="z-20 w-[340px] glass-card shadow-2xl rounded-[32px] p-8 space-y-6 border border-white/50"
+          className="z-20 w-85 glass-card shadow-2xl rounded-4xl p-8 space-y-6 border border-white/50"
         >
           <div className="flex items-center gap-4">
             <div className="size-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
@@ -102,7 +121,10 @@ export const StepOneVisual = () => {
         </motion.div>
 
         {/* Rent Wallet Card */}
-        <motion.div animate={floatAnimation} className="absolute -top-16 right-0 z-30">
+        <motion.div
+          animate={floatAnimation}
+          className="absolute -top-16 right-0 z-30"
+        >
           <WalletCard
             icon={<Shield className="size-5" />}
             bgColor="bg-indigo-600"
@@ -113,7 +135,10 @@ export const StepOneVisual = () => {
         </motion.div>
 
         {/* Savings Wallet Card */}
-        <motion.div animate={floatDownAnimation} className="absolute -bottom-10 left-0 z-30">
+        <motion.div
+          animate={floatDownAnimation}
+          className="absolute -bottom-10 left-0 z-30"
+        >
           <WalletCard
             icon={<Zap className="size-5" />}
             bgColor="bg-emerald-500"
@@ -124,7 +149,10 @@ export const StepOneVisual = () => {
         </motion.div>
 
         {/* Shopping Wallet Card */}
-        <motion.div animate={scaleMoveAnimation} className="absolute bottom-16 -right-8 z-30">
+        <motion.div
+          animate={scaleMoveAnimation}
+          className="absolute bottom-16 -right-8 z-30"
+        >
           <WalletCard
             icon={<Gift className="size-5" />}
             bgColor="bg-amber-500"

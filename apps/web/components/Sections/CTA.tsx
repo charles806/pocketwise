@@ -132,7 +132,7 @@ export default function WaitlistSection() {
         >
           PocketWise is almost ready. Join the waitlist and get early access
           before the public launch — plus{" "}
-          <span className="text-white font-semibold">₦100 wallet credit</span>{" "}
+          <span className="text-white font-semibold">₦1000 wallet credit</span>{" "}
           when you sign up on launch day.
         </motion.p>
 

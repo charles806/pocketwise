@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Lock,
   Shield,
-  Clock,
+
 } from "lucide-react";
 
 const benefits = [
@@ -65,7 +65,7 @@ export default function WaitlistPage() {
   };
 
   return (
-    <section className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-24 bg-gradient-to-b from-white to-[#f6f7ff] overflow-hidden">
+    <section className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-24 bg-linear-to-b from-white to-[#f6f7ff] overflow-hidden">
       {/* Background Effects */}
       <div
         className="absolute inset-0 pointer-events-none overflow-hidden"
@@ -116,14 +116,14 @@ export default function WaitlistPage() {
         >
           <h1 className="text-gray-950 text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-[-1.5px]">
             Be among the first to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5B4FCF] to-[#8B5CF6]">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#5B4FCF] to-[#8B5CF6]">
               sort your money
             </span>{" "}
             automatically.
           </h1>
           <p className="text-gray-500 text-lg leading-relaxed max-w-lg mx-auto">
             PocketWise launches soon. Join the founding members and get
-            exclusive early access + ₦100 wallet credit.
+            exclusive early access + ₦1000 wallet credit.
           </p>
         </motion.div>
 
@@ -134,7 +134,7 @@ export default function WaitlistPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          {benefits.map((benefit, i) => (
+          {benefits.map((benefit) => (
             <div
               key={benefit.text}
               className="flex items-center gap-2 px-4 py-2 bg-white/60 border border-gray-100 rounded-full text-sm text-gray-600"
