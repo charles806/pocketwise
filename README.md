@@ -2,7 +2,7 @@
 
 > **Smart Wallet for Nigerian Youth** — *Your money, automatically sorted.*
 
-PocketWise is a fintech application built for Nigerian youth aged 18–25 that automatically splits every deposit into four purpose-driven wallets the moment money arrives — no manual budgeting, no willpower required. It runs on **real money via Anchor BaaS** from day one.
+PocketWise is a fintech application built for Nigerian youth aged 16–25 that automatically splits every deposit into four purpose-driven wallets the moment money arrives — no manual budgeting, no willpower required. It runs on **real money via Anchor BaaS** from day one.
 
 ---
 
