@@ -10,6 +10,10 @@ const faqs = [
     a: "No. PocketWise is a smart wallet powered by Anchor BaaS, which holds a CBN license. Your money is held in a regulated environment — we just make it smarter.",
   },
   {
+    q: "What happens to my money if PocketWise shuts down?",
+    a: "Your money is held directly by Anchor, a CBN-licensed bank — not by PocketWise. If PocketWise shuts down tomorrow, your funds remain safe in your Anchor account and you can withdraw them in full.",
+  },
+  {
     q: "Is my money real?",
     a: "Yes, completely. PocketWise uses real money from day one. No simulated balances. Every deposit and transfer is a real financial transaction.",
   },
