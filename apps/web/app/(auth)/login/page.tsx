@@ -219,7 +219,7 @@ const LoginPage = () => {
 
           <div className="relative z-10 max-w-xl">
             <h1 className="text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tighter leading-[1.05] mb-6">
-              No More "Where Did My Money Go?&quot;
+              No More &quot;Where Did My Money Go?&quot;
             </h1>
             <p className="text-xl text-slate-600 font-medium leading-relaxed">
               PocketWise automatically splits every deposit into smart wallets
