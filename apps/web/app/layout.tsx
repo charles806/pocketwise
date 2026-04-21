@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import localFont from "next/font/local";
 import { AuthProvider } from "../context/AuthContext";
+import { ToastProvider } from "../context/ToastContext";
+import { Toaster } from "../components/UI/Toaster";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -44,7 +46,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://getpocketwise.app",
   },
-  manifest: "https://getpocketwise.app/manifest.json",
+  manifest: "/manifest.json",
   authors: [{ name: "Pocketwise Team" }],
   category: "finance",
   applicationName: "Pocketwise",
@@ -84,11 +86,14 @@ export default function RootLayout({
           Skip to content
         </a>
 
-        <AuthProvider>
-          <main id="main-content" className="">
-            {children}
-          </main>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <Toaster />
+            <main id="main-content" className="">
+              {children}
+            </main>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

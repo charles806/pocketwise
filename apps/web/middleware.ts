@@ -6,9 +6,9 @@ export const middleware = (
 ) => {
     const token = request.cookies.get('refreshToken')?.value;
 
-    const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
+    const iswallet = request.nextUrl.pathname.startsWith('/wallet');
 
-    if (!token && isDashboard) {
+    if (!token && iswallet) {
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('from', request.nextUrl.pathname)
         return NextResponse.redirect(loginUrl)
@@ -18,5 +18,5 @@ export const middleware = (
 
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/wallet/:path*'],
 };

@@ -122,7 +122,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
           }
         }
-      } catch { /* empty */ } finally {
+      } catch { console.debug("No active session found"); } finally {
         setIsLoading(false);
       }
     };
