@@ -22,7 +22,7 @@ const Onboarding = () => {
   useEffect(() => {
     if (isCompleting) {
       const timer = setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/wallet");
       }, 3000);
       return () => clearTimeout(timer);
     }

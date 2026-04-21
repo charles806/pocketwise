@@ -72,8 +72,17 @@ const refresh = async (req: Request, res: Response) => {
     const message =
       error instanceof Error ? error.message : "Error refreshing token";
     const status = (error as any)?.statusCode || 500;
+
+    if (status === 401) {
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+    }
     sendError(res, message, status);
   }
+
 };
 
 const logout = async (_req: Request, res: Response) => {

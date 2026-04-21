@@ -24,11 +24,13 @@ const authService = {
       firstName,
       lastName,
       userName,
-      email,
+      email: rawEmail,
       phoneNumber,
       dateOfBirth,
       password,
     } = data;
+
+    const email = rawEmail.toLowerCase();
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -101,7 +103,8 @@ const authService = {
   },
 
   async login(data: LoginInput) {
-    const { email, password } = data;
+    const email = data.email.toLowerCase();
+    const { password } = data;
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {

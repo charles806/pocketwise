@@ -14,6 +14,8 @@ import { loginSchema } from "../../../libs/validation";
 import { useRouter } from "next/navigation";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "../../../context/AuthContext";
+import { useToast } from "../../../context/ToastContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -31,6 +33,8 @@ const signInschema = loginSchema;
 
 const LoginForm = () => {
   const router = useRouter();
+  const { setAuth } = useAuth();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +46,8 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = { email, password };
+    const normalizedEmail = email.toLowerCase().trim();
+    const data = { email: normalizedEmail, password };
 
     const result = signInschema.safeParse(data);
     if (!result.success) {
@@ -67,14 +72,35 @@ const LoginForm = () => {
       const dataRes = (await res.json()) as LoginFormResponse;
 
       if (res.ok) {
-        console.log("Login successful:", dataRes);
-        router.push(redirectTo || "/dashboard");
+        setAuth(dataRes.accessToken, dataRes.user);
+        router.push(redirectTo || "/wallet");
       } else {
-        setErrors({ general: dataRes.message || "Login failed" });
+        // Log full server error for developers, show safe message to users
+        console.error("[Login] Server error:", dataRes.message);
+
+        if (res.status === 401) {
+          toast("Invalid email or password. Please try again.", {
+            type: "error",
+            title: "Login Failed",
+          });
+        } else if (res.status === 429) {
+          toast("Too many attempts. Please wait a moment and try again.", {
+            type: "warning",
+            title: "Slow Down",
+          });
+        } else {
+          toast("Something went wrong. Please try again.", {
+            type: "error",
+            title: "Error",
+          });
+        }
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setErrors({ general: "An unexpected error occurred." });
+      console.error("[Login] Network error:", error);
+      toast("Unable to connect. Check your internet connection.", {
+        type: "error",
+        title: "Connection Error",
+      });
     } finally {
       setLoading(false);
     }
@@ -234,6 +260,7 @@ const LoginPage = () => {
                 src={loginImage}
                 alt="PocketWise App Interface"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.25)]"
                 priority
               />

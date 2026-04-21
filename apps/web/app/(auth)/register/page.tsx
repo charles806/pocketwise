@@ -13,6 +13,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "../../../context/AuthContext";
+import { useToast } from "../../../context/ToastContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -59,6 +60,7 @@ const fullSignupSchema = z
 export default function SignUp() {
   const router = useRouter();
   const { setAuth } = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState<1 | 2>(1);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -127,8 +129,9 @@ export default function SignUp() {
   const handleStep2Submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const normalizedEmail = email.toLowerCase().trim();
     const fullData = {
-      email,
+      email: normalizedEmail,
       password,
       confirmPassword,
       firstName,
@@ -157,8 +160,9 @@ export default function SignUp() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           password,
           confirmPassword,
           firstName,
@@ -173,12 +177,22 @@ export default function SignUp() {
 
       if (!response.ok) {
         const errorMessage = data.message || "Failed to create account";
-        if (errorMessage.toLowerCase().includes("email")) {
-          setErrors({ email: errorMessage });
-        } else if (errorMessage.toLowerCase().includes("password")) {
-          setErrors({ password: errorMessage });
+        console.error("[Register] Server error:", errorMessage);
+
+        if (response.status === 409) {
+          // Email already exists — show inline error near the field
+          setErrors({ email: "An account with this email already exists." });
+          setStep(1);
+        } else if (response.status === 400) {
+          toast("Please check your details and try again.", {
+            type: "warning",
+            title: "Invalid Details",
+          });
         } else {
-          setErrors({ general: errorMessage });
+          toast("Something went wrong. Please try again.", {
+            type: "error",
+            title: "Registration Failed",
+          });
         }
         setLoading(false);
         return;
@@ -187,8 +201,12 @@ export default function SignUp() {
       const signupData = data.data as SignupResponse;
       setAuth(signupData.accessToken, signupData.user);
       router.push("/onboarding");
-    } catch {
-      setErrors({ general: "Network error. Please try again." });
+    } catch (error) {
+      console.error("[Register] Network error:", error);
+      toast("Unable to connect. Check your internet connection.", {
+        type: "error",
+        title: "Connection Error",
+      });
       setLoading(false);
     }
   };
@@ -394,11 +412,6 @@ export default function SignUp() {
                 onSubmit={handleStep2Submit}
                 className="flex flex-col gap-5 w-full"
               >
-                {errors.general && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                    {errors.general}
-                  </div>
-                )}
 
                 <TextField
                   label="First name"
