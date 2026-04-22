@@ -267,7 +267,7 @@ export default function SignUp() {
         <section className="w-full lg:w-1/2 flex flex-col pt-12 pb-12 overflow-y-auto bg-white">
           <div className="w-full max-w-md mx-auto my-auto px-6">
             <div className="flex flex-col gap-2 text-center mb-8">
-              <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
                 <span
                   className={`text-xs font-medium px-3 py-1 rounded-full ${step === 1 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
                 >
