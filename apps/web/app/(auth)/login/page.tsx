@@ -42,7 +42,7 @@ const LoginForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const search = useSearchParams();
-  const redirectTo = search.get("form");
+  const redirectTo = search.get("from");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,7 +73,8 @@ const LoginForm = () => {
 
       if (res.ok) {
         setAuth(dataRes.accessToken, dataRes.user);
-        router.push(redirectTo || "/wallet");
+        window.location.href = redirectTo || "/wallet";
+        return;
       } else {
         // Log full server error for developers, show safe message to users
         console.error("[Login] Server error:", dataRes.message);
