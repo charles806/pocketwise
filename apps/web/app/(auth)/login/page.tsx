@@ -42,7 +42,7 @@ const LoginForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const search = useSearchParams();
-  const redirectTo = search.get("from");
+  const redirectTo = search.get("form");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
