@@ -1,13 +1,16 @@
 "use client";
+import { useEffect } from "react";
 import Image from "next/image";
-import user from "../../../../public/user.png";
+import userS from "../../../../public/user.png";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import { ResponsiveNav } from "./ResponsiveNav";
-import { Bell } from "lucide-react";
+import { Bell, UserSearch } from "lucide-react";
+import { useAuth } from "../../../../context/AuthContext";
 
 export const WalletHeader = () => {
   const router = useRouter();
+  const { user } = useAuth();
 
   const greetings = ["Good Morning", "Good Afternoon", "Good Evening"];
   const currentHour = new Date().getHours();
@@ -19,13 +22,16 @@ export const WalletHeader = () => {
     greeting = greetings[2];
   }
 
+
+
   return (
+
     <header className="flex items-center justify-between px-6 h-20 border-b border-gray-200 bg-white sticky top-0 z-10">
       {/* Left */}
       <div className="flex items-center gap-3">
         <div className="partOne relative w-11 h-11 rounded-full overflow-hidden bg-gray-100 cursor-pointer shrink-0">
           <Image
-            src={user}
+            src={userS}
             alt="User profile picture"
             fill
             className="object-cover"
@@ -37,8 +43,9 @@ export const WalletHeader = () => {
         <div className="flex flex-col leading-tight">
           <p className="text-sm text-gray-500">{greeting}</p>
           <h5 className="text-base font-semibold text-gray-900">
-            Charles <span className="inline-block">👋</span>
+            {user?.firstName} <span className="inline-block">👋</span>
           </h5>
+
         </div>
       </div>
 

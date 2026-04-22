@@ -179,12 +179,19 @@ export default function SignUp() {
         const errorMessage = data.message || "Failed to create account";
         console.error("[Register] Server error:", errorMessage);
 
+        if(response.status === 400){
+          toast(errorMessage, {
+            type: "warning",
+            title: "Invalid Details",
+          });
+        }
+
         if (response.status === 409) {
           // Email already exists — show inline error near the field
           setErrors({ email: "An account with this email already exists." });
           setStep(1);
         } else if (response.status === 400) {
-          toast("Please check your details and try again.", {
+          toast(errorMessage, {
             type: "warning",
             title: "Invalid Details",
           });
@@ -200,7 +207,7 @@ export default function SignUp() {
 
       const signupData = data.data as SignupResponse;
       setAuth(signupData.accessToken, signupData.user);
-      router.push("/onboarding");
+      router.push("/wallet");
     } catch (error) {
       console.error("[Register] Network error:", error);
       toast("Unable to connect. Check your internet connection.", {

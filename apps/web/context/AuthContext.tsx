@@ -19,6 +19,8 @@ interface User {
   lastName?: string;
   userName?: string;
   isSimulationMode?: boolean;
+  onboardingComplete?: boolean;
+  primaryGoal?: string | null;
 }
 
 interface AuthContextType {
@@ -47,11 +49,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setAccessToken(null);
     // Clear session flag cookie for middleware
     document.cookie = "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-    
+
     fetch(`${API_BASE}/api/v1/auth/logout`, {
       method: "POST",
       credentials: "include",
-    }).catch(() => {});
+    }).catch(() => { });
     router.push("/login");
   }, [router]);
 
@@ -103,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const path = window.location.pathname;
       const searchParams = new URLSearchParams(window.location.search);
       const redirectTo = searchParams.get("from") || "/wallet";
-      
+
       if (path === "/login" || path === "/register") {
         router.push(redirectTo);
       }
@@ -112,13 +114,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     const initAuth = async () => {
+      const url = `${API_BASE}/api/v1/auth/refresh`;
+      console.log(`[AuthContext] initAuth: Fetching from ${url}`);
       try {
-        const response = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
+        const response = await fetch(url, {
           method: "POST",
           credentials: "include",
         });
 
         if (!response.ok) {
+          console.log("[AuthContext] initAuth: No session found (401/404)");
           setIsLoading(false);
           return;
         }
@@ -142,11 +147,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (meResponse.ok) {
             const meData = await meResponse.json();
             if (meData.data) {
+              console.log("[AuthContext] initAuth: Success! User:", meData.data);
               setUser(meData.data);
             }
           }
         }
-      } catch { console.debug("No active session found"); } finally {
+      } catch (err) {
+        console.error("[AuthContext] initAuth Error:", err);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -155,6 +163,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const setAuth = useCallback((token: string, userData: User) => {
+    console.log("[AuthContext] Setting user data:", userData);
     setAccessToken(token);
     setUser(userData);
     // Set session flag cookie for middleware

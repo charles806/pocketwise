@@ -5,6 +5,7 @@ import {
   refresh,
   logout,
   me,
+  updateGoal,
 } from "../controller/auth.controller.js";
 import { validate } from "../middleware/validate.middleware.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -17,5 +18,6 @@ router.post("/login", validate(loginSchema), login);
 router.post("/refresh", refresh);
 router.post("/logout", logout);
 router.get("/me", authMiddleware, me);
+router.patch("/goal", authMiddleware, updateGoal);
 
 export default router;

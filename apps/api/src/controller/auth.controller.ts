@@ -9,7 +9,7 @@ const signUp = async (req: Request, res: Response) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Lax is necessary for local cross-port cookies
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -18,10 +18,7 @@ const signUp = async (req: Request, res: Response) => {
       "Account created successfully",
       {
         accessToken: result.accessToken,
-        user: {
-          id: result.id,
-          email: result.email,
-        },
+        user: result,
       },
       201,
     );
@@ -40,7 +37,7 @@ const login = async (req: Request, res: Response) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Lax is necessary for local cross-port cookies
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -111,4 +108,21 @@ const me = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, login, refresh, logout, me };
+const updateGoal = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+
+    const { goal } = req.body;
+    const result = await authService.updateGoal(userId, goal);
+    sendSuccess(res, "Goal updated successfuly", result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error updating goal";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+export { signUp, login, refresh, logout, me, updateGoal };

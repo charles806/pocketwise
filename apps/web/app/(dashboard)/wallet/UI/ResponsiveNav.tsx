@@ -5,7 +5,7 @@ import {
   Home,
   ChartPie,
   History,
-  Goal,
+  Target,
   CreditCard,
 } from "lucide-react";
 
@@ -19,7 +19,7 @@ const navItems: NavItemType[] = [
   { icon: Home, label: "Home", path: "/wallet" },
   { icon: ChartPie, label: "Analytics", path: "/analytics" },
   { icon: History, label: "History", path: "/history" },
-  { icon: Goal, label: "Goals", path: "/goals" },
+  { icon: Target, label: "Goals", path: "/goals" },
   { icon: CreditCard, label: "Card", path: "/card" },
 ];
 

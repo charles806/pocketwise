@@ -11,6 +11,7 @@ interface SignupInput {
   phoneNumber?: string;
   dateOfBirth: string;
   password: string;
+  primaryGoal?: string;
 }
 
 interface LoginInput {
@@ -28,6 +29,7 @@ const authService = {
       phoneNumber,
       dateOfBirth,
       password,
+      primaryGoal,
     } = data;
 
     const email = rawEmail.toLowerCase();
@@ -47,7 +49,12 @@ const authService = {
       age--;
     }
 
-    const isSimulationMode = age < 16;
+    // const isSimulationMode = age < 16;
+    if (age < 16) {
+      const error = new Error("You must be at least 16 years old to create an account") as any;
+      error.statusCode = 400;
+      throw error;
+    }
     const passwordHash = await bcrypt.hash(password, 12);
 
     const newUser = await prisma.$transaction(async (tx) => {
@@ -60,7 +67,8 @@ const authService = {
           phone: phoneNumber || null,
           passwordHash: passwordHash,
           dateOfBirth: dob,
-          isSimulationMode,
+          primaryGoal: primaryGoal || null,
+          // isSimulationMode,
         },
       });
 
@@ -97,6 +105,8 @@ const authService = {
       lastName: newUser.lastName,
       userName: newUser.userName,
       isSimulationMode: newUser.isSimulationMode,
+      onboardingComplete: newUser.onboardingComplete,
+      primaryGoal: newUser.primaryGoal,
       accessToken,
       refreshToken,
     };
@@ -142,6 +152,8 @@ const authService = {
         lastName: user.lastName,
         userName: user.userName,
         isSimulationMode: user.isSimulationMode,
+        onboardingComplete: user.onboardingComplete,
+        primaryGoal: user.primaryGoal,
       },
     };
   },
@@ -187,6 +199,7 @@ const authService = {
         kycTier: true,
         isSimulationMode: true,
         onboardingComplete: true,
+        primaryGoal: true,
         createdAt: true,
       },
     });
@@ -196,6 +209,23 @@ const authService = {
       error.statusCode = 404;
       throw error;
     }
+
+    return user;
+  },
+
+  async updateGoal(userId: string, goal: string | null) {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        primaryGoal: goal,
+        onboardingComplete: true,
+      },
+      select: {
+        id: true,
+        onboardingComplete: true,
+        primaryGoal: true,
+      }
+    });
 
     return user;
   },

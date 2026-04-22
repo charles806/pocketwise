@@ -5,34 +5,46 @@
   /* --- PRIMARY PIVOT --- */
   /* Shifting from "Vivid Purple" to "Deep Indigo/Blurple" */
   /* This is the Stripe/Revolut sweet spot. */
-  --primary: #4f46e5;         /* Deeper, more stable Indigo */
-  --primary-dark: #3730a3;    /* Professional Navy-Purple */
-  --primary-light: #eef2ff;   /* Cleaner, cooler tint */
+  --primary: #4f46e5;
+  /* Deeper, more stable Indigo */
+  --primary-dark: #3730a3;
+  /* Professional Navy-Purple */
+  --primary-light: #eef2ff;
+  /* Cleaner, cooler tint */
 
   /* --- NEUTRALS (The "Clean" Factor) --- */
   /* Replaced generic grays with "Slate" to look more technical */
-  --background: #f8fafc;      /* Brighter, more premium canvas */
+  --background: #f8fafc;
+  /* Brighter, more premium canvas */
   --surface: #ffffff;
-  --text-primary: #0f172a;    /* Deep Slate (easier on eyes than pure black) */
-  --text-secondary: #475569;  /* Darker gray for better accessibility */
+  --text-primary: #0f172a;
+  /* Deep Slate (easier on eyes than pure black) */
+  --text-secondary: #475569;
+  /* Darker gray for better accessibility */
 
   /* --- CATEGORY COLORS (Desaturated for Maturity) --- */
   /* We kept the colors but moved them away from "Neon" */
-  --spend: #4f46e5;           /* Matches primary */
+  --spend: #4f46e5;
+  /* Matches primary */
   --spend-bg-light: #eef2ff;
-  
-  --savings: #059669;         /* "Bank Green" - deeper than your current one */
+
+  --savings: #059669;
+  /* "Bank Green" - deeper than your current one */
   --savings-bg-light: #ecfdf5;
-  
-  --emergency: #d97706;       /* "Amber" instead of bright Yellow/Orange */
+
+  --emergency: #d97706;
+  /* "Amber" instead of bright Yellow/Orange */
   --emergency-bg-light: #fffbeb;
-  
-  --flex: #db2777;            /* "Deep Berry" instead of Hot Pink */
+
+  --flex: #db2777;
+  /* "Deep Berry" instead of Hot Pink */
   --flex-bg-light: #fdf2f8;
 
   /* --- DARK MODE ANCHORS --- */
-  --dark-bg: #020617;         /* Deepest Navy (Professional "Midnight") */
-  --dark-surface: #0f172a;    /* Slate Navy */
+  --dark-bg: #020617;
+  /* Deepest Navy (Professional "Midnight") */
+  --dark-surface: #0f172a;
+  /* Slate Navy */
 }
 
 
@@ -444,4 +456,20 @@ h6 {
 .mobile-menu-overlay.open {
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
