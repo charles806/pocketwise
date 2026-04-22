@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import user from "../../../public/user.png";
+import user from "../../../../public/user.png";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import { ResponsiveNav } from "./ResponsiveNav";
