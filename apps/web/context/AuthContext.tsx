@@ -97,6 +97,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [logout]);
 
+  // Auto-redirect if session is recovered and user is on auth page
+  useEffect(() => {
+    if (!isLoading && user) {
+      const path = window.location.pathname;
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get("from") || "/wallet";
+      
+      if (path === "/login" || path === "/register") {
+        router.push(redirectTo);
+      }
+    }
+  }, [user, isLoading, router]);
+
   useEffect(() => {
     const initAuth = async () => {
       try {
