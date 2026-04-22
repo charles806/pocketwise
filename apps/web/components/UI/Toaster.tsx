@@ -166,10 +166,7 @@ export function Toaster() {
       {/* Desktop: bottom-right */}
       <motion.ul
         layout
-        className="
-          fixed z-9999 flex flex-col gap-2 pointer-events-none
-          bottom-6 right-6 sm:flex
-        "
+        className="hidden md:flex fixed z-9999 flex-col gap-2 pointer-events-none bottom-6 right-6"
         aria-label="Notifications"
       >
         <AnimatePresence mode="popLayout">
@@ -182,11 +179,7 @@ export function Toaster() {
       {/* Mobile: top-center */}
       <motion.ul
         layout
-        className="
-          fixed z-9999 flex flex-col gap-2 pointer-events-none
-          top-4 left-4 right-4
-          sm:hidden
-        "
+        className="flex md:hidden fixed z-9999 flex-col gap-2 pointer-events-none top-4 left-4 right-4"
         aria-label="Notifications"
       >
         <AnimatePresence mode="popLayout">
