@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export const middleware = async (request: NextRequest) => {
-  const token = request.cookies.get("refreshToken")?.value;
+  // The refreshToken is httpOnly and set on the API domain,
+  // so this middleware (on the frontend domain) can't read it.
+  // Instead, we check a lightweight session flag set by the client after login.
+  const token = request.cookies.get("auth_session")?.value;
 
   const iswallet = request.nextUrl.pathname.startsWith("/wallet");
 

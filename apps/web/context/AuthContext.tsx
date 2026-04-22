@@ -45,6 +45,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     setUser(null);
     setAccessToken(null);
+    // Clear session flag cookie for middleware
+    document.cookie = "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    
     fetch(`${API_BASE}/api/v1/auth/logout`, {
       method: "POST",
       credentials: "include",
@@ -68,6 +71,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (data.success && data.data?.accessToken) {
         setAccessToken(data.data.accessToken);
+        // Set session flag cookie for middleware (expires in 7 days to match refresh token)
+        const date = new Date();
+        date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+        document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
 
         const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
           headers: {
@@ -90,6 +97,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [logout]);
 
+  // Auto-redirect if session is recovered and user is on auth page
+  useEffect(() => {
+    if (!isLoading && user) {
+      const path = window.location.pathname;
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get("from") || "/wallet";
+      
+      if (path === "/login" || path === "/register") {
+        router.push(redirectTo);
+      }
+    }
+  }, [user, isLoading, router]);
+
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -107,6 +127,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (data.success && data.data?.accessToken) {
           setAccessToken(data.data.accessToken);
+          // Set session flag cookie for middleware
+          const date = new Date();
+          date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+          document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
 
           const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
             headers: {
@@ -133,6 +157,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const setAuth = useCallback((token: string, userData: User) => {
     setAccessToken(token);
     setUser(userData);
+    // Set session flag cookie for middleware
+    const date = new Date();
+    date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+    document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
   }, []);
 
   return (
