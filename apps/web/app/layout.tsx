@@ -87,8 +87,8 @@ export default function RootLayout({
         </a>
 
         <ToastProvider>
+          <Toaster />
           <AuthProvider>
-            <Toaster />
             <main id="main-content" className="">
               {children}
             </main>

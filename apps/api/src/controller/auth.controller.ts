@@ -9,8 +9,13 @@ const signUp = async (req: Request, res: Response) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".getpocketwise.vercel.app"
+          : undefined,
+      path: "/",
     });
 
     sendSuccess(
@@ -40,8 +45,13 @@ const login = async (req: Request, res: Response) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".getpocketwise.vercel.app"
+          : undefined,
+      path: "/",
     });
 
     sendSuccess(res, "Login successful", {
@@ -77,19 +87,26 @@ const refresh = async (req: Request, res: Response) => {
       res.clearCookie("refreshToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        domain:
+          process.env.NODE_ENV === "production"
+            ? ".getpocketwise.vercel.app"
+            : undefined,
+        path: "/",
       });
     }
     sendError(res, message, status);
   }
-
 };
 
 const logout = async (_req: Request, res: Response) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    domain:
+      process.env.NODE_ENV === "production" ? ".getpocketwise.vercel.app" : undefined,
+    path: "/",
   });
   sendSuccess(res, "Logged out successfully");
 };
