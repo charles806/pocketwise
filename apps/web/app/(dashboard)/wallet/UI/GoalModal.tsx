@@ -59,12 +59,18 @@ export const GoalModal = () => {
   // Show if user is logged in, loading is finished, and onboarding is NOT complete
   useEffect(() => {
     if (!isLoading && user && !user.onboardingComplete) {
+      // Small delay for better UX after login/load
       const timer = setTimeout(() => setVisible(true), 1200);
       return () => clearTimeout(timer);
     }
   }, [user, isLoading]);
 
   const saveGoal = async (goalValue: string | null) => {
+    if (!accessToken) {
+      console.error("No access token found for saving goal");
+      return;
+    }
+
     setSaving(true);
     try {
       const response = await fetch(`${API_BASE}/api/v1/auth/goal`, {
@@ -80,9 +86,12 @@ export const GoalModal = () => {
         // Refresh session to update global user state with new goal/onboarding status
         await refreshSession();
         setVisible(false);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to save goal:", errorData.message || response.statusText);
       }
     } catch (error) {
-      console.error("Failed to save goal:", error);
+      console.error("Network error while saving goal:", error);
     } finally {
       setSaving(false);
     }
@@ -94,7 +103,9 @@ export const GoalModal = () => {
   };
 
   const handleSkip = () => {
-    saveGoal(null);
+    // If they skip, we just close it for now. 
+    // It will come back on refresh until they actually select a goal and save it.
+    setVisible(false);
   };
 
   if (!visible) return null;

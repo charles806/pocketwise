@@ -51,7 +51,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 
     return (
         <div
-            className="w- sm:w-full max-w-[90%] md:max-w-[90%] mx-auto bg-gradient-to-br from-[#4f46e5] to-[#3730a3] rounded-[2rem] shadow-2xl border border-white/10 cursor-pointer"
+            className=" sm:w-full max-w-[90%] md:max-w-[90%] mx-auto bg-gradient-to-br from-[#4f46e5] to-[#3730a3] rounded-[2rem] shadow-lg border border-white/10 cursor-pointer"
             role="region"
             aria-label="Balance card"
         >
@@ -70,7 +70,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                     {/* Monthly Change Indicator */}
                     <div className="flex items-center gap-2">
                         <span className={`text-sm font-semibold bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 ${monthlyChangeColor}`}>
-                            {monthlyChangeDisplay}
+                            {monthlyChangeDisplay} 
                         </span>
                         <span className="text-indigo-200 text-sm font-medium">this month</span>
                     </div>
@@ -80,7 +80,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                 <div className="flex justify-between gap-3 sm:gap-4 mt-2">
                     <button
                         onClick={onSend}
-                        className="flex-1 flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5 cursor-pointer"
+                        className="flex-1 cursor-pointer flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5 cursor-pointer"
                         aria-label="Send money"
                     >
                         <Send className="w-5 h-5 text-indigo-200" />
@@ -88,7 +88,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                     </button>
                     <button
                         onClick={onReceive}
-                        className="flex-1 flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5"
+                        className="flex-1 cursor-pointer flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5"
                         aria-label="Receive money"
                     >
                         <Download className="w-5 h-5 text-indigo-200" />
@@ -96,7 +96,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                     </button>
                     <button
                         onClick={onTopUp}
-                        className="flex-1 flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5"
+                        className="flex-1 cursor-pointer flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5"
                         aria-label="Top up balance"
                     >
                         <Plus className="w-5 h-5 text-indigo-200" />

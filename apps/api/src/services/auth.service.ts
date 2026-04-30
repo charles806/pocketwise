@@ -68,7 +68,7 @@ const authService = {
           passwordHash: passwordHash,
           dateOfBirth: dob,
           primaryGoal: primaryGoal || null,
-          // isSimulationMode,
+          onboardingComplete: !!primaryGoal,
         },
       });
 
