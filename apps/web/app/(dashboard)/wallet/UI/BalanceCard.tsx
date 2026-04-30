@@ -34,7 +34,9 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 
     // Determine display text and styling for monthly change
     const isMonthlyChangePositive = monthlyChange >= 0;
-    const monthlyChangeFormatted = new Intl.NumberFormat('en-NG', {
+    const safeLocale = 'en-NG';
+    
+    const monthlyChangeFormatted = new Intl.NumberFormat(safeLocale, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(Math.abs(monthlyChange));

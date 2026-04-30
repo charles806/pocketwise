@@ -404,7 +404,7 @@ NEXT_PUBLIC_SENTRY_DSN=
 
 ### Phase 5 — Beta & Polish *(Weeks 9–10)*
 - Beta test with 10–20 real users (UNILAG, UI, FUTO)
-- A/B test 70/30/10/10 split ratio with real behavior data
+- A/B test 50/30/10/10 split ratio with real behavior data
 - Bug fixes from beta feedback
 - Referral system — `POST /api/referrals`, ₦100 wallet credit per successful referral
 - React Native evaluation for mobile app post-MVP
