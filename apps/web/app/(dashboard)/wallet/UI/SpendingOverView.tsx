@@ -21,7 +21,7 @@ const SpendingItem = ({ label, amount, progress, color }: SpendingItemProps) => 
       </div>
       
       {/* Progress Bar Track */}
-      <div className="w-full h-[7px] bg-[#f1f5f9] rounded-full overflow-hidden">
+      <div className="w-full h-1.75 bg-[#f1f5f9] rounded-full overflow-hidden">
         {/* Progress Fill */}
         <div 
           className="h-full rounded-full transition-all duration-1000 ease-out"
