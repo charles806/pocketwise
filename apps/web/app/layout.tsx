@@ -38,13 +38,13 @@ export const metadata: Metadata = {
     title: "Pocketwise: Your money, automatically sorted.",
     description:
       "Stop struggling to save. Pocketwise automatically allocates your money into four purpose-driven wallets the moment it arrives. Built for Nigerian youth.",
-    url: "https://getpocketwise.app",
+    url: "https://pocketwise.xyz",
     siteName: "Pocketwise",
     locale: "en_NG",
     type: "website",
   },
   alternates: {
-    canonical: "https://getpocketwise.app",
+    canonical: "https://pocketwise.xyz",
   },
   manifest: "/manifest.json",
   authors: [{ name: "Pocketwise Team" }],

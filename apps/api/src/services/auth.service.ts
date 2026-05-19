@@ -49,7 +49,6 @@ const authService = {
       age--;
     }
 
-    // const isSimulationMode = age < 16;
     if (age < 16) {
       const error = new Error("You must be at least 16 years old to create an account") as any;
       error.statusCode = 400;
@@ -89,7 +88,7 @@ const authService = {
     const accessToken = jwt.sign(
       { id: newUser.id, email: newUser.email },
       process.env.JWT_ACCESS_SECRET!,
-      { expiresIn: "15m" },
+      { expiresIn: "45m" },
     );
 
     const refreshToken = jwt.sign(
@@ -133,7 +132,7 @@ const authService = {
     const accessToken = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_ACCESS_SECRET!,
-      { expiresIn: "15m" },
+      { expiresIn: "45m" },
     );
 
     const refreshToken = jwt.sign(
@@ -175,7 +174,7 @@ const authService = {
       const accessToken = jwt.sign(
         { id: user.id, email: user.email },
         process.env.JWT_ACCESS_SECRET!,
-        { expiresIn: "15m" },
+        { expiresIn: "45m" },
       );
 
       return { accessToken };

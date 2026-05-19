@@ -6,6 +6,7 @@ import { sendSuccess, sendError } from "./utils/response.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import authRouter from "./routes/auth.routes.js";
 import waitlistRouter from "./routes/waitlist.routes.js";
+import walletRouter from "./routes/wallet.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -39,7 +40,7 @@ app.get("/api/v1/health", (req: Request, res: Response) => {
 app.use("/api/v1/auth", authRouter);
 //Waitlist
 app.use("/api/v1/waitlist", waitlistRouter);
-
+app.use("/api/v1", walletRouter)
 app.use(errorMiddleware);
 
 // if (!process.env.VERCEL) {

@@ -53,7 +53,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 
     return (
         <div
-            className=" sm:w-full max-w-[90%] md:max-w-[90%] mx-auto bg-gradient-to-br from-[#4f46e5] to-[#3730a3] rounded-[2rem] shadow-lg border border-white/10 cursor-pointer"
+            className=" sm:w-full max-w-[90%] md:max-w-[90%] mx-auto bg-linear-to-br from-[#4f46e5] to-primary-dark rounded-4xl shadow-lg border border-white/10 cursor-pointer"
             role="region"
             aria-label="Balance card"
         >
@@ -64,7 +64,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                         <p className="text-indigo-200 text-sm font-semibold tracking-wider uppercase">
                             Total Balance
                         </p>
-                        <p className="text-white text-5xl sm:text-6xl font-bold tracking-tight leading-none break-words">
+                        <p className="text-white text-5xl sm:text-6xl font-bold tracking-tight leading-none wrap-break-word">
                             {currencySymbol}{formattedTotalBalance}
                         </p>
                     </div>
@@ -82,7 +82,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                 <div className="flex justify-between gap-3 sm:gap-4 mt-2">
                     <button
                         onClick={onSend}
-                        className="flex-1 cursor-pointer flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5 cursor-pointer"
+                        className="flex-1 cursor-pointer flex flex-col items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5"
                         aria-label="Send money"
                     >
                         <Send className="w-5 h-5 text-indigo-200" />

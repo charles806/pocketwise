@@ -4,7 +4,7 @@ import { WalletHeader } from "./UI/Header";
 import { GoalModal } from "./UI/GoalModal";
 import BalanceCard from "./UI/BalanceCard";
 import WalletCards from "./UI/WalletCard";
-import SpendingOverview from "./UI/SpendingOverView";
+// import SpendingOverview from "./UI/SpendingOverView";
 import RecentTransactions from "./UI/RecentTransactions";
 
 const Wallet = () => {
@@ -25,9 +25,9 @@ const Wallet = () => {
         </div>
 
         {/* Spending Overview */}
-        <div className="SpendingOverview">
+        {/* <div className="SpendingOverview">
           <SpendingOverview />
-        </div>
+        </div> */}
 
         {/* Recent Transactions */}
         <div className="recentTransaction">

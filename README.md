@@ -495,51 +495,6 @@ NEXT_PUBLIC_SENTRY_DSN=
 | Savings goal completion (90d) | 25%     | Proves behavioral change                |
 | Emergency override rate       | < 15%   | Measures discipline effectiveness       |
 
-### Business Targets
-
-- **LTV:CAC ratio** — payback period under 3 months
-- **Transaction fee revenue** — positive unit economics by 200 active users
-- **Pro conversion rate** — 10% of active users at 500+ user milestone
-- **Referral-driven acquisition** — 30% of new users from referral program
-
----
-
-## Monetization
-
-### Phase 1 — Free *(Launch → 500 users)*
-All core features free. Revenue from transaction fees only (0.5–1% above ₦1,000).
-
-### Phase 2 — PocketWise Pro *(500–1,000 active users)*
-₦500–₦1,000/month. Pro adds:
-- Unlimited savings goals (free tier: 2 max)
-- Custom split percentages
-- Advanced analytics (6-month trends, category breakdowns)
-- Priority AI Coach messages
-- Export financial reports as PDF
-
-### Phase 3 — Scale *(Post-1,000 users)*
-- Referral program — ₦100 wallet credit per successful referral
-- University campus ambassador program (UNILAG, UI, FUTO, ABU)
-- Interest-bearing savings via money market fund partnerships
-
----
-
-## Risks & Contingency
-
-| Risk                       | Likelihood | Mitigation                                                      |
-|----------------------------|------------|-----------------------------------------------------------------|
-| Anchor integration delay   | Medium     | Start sandbox testing in Week 1; Paystack as fallback           |
-| Build timeline slips 2+ weeks | Medium  | Launch waitlist page immediately; delay app, not marketing      |
-| Low beta engagement        | Low        | Personal outreach to 20 friends/classmates before public launch |
-| Split ratio wrong for users | Medium    | A/B test in beta; Pro users can customize                       |
-| CBN regulatory change      | Low        | Anchor absorbs regulatory risk; monitor CBN circulars quarterly |
-
-**Post-launch contingency:**
-- If retention < 20% at Week 2 → run user interviews with first 50 users before building anything new
-- If transaction fees < ₦50k/month at 500 users → revisit fee structure and Pro tier timing
-- If Anchor proves too slow → ship with Paystack virtual accounts as a temporary bridge
-
----
 
 *PocketWise — Building the financial backbone of Nigerian youth.*
 

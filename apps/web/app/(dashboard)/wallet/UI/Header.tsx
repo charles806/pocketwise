@@ -1,28 +1,18 @@
 "use client";
-import { useEffect } from "react";
 import Image from "next/image";
 import userS from "../../../../public/user.png";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import { ResponsiveNav } from "./ResponsiveNav";
-import { Bell, UserSearch } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
+import { Greeting } from "../../../../libs/utils";
 
 export const WalletHeader = () => {
   const router = useRouter();
   const { user } = useAuth();
 
-  const greetings = ["Good Morning", "Good Afternoon", "Good Evening"];
-  const currentHour = new Date().getHours();
-
-  let greeting = greetings[0];
-  if (currentHour >= 12 && currentHour < 18) {
-    greeting = greetings[1];
-  } else if (currentHour >= 18 || currentHour < 6) {
-    greeting = greetings[2];
-  }
-
-
+const greeting = Greeting()
 
   return (
 

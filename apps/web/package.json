@@ -11,6 +11,7 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@next/swc-darwin-x64": "^16.2.6",
     "@repo/tailwind-config": "*",
     "@repo/ui": "*",
     "@vercel/analytics": "^2.0.1",
