@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import logo from "../../../logo.png";
+import logo from "../../../icon.png";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {

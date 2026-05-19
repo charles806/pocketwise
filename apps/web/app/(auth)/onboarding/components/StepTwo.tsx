@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import logo from "../../../logo.png";
+import logo from "../../../icon.png";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -98,9 +98,7 @@ const StepTwo = ({ onNext, onPrev, onSkip }: StepTwoProps) => {
           >
             <h1 className="text-slate-900 font-sans text-4xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
               Your budget, <br />
-              <span className="text-(--primary)">
-                always under control.
-              </span>
+              <span className="text-(--primary)">always under control.</span>
             </h1>
             <p className="text-slate-500 font-sans text-lg lg:text-xl leading-relaxed">
               Create smart budgets for every category. PocketWise tracks your
