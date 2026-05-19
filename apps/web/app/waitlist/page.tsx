@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const benefits = [
-  { icon: Lock, text: "₦100 welcome credit on launch" },
+  { icon: Lock, text: "₦1000 welcome credit on launch" },
   { icon: Sparkles, text: "Early access before public launch" },
   { icon: Shield, text: "Priority support for founding members" },
 ];

@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: "What's the minimum amount I can deposit?",
-    a: "₦100. PocketWise is built for how Nigerian youth actually transact — not around foreign minimums.",
+    a: "₦1000. PocketWise is built for how Nigerian youth actually transact — not around foreign minimums.",
   },
   {
     q: "What's the Emergency wallet lock?",
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: "Is PocketWise free?",
-    a: "Yes — PocketWise launches completely free. We earn a small transaction fee (0.5–1%) on transfers above ₦1,000. No hidden charges.",
+    a: "Yes — PocketWise launches completely free. We earn a small transaction fee (0.5–1%) on transfers above ₦10,000. No hidden charges.",
   },
   {
     q: "Who is PocketWise for?",

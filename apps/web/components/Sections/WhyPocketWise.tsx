@@ -31,7 +31,7 @@ const cards = [
   {
     icon: BarChart3,
     title: "Built for Nigerian Reality",
-    body: "Supports ₦100 minimum transactions. Works with bank transfer and USSD. No dollar cards or foreign infrastructure needed.",
+    body: "Supports ₦1000 minimum transactions. Works with bank transfer and USSD. No dollar cards or foreign infrastructure needed.",
     color: "#DC2626",
     bgLight: "#FEE2E2",
     delay: 0.3,

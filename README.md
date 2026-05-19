@@ -398,7 +398,7 @@ NEXT_PUBLIC_SENTRY_DSN=
 ### Phase 4 — KYC & Live Money *(Weeks 7–8)*
 - Anchor KYC integration — Tier 1 on signup, Tier 2 before withdrawals
 - Move Anchor from sandbox to production
-- Transaction fee logic (0.5–1% above ₦1,000)
+- Transaction fee logic (0.5–1% above ₦10,000)
 - Sentry error monitoring setup
 - Performance audit and optimization
 
@@ -406,7 +406,7 @@ NEXT_PUBLIC_SENTRY_DSN=
 - Beta test with 10–20 real users (UNILAG, UI, FUTO)
 - A/B test 50/30/10/10 split ratio with real behavior data
 - Bug fixes from beta feedback
-- Referral system — `POST /api/referrals`, ₦100 wallet credit per successful referral
+- Referral system — `POST /api/referrals`, ₦1000 wallet credit per successful referral
 - React Native evaluation for mobile app post-MVP
 
 ---

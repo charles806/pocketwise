@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import logo from "../../../icon.png";
+import logo from "../../../logo.png";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -130,7 +130,7 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
               <motion.div
                 animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-[10%] -right-[10%] size-64 bg-(--primary)/20 blur-[100px] rounded-full"
+                className="absolute top-[-10%] right-[-10%] size-64 bg-(--primary)/20 blur-[100px] rounded-full"
               />
             )}
           </div>

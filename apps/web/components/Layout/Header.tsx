@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import logo from "../../public/logo.png"
 import {
   Menu,
   X,
@@ -38,7 +39,7 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-[95%] md:w-[80%] max-w-[1200px] rounded-[24px] border border-white/40 bg-white/70 backdrop-blur-[12px] ${scrolled
+        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-[95%] md:w-[80%] max-w-300 rounded-3xl border border-white/40 bg-white/70 backdrop-blur-md ${scrolled
             ? "shadow-[0_8px_30px_rgb(0,0,0,0.12)] bg-white/80"
             : "shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/60"
           }`}
@@ -46,13 +47,12 @@ export default function Header() {
         <div className="w-full px-5 sm:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
+            <Link href="/" className="flex items-center gap-1 group">
               <Image
-                src="/icon.png"
+                src={logo}
                 alt="PocketWise Logo"
-                width={36}
-                height={36}
-                className="rounded-xl shadow-lg shadow-violet-600/25 group-hover:scale-110 transition-transform duration-300"
+                width={75}
+                height={75}
               />
               <span className="font-jakarta font-bold text-lg text-gray-900 tracking-tight">
                 PocketWise
