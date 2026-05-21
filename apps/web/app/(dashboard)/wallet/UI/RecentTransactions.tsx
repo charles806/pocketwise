@@ -1,6 +1,9 @@
 "use client";
-import React from "react";
-import { ShoppingBag, CreditCard, ArrowDownLeft, Phone, PlayCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ShoppingBag, CreditCard, ArrowDownLeft, ReceiptText, ArrowRight } from "lucide-react";
+import { useAuth } from "../../../../context/AuthContext";
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL
 
 interface TransactionProps {
   title: string;
@@ -17,7 +20,7 @@ const TransactionItem = ({ title, time, amount, type, icon, iconBg, iconColor }:
     <div className="w-full flex items-center justify-between py-4 border-b border-slate-50 last:border-0 group cursor-pointer transition-all hover:px-2">
       <div className="flex items-center gap-4">
         {/* Icon Container */}
-        <div 
+        <div
           className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
           style={{ backgroundColor: iconBg }}
         >
@@ -25,7 +28,7 @@ const TransactionItem = ({ title, time, amount, type, icon, iconBg, iconColor }:
             {icon}
           </div>
         </div>
-        
+
         {/* Text */}
         <div className="flex flex-col">
           <span className="text-[#0f172a] font-bold text-[17px] tracking-tight leading-tight">
@@ -39,10 +42,9 @@ const TransactionItem = ({ title, time, amount, type, icon, iconBg, iconColor }:
 
       {/* Amount */}
       <div className="text-right">
-        <span 
-          className={`font-bold text-[17px] tracking-tight ${
-            type === "income" ? "text-[#10b981]" : "text-[#f43f5e]"
-          }`}
+        <span
+          className={`font-bold text-[17px] tracking-tight ${type === "income" ? "text-[#10b981]" : "text-[#f43f5e]"
+            }`}
         >
           {type === "income" ? `+${amount}` : `-${amount}`}
         </span>
@@ -52,6 +54,36 @@ const TransactionItem = ({ title, time, amount, type, icon, iconBg, iconColor }:
 };
 
 export const RecentTransactions = () => {
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const { accessToken } = useAuth()
+
+  useEffect(() => {
+    const getTransactions = async () => {
+      const url = `${API_BASE}/api/v1/transactions`
+      if (!accessToken) return;
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
+          credentials: "include"
+        })
+        if (!response.ok) {
+          console.log(" No session found (401/404)");
+          return
+        }
+
+        const { data } = await response.json()
+        // API returns an object containing { transaction: [...] }
+        setTransactions(data.transaction || [])
+
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    getTransactions()
+  }, [accessToken])
   return (
     <section className="w-full max-w-[90%] mx-auto bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 p-8">
       {/* Header */}
@@ -66,51 +98,72 @@ export const RecentTransactions = () => {
 
       {/* Transaction List */}
       <div className="flex flex-col">
-        <TransactionItem
-          title="Shoprite"
-          time="Today, 2:30 PM"
-          amount="₦12,500"
-          type="expense"
-          icon={<ShoppingBag size={24} />}
-          iconBg="#fef3c7"
-          iconColor="#d97706"
-        />
-        <TransactionItem
-          title="Salary Deposit"
-          time="Yesterday, 9:00 AM"
-          amount="₦150,000"
-          type="income"
-          icon={<CreditCard size={24} />}
-          iconBg="#eef2ff"
-          iconColor="#4f46e5"
-        />
-        <TransactionItem
-          title="Chicken Republic"
-          time="Yesterday, 1:15 PM"
-          amount="₦3,200"
-          type="expense"
-          icon={<ArrowDownLeft size={24} />}
-          iconBg="#d1fae5"
-          iconColor="#059669"
-        />
-        <TransactionItem
-          title="MTN Airtime"
-          time="Mon, 5:45 PM"
-          amount="₦2,000"
-          type="expense"
-          icon={<Phone size={24} />}
-          iconBg="#fce7f3"
-          iconColor="#db2777"
-        />
-        <TransactionItem
-          title="Netflix"
-          time="Sun, 12:00 PM"
-          amount="₦4,900"
-          type="expense"
-          icon={<PlayCircle size={24} />}
-          iconBg="#fef3c7"
-          iconColor="#d97706"
-        />
+        {transactions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-14 px-6 text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
+
+            {/* Animated icon container */}
+            <div className="relative mb-5">
+              <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
+                <ReceiptText className="w-7 h-7 text-slate-400" />
+              </div>
+              {/* Pulse ring */}
+              <div className="absolute inset-0 rounded-2xl border-2 border-slate-200 animate-ping opacity-30" />
+            </div>
+
+            {/* Text */}
+            <h4 className="text-slate-900 font-semibold text-lg mb-1.5">
+              No transactions yet
+            </h4>
+            <p className="text-slate-400 text-sm max-w-xs leading-relaxed mb-6">
+              Add money to your wallet to get started. Your activity will appear here automatically.
+            </p>
+
+            {/* CTA */}
+            <button className="inline-flex items-center gap-2 bg-[#4f46e5] hover:bg-[#3730a3] active:scale-95 transition-all duration-200 text-white text-sm font-semibold px-6 py-3 rounded-xl shadow-sm hover:shadow-md cursor-pointer">
+              Add Money
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            {/* Helper text */}
+            <p className="text-xs text-slate-300 mt-4">
+              Money splits automatically the moment it arrives
+            </p>
+          </div>
+        ) : (
+          transactions.slice(0, 8).map((tx, idx) => {
+            const isIncome = tx.type === "deposit" || tx.type === "split_credit" || tx.type === "referral_credit";
+
+            const date = new Date(tx.createdAt);
+            const timeStr = date.toLocaleDateString('en-NG', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+
+            let icon = <ShoppingBag size={24} />;
+            let iconBg = "#fef3c7";
+            let iconColor = "#d97706";
+
+            if (isIncome) {
+              icon = <CreditCard size={24} />;
+              iconBg = "#eef2ff";
+              iconColor = "#4f46e5";
+            } else if (tx.type === "withdrawal" || tx.type === "transfer") {
+              icon = <ArrowDownLeft size={24} />;
+              iconBg = "#d1fae5";
+              iconColor = "#059669";
+            }
+
+            return (
+              <TransactionItem
+                key={tx.id || idx}
+                title={tx.reason || (isIncome ? "Credit" : "Debit")}
+                time={timeStr}
+                amount={`₦${Number(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                type={isIncome ? "income" : "expense"}
+                icon={icon}
+                iconBg={iconBg}
+                iconColor={iconColor}
+              />
+            );
+          })
+        )}
       </div>
     </section>
   );

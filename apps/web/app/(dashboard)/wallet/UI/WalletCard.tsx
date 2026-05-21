@@ -54,7 +54,7 @@ const WalletCards = ({ wallets }: WalletCardsProps) => {
 
         const wallet = wallets.find((w: any) => w.type === type)
 
-        const balanceNum = wallet ? Number(wallet.balanceNum) : 0;
+        const balanceNum = wallet ? Number(wallet.balance) : 0;
 
         return formatNaira(balanceNum)
     }

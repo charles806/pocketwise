@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import localFont from "next/font/local";
 import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
@@ -21,8 +22,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title:
-    "Pocketwise — Smart Wallet for Nigerian Youth | Auto-Split Money, Save & Spend Wisely",
+  title: "Pocketwise: Smart Wallet & Money Manager",
   icons: {
     icon: [{ url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" }],
     shortcut: ["/favicon-32x32.png"],
@@ -31,13 +31,13 @@ export const metadata: Metadata = {
     ],
   },
   description:
-    "Automatically split every deposit into Spend, Savings, Emergency, and Flex wallets using the Warren Buffett principle. Build financial discipline without willpower — designed for Nigerian students and young earners.",
+    "Automatically split deposits into Spend, Savings, and Flex wallets. Build financial discipline without willpower—designed for Nigerian youth and students.",
   keywords:
     "smart wallet, Nigerian youth finance, auto-save, Warren Buffett split, money management app, PiggyVest alternative, Cowrywise alternative, save money Nigeria, student finance, emergency fund, AI money coach",
   openGraph: {
-    title: "Pocketwise: Your money, automatically sorted.",
+    title: "Pocketwise: Smart Wallet & Money Manager",
     description:
-      "Stop struggling to save. Pocketwise automatically allocates your money into four purpose-driven wallets the moment it arrives. Built for Nigerian youth.",
+      "Automatically split deposits into Spend, Savings, and Flex wallets. Build financial discipline without willpower—designed for Nigerian youth and students.",
     url: "https://pocketwise.xyz",
     siteName: "Pocketwise",
     locale: "en_NG",
@@ -94,6 +94,28 @@ export default function RootLayout({
             </main>
           </AuthProvider>
         </ToastProvider>
+        <Script
+          id="structured-data"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Pocketwise",
+              "url": "https://pocketwise.xyz",
+              "description":
+                "Automatically split deposits into Spend, Savings, and Flex wallets. Build financial discipline without willpower—designed for Nigerian youth and students.",
+              "applicationCategory": "FinanceApplication",
+              "operatingSystem": "Web",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "NGN",
+              },
+            }),
+          }}
+        />
       </body>
     </html>
   );

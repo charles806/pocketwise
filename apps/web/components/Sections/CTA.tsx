@@ -182,7 +182,7 @@ export default function WaitlistSection() {
                     <span>Joining...</span>
                   </>
                 ) : (
-                  "Claim My Early Access →"
+                  "Join Waitlist"
                 )}
               </motion.button>
             </form>

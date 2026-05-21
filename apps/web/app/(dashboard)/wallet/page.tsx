@@ -35,7 +35,6 @@ const Wallet = () => {
         }
 
         const { data } = await response.json()
-        console.log("Wallet response", data.totalBalance, data.wallets)
         setBalance(data.totalBalance)
         setWallets(data.wallets)
 
@@ -62,13 +61,8 @@ const Wallet = () => {
           <WalletCards wallets={wallets} />
         </div>
 
-        {/* Spending Overview */}
-        {/* <div className="SpendingOverview">
-          <SpendingOverview />
-        </div> */}
-
         {/* Recent Transactions */}
-        <div className="recentTransaction">
+        <div className="recentTransaction pb-12">
           <RecentTransactions />
         </div>
 
