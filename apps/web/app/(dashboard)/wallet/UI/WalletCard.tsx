@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { formatNaira } from "../../../../libs/utils";
 
 interface WalletItemProps {
     label: string;
@@ -9,7 +10,12 @@ interface WalletItemProps {
     balanceColor: string;
 }
 
+interface WalletCardsProps {
+    wallets: any[] | null;
+}
+
 const WalletItem = ({ label, percentage, balance, dotColor, balanceColor }: WalletItemProps) => {
+
     return (
         <div className="w-full group cursor-pointer transition-all duration-200 active:scale-[0.98]">
             <div className="flex items-center justify-between p-5 bg-[#f8fafc] hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 border border-slate-100 rounded-3xl transition-all duration-300">
@@ -42,7 +48,16 @@ const WalletItem = ({ label, percentage, balance, dotColor, balanceColor }: Wall
     );
 };
 
-const WalletCards = () => {
+const WalletCards = ({ wallets }: WalletCardsProps) => {
+    const getBalance = (type: string) => {
+        if (!wallets) return "₦0.00"
+
+        const wallet = wallets.find((w: any) => w.type === type)
+
+        const balanceNum = wallet ? Number(wallet.balanceNum) : 0;
+
+        return formatNaira(balanceNum)
+    }
     return (
         <section className="w-full max-w-[90%] mx-auto bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
             {/* Header */}
@@ -50,9 +65,9 @@ const WalletCards = () => {
                 <h3 className="font-extrabold text-2xl text-slate-900 tracking-tight">
                     My Wallets
                 </h3>
-                <button className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors px-4 py-2 bg-indigo-50 rounded-full">
+                {/* <button className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors px-4 py-2 bg-indigo-50 rounded-full">
                     See all
-                </button>
+                </button> */}
             </div>
 
             {/* Wallet List */}
@@ -60,28 +75,28 @@ const WalletCards = () => {
                 <WalletItem
                     label="Spend"
                     percentage="50%"
-                    balance="₦75,000"
+                    balance={getBalance("spend")}
                     dotColor="#4f46e5"
                     balanceColor="#4f46e5"
                 />
                 <WalletItem
                     label="Savings"
                     percentage="30%"
-                    balance="₦45,000"
+                    balance={getBalance("savings")}
                     dotColor="#059669"
                     balanceColor="#059669"
                 />
                 <WalletItem
                     label="Emergency"
                     percentage="10%"
-                    balance="₦15,000"
+                    balance={getBalance("emergency")}
                     dotColor="#d97706"
                     balanceColor="#d97706"
                 />
                 <WalletItem
                     label="Pocketwise"
                     percentage="10%"
-                    balance="₦15,000"
+                    balance={getBalance("pocketwise")}
                     dotColor="#db2777"
                     balanceColor="#db2777"
                 />

@@ -1,5 +1,6 @@
 "use client"
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../../context/AuthContext";
 import { WalletHeader } from "./UI/Header";
 import { GoalModal } from "./UI/GoalModal";
 import BalanceCard from "./UI/BalanceCard";
@@ -7,7 +8,44 @@ import WalletCards from "./UI/WalletCard";
 // import SpendingOverview from "./UI/SpendingOverView";
 import RecentTransactions from "./UI/RecentTransactions";
 
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL
+
 const Wallet = () => {
+  const [balance, setBalance] = useState<number>(0)
+  const [wallets, setWallets] = useState<any[] | null>(null)
+  const { accessToken } = useAuth()
+
+  useEffect(() => {
+    const getWallet = async () => {
+      if (!accessToken) return;
+      const url = `${API_BASE}/api/v1/wallets`
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
+          credentials: "include"
+        })
+
+        if (!response.ok) {
+          console.log(" No session found (401/404)");
+          return
+        }
+
+        const { data } = await response.json()
+        console.log("Wallet response", data.totalBalance, data.wallets)
+        setBalance(data.totalBalance)
+        setWallets(data.wallets)
+
+
+      } catch (error) {
+        console.error("Error fetching wallets", error)
+      }
+    }
+    getWallet()
+  }, [accessToken])
   return (
     <>
       <WalletHeader />
@@ -16,12 +54,12 @@ const Wallet = () => {
 
         {/* Balance Card */}
         <div className="BalanceCaed">
-          <BalanceCard totalBalance={10000} monthlyChange={20} />
+          <BalanceCard totalBalance={balance} />
         </div>
 
         {/* Wallet Cards */}
         <div className="walletCard">
-          <WalletCards />
+          <WalletCards wallets={wallets} />
         </div>
 
         {/* Spending Overview */}

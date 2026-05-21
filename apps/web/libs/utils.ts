@@ -1,11 +1,11 @@
-export function formatNaira() {
+export function formatNaira(balance: number) {
     const localCurrenct = "en-NG";
     return new Intl.NumberFormat(localCurrenct, {
         style: "currency",
         currency: "NGN",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    });
+    }).format(balance);
 }
 
 export function SplitCacultor(amount: number) {

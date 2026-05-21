@@ -7,7 +7,7 @@ interface BalanceCardProps {
     /** The total account balance */
     totalBalance: number;
     /** The change in balance (positive or negative) for "this month" */
-    monthlyChange: number;
+    // monthlyChange: number;
     /** Currency symbol (default: ₦) */
     currencySymbol?: string;
     /** Optional click handler for Send Button */
@@ -20,7 +20,7 @@ interface BalanceCardProps {
 
 const BalanceCard: React.FC<BalanceCardProps> = ({
     totalBalance,
-    monthlyChange,
+    // monthlyChange,
     currencySymbol = '₦',
     onSend,
     onReceive,
@@ -33,23 +33,23 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
     }).format(totalBalance);
 
     // Determine display text and styling for monthly change
-    const isMonthlyChangePositive = monthlyChange >= 0;
+    // const isMonthlyChangePositive = monthlyChange >= 0;
     const safeLocale = 'en-NG';
     
-    const monthlyChangeFormatted = new Intl.NumberFormat(safeLocale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(Math.abs(monthlyChange));
+    // const monthlyChangeFormatted = new Intl.NumberFormat(safeLocale, {
+    //     minimumFractionDigits: 2,
+    //     maximumFractionDigits: 2,
+    // }).format(Math.abs(monthlyChange));
 
-    const monthlyChangeDisplay = isMonthlyChangePositive
-        ? `${currencySymbol}${monthlyChangeFormatted}`
-        : `-${currencySymbol}${monthlyChangeFormatted}`;
+    // const monthlyChangeDisplay = isMonthlyChangePositive
+    //     ? `${currencySymbol}${monthlyChangeFormatted}`
+    //     : `-${currencySymbol}${monthlyChangeFormatted}`;
 
-    const monthlyChangeColor = isMonthlyChangePositive
-        ? 'text-emerald-300'
-        : monthlyChange < 0
-            ? 'text-red-300'
-            : 'text-gray-300';
+    // const monthlyChangeColor = isMonthlyChangePositive
+    //     ? 'text-emerald-300'
+    //     : monthlyChange < 0
+    //         ? 'text-red-300'
+    //         : 'text-gray-300';
 
     return (
         <div
@@ -70,12 +70,12 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                     </div>
 
                     {/* Monthly Change Indicator */}
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                         <span className={`text-sm font-semibold bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 ${monthlyChangeColor}`}>
                             {monthlyChangeDisplay} 
                         </span>
                         <span className="text-indigo-200 text-sm font-medium">this month</span>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Action Buttons */}

@@ -5,7 +5,7 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 const walletRouter = Router();
 
 walletRouter.get(
-    "/wallets",
+    "/",
     authMiddleware,
     getWallets
 );

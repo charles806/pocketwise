@@ -115,7 +115,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initAuth = async () => {
       const url = `${API_BASE}/api/v1/auth/refresh`;
-      console.log(`[AuthContext] initAuth: Fetching from ${url}`);
+      // console.log(`[AuthContext] initAuth: Fetching from ${url}`);
       try {
         const response = await fetch(url, {
           method: "POST",
