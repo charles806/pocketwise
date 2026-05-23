@@ -7,7 +7,7 @@ const cspHeader = `
 
   font-src 'self' data: https://fonts.gstatic.com;
 
-  connect-src 'self' https://pocketwise.xyz;
+  connect-src 'self' https://pocketwise-api.vercel.app;
 
   img-src 'self' blob: data: https://res.cloudinary.com;
 
@@ -27,11 +27,11 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Content-Security-Policy',
-            value: cspHeader.replace(/\n/g, ''),
+            key: "Content-Security-Policy",
+            value: cspHeader.replace(/\n/g, ""),
           },
         ],
       },
