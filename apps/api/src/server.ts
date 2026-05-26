@@ -37,19 +37,16 @@ app.get("/api/v1/health", (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: "PocketWise API is running" });
 });
 
-//Auth
+//Auth Routes
 app.use("/api/v1/auth", authRouter);
-//Waitlist
+//Waitlist Routes
 app.use("/api/v1/waitlist", waitlistRouter);
+//Main App Routes
 app.use("/api/v1/wallets", walletRouter)
 app.use("/api/v1/transactions", transactionRouter)
+//Error Handling Middleware
 app.use(errorMiddleware);
 
-// if (!process.env.VERCEL) {
-//   app.listen(PORT, () => {
-//     console.log(`Server is running on port http://localhost:${PORT}`);
-//   });
-// }
 
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);

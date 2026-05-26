@@ -11,7 +11,6 @@ import { Eye, EyeOff } from "lucide-react";
 import Button from "@mui/material/Button";
 import { LockIcon } from "lucide-react";
 import { loginSchema } from "../../../libs/validation";
-import { useRouter } from "next/navigation";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
@@ -32,7 +31,6 @@ interface LoginFormResponse {
 const signInschema = loginSchema;
 
 const LoginForm = () => {
-  const router = useRouter();
   const { setAuth } = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
@@ -72,6 +70,8 @@ const LoginForm = () => {
       const dataRes = (await res.json()) as LoginFormResponse;
 
       if (res.ok) {
+        console.log("Login User Data:", dataRes.user);
+        console.log("")
         setAuth(dataRes.accessToken, dataRes.user);
         window.location.href = redirectTo || "/wallet";
         return;

@@ -18,7 +18,7 @@ const WalletItem = ({ label, percentage, balance, dotColor, balanceColor }: Wall
 
     return (
         <div className="w-full group cursor-pointer transition-all duration-200 active:scale-[0.98]">
-            <div className="flex items-center justify-between p-5 bg-[#f8fafc] hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 border border-slate-100 rounded-3xl transition-all duration-300">
+            <div className="flex items-center justify-between p-5 bg-background hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 border border-slate-100 rounded-3xl transition-all duration-300">
                 <div className="flex items-center gap-4">
                     {/* Status Dot */}
                     <div
@@ -96,7 +96,7 @@ const WalletCards = ({ wallets }: WalletCardsProps) => {
                 <WalletItem
                     label="Pocketwise"
                     percentage="10%"
-                    balance={getBalance("pocketwise")}
+                    balance={getBalance("flex")}
                     dotColor="#db2777"
                     balanceColor="#db2777"
                 />

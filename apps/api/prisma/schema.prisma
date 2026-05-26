@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  directUrl = env("DATABASE_URL")
 }
 
 model Waitlist {
@@ -79,6 +79,9 @@ model Transaction {
   anchorRef    String?           @map("anchor_ref")
   splitGroupId String?           @map("split_group_id") @db.Uuid
   status       TransactionStatus @default(pending)
+  reference String @unique
+  senderWalletId   String?           @map("sender_wallet_id") @db.Uuid
+  receiverWalletId String?           @map("receiver_wallet_id") @db.Uuid
   createdAt    DateTime          @default(now()) @map("created_at")
   user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   wallet       Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)

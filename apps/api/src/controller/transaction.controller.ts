@@ -25,3 +25,4 @@ export const getTranactions = async (req: Request, res: Response) => {
         sendError(res, message, status);
     }
 }
+
