@@ -105,8 +105,8 @@ const transferService = {
             }
 
             // Find Receiver Wallet
-            const receiverWallet = await tx.wallet.findUnique({ 
-                where: { id: receiverWalletId } 
+            const receiverWallet = await tx.wallet.findUnique({
+                where: { id: receiverWalletId }
             });
 
             if (!receiverWallet) {
