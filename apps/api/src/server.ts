@@ -8,6 +8,7 @@ import authRouter from "./routes/auth.routes.js";
 import waitlistRouter from "./routes/waitlist.routes.js";
 import walletRouter from "./routes/wallet.routes.js";
 import transactionRouter from "./routes/transaction.routes.js";
+import { webhookRoutes } from "./routes/webhook.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -44,6 +45,7 @@ app.use("/api/v1/waitlist", waitlistRouter);
 //Main App Routes
 app.use("/api/v1/wallets", walletRouter)
 app.use("/api/v1/transactions", transactionRouter)
+app.use("/api/v1/webhooks", webhookRoutes)
 //Error Handling Middleware
 app.use(errorMiddleware);
 

@@ -76,10 +76,10 @@ model Transaction {
   type         TransactionType
   amount       Decimal           @db.Decimal(12, 2)
   reason       String?
-  anchorRef    String?           @map("anchor_ref")
+anchorRef String? @unique @map("anchor_ref")   
   splitGroupId String?           @map("split_group_id") @db.Uuid
   status       TransactionStatus @default(pending)
-  reference String @unique
+  reference  String @unique
   senderWalletId   String?           @map("sender_wallet_id") @db.Uuid
   receiverWalletId String?           @map("receiver_wallet_id") @db.Uuid
   createdAt    DateTime          @default(now()) @map("created_at")
@@ -102,6 +102,7 @@ model SavingsGoal {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt DateTime?
 
   @@map("savings_goals")
 }
