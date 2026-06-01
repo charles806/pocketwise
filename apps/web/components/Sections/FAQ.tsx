@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: "Can I change the 50/30/10/10 split?",
-    a: "Not in the free tier. The default split is intentional — it works. PocketWise Pro (coming soon) will allow custom split percentages for users who want more control.",
+    a: "Yes — you can change your split percentages anytime from your wallet settings. The default 50/30/10/10 is a solid starting point, but you're free to adjust it to what works for you.",
   },
   {
     q: "What's the minimum amount I can deposit?",
@@ -35,7 +35,7 @@ const faqs = [
   },
   {
     q: "Who is PocketWise for?",
-    a: "Nigerian youth aged 18–25 — students, young professionals, side-hustlers, and first-time earners who want to build real financial discipline without the lectures.",
+    a: "PocketWise is for everyone, of all ages. The goal is simple — help you manage your money better.",
   },
 ];
 
