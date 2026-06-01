@@ -100,7 +100,7 @@ export const updateSavingsGoalController = async (
 
     const result = await savingsGoalService.updateSavingsGoal(
       userId,
-      goalId,
+      goalIdResult.data,
       parse.data,
     );
 
@@ -115,17 +115,19 @@ export const updateSavingsGoalController = async (
   }
 };
 
-export const deleteSavingsGoalController = async (req: Request, res: Response) => {
+export const deleteSavingsGoalController = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const userId = req.user?.id
-    const { goalId } = req.params
-
+    const userId = req.user?.id;
+    const { goalId } = req.params;
 
     if (!userId) {
       return sendError(res, "Unauthorized", 401);
     }
 
-    const goalIdResult = uuidParamSchema.safeParse(goalId)
+    const goalIdResult = uuidParamSchema.safeParse(goalId);
 
     if (!goalIdResult.success) {
       return sendError(
@@ -136,10 +138,12 @@ export const deleteSavingsGoalController = async (req: Request, res: Response) =
       );
     }
 
-    const result = await savingsGoalService.deleteSavingsGoal(userId, goalId)
+    const result = await savingsGoalService.deleteSavingsGoal(
+      userId,
+      goalIdResult.data,
+    );
 
-    return sendSuccess(res, "Success", result, 200)
-
+    return sendSuccess(res, "Success", result, 200);
   } catch (error) {
     return sendError(
       res,
@@ -148,6 +152,4 @@ export const deleteSavingsGoalController = async (req: Request, res: Response) =
       error,
     );
   }
-}
-
-
+};
