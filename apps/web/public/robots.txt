@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /wallet
+Disallow: /admin
+Disallow: /onboarding
+
+Sitemap: https://pocketwise.xyz/sitemap.xml

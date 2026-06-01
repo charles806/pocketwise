@@ -234,7 +234,6 @@ function WalletSplitCard() {
           <div
             key={row.name}
             className="flex items-center justify-between p-3 rounded-xl cursor-pointer"
-
           >
             <div className="flex items-center gap-3">
               <div
@@ -281,7 +280,7 @@ function TransferCard() {
           className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold"
           style={{ background: "#5B4FCF" }}
         >
-          <DollarSign size={20} />
+          ₦
         </motion.div>
         <div>
           <p className="font-jakarta font-semibold text-foreground text-sm">
@@ -543,10 +542,11 @@ function FeatureRow({ feature }: { feature: (typeof features)[0] }) {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
-      className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${!feature.textLeft
-        ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1"
-        : ""
-        }`}
+      className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${
+        !feature.textLeft
+          ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1"
+          : ""
+      }`}
     >
       <motion.div variants={itemVariants} className="flex flex-col">
         <motion.span
