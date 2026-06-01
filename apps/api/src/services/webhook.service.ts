@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import { calculateWalletSplits } from "./split.service.js";
 import crypto from "crypto";
-import type { Decimal } from "@prisma/client/runtime/binary";
+// import type { Decimal } from "@prisma/client/runtime/binary";
 
 interface AnchorDepositPayload {
     event: string;

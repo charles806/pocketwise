@@ -1,3 +1,4 @@
+import type { TransactionType, WalletType } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 
 
@@ -5,6 +6,14 @@ interface TransferInterface {
     userId: string,
     receiverWalletId: string,
     amount: number
+}
+
+interface internalWalletTransferInterface {
+    userId: string,
+    fromType: WalletType,
+    toType: WalletType,
+    amount: number,
+    type: TransactionType
 }
 
 const walletService = {
@@ -174,4 +183,117 @@ const transferService = {
     }
 }
 
-export { walletService, transferService };
+const internalWalletTransferService = {
+    async internalWalletTransfer(data: internalWalletTransferInterface) {
+        const { userId, fromType, toType, amount, type } = data
+
+        if (!amount || Number.isNaN(amount) || amount <= 0) {
+            const error = new Error("Transfer amount must be greater than zero") as any;
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const reference = crypto.randomUUID()
+
+        const result = await prisma.$transaction(async (tx) => {
+            // Lock both wallet rows
+            await tx.$queryRaw`
+        SELECT id
+        FROM wallets
+        WHERE user_id = ${userId}::uuid
+          AND type IN (${fromType}, ${toType})
+        FOR UPDATE
+    `;
+
+            const wallets = await tx.wallet.findMany({
+                where: {
+                    userId: data.userId,
+                    type: {
+                        in: [data.fromType, data.toType]
+                    }
+                }
+            });
+
+            const fromWallet = wallets.find(
+                wallets => wallets.type === data.fromType
+            )
+
+
+            const toWallet = wallets.find(
+                wallets => wallets.type === data.toType
+            )
+
+            if (!fromWallet) {
+                throw new Error(`${data.fromType} wallet not found`);
+            }
+
+            if (!toWallet) {
+                throw new Error(`${data.toType} wallet not found`);
+            }
+
+            if (fromWallet.balance.toNumber() < amount) {
+                throw new Error("Insufficient funds")
+            }
+
+            const deductWallet = await tx.wallet.update({
+                where: {
+                    id: fromWallet.id
+                },
+                data: {
+                    balance: { decrement: amount }
+                }
+            })
+
+            const addWallet = await tx.wallet.update({
+                where: {
+                    id: toWallet.id
+                },
+                data: {
+                    balance: { increment: amount }
+                }
+            })
+
+            // Create Sender DEBIT transaction
+            await tx.transaction.create({
+                data: {
+                    userId,
+                    walletId: fromWallet.id,
+                    type: type,
+                    amount: -amount,
+                    status: 'success',
+                    reference: reference,
+                    senderWalletId: deductWallet.id,
+                    receiverWalletId: addWallet.id,
+                }
+            });
+
+            // Create Receiver CREDIT transaction
+            await tx.transaction.create({
+                data: {
+                    userId: addWallet.userId,
+                    walletId: addWallet.id,
+                    type: type,
+                    amount: amount,
+                    status: 'success',
+                    reference: `${reference}-rx`,
+                    senderWalletId: deductWallet.id,
+                    receiverWalletId: addWallet.id,
+                }
+            });
+
+            return {
+                reference,
+                fromWalletBalance: deductWallet.balance,
+                toWalletBalance: addWallet.balance
+            }
+
+
+        });
+
+        return result
+
+
+    }
+}
+
+export { walletService, transferService, internalWalletTransferService };
