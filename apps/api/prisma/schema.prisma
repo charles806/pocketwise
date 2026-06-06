@@ -36,6 +36,7 @@ model User {
   savingsGoals       SavingsGoal[]
   transactions       Transaction[]
   wallets            Wallet[]
+  notifications Notification[]
   primaryGoal        String?       @map("primary_goal")
   walletSplitConfig WalletSplitConfig?
 
@@ -152,6 +153,20 @@ model WalletSplitConfig {
   @@map("wallet_split_configs")
 }
 
+model Notification {
+  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String               @map("user_id") @db.Uuid
+  title     String
+  message   String
+  category  NotificationCategory
+  isRead    Boolean              @default(false) @map("is_read")
+  createdAt DateTime             @default(now()) @map("created_at")
+  updatedAt DateTime             @default(now()) @updatedAt @map("updated_at")
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
 enum WalletType {
   spend
   savings
@@ -179,4 +194,12 @@ enum ReferralStatus {
   pending
   credited
   expired
+}
+
+enum NotificationCategory {
+  TRANSACTION
+  GOAL
+  SECURITY
+  SYSTEM
+  PROMOTION
 }

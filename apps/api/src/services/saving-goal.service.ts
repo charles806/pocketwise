@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 import { calculateDaysRemaining, calculateProgress } from "../utils/goal.utils.js";
 import type { CreateSavingsGoalInput, UpdateSavingsGoalInput } from "../validators/savings-goal.validator.js";
+import { internalWalletTransferService } from "./wallet.service.js";
 
 
 export const savingsGoalService = {
@@ -110,6 +111,55 @@ export const savingsGoalService = {
             }
         })
 
-        return  softDelete 
+        return softDelete
+    },
+
+    async completeGoal(goalId: string, userId: string) {
+        const getGoal = await prisma.savingsGoal.findFirst({
+            where: {
+                userId: userId,
+                id: goalId,
+                isCompleted: false,
+                status: "ACTIVE",
+                deletedAt: null
+            }
+        })
+
+        const getSaveWalletBalance = await prisma.wallet.findUnique({
+            where: {
+                userId_type: {
+                    userId: userId,
+                    type: "savings"
+                }
+            }
+        })
+
+        if (!getGoal) throw new Error("Goal not found")
+        if (!getSaveWalletBalance) throw new Error("Save wallet not found")
+
+        if (getSaveWalletBalance.balance.toNumber() > 0) {
+            await internalWalletTransferService.internalWalletTransfer({
+                userId: userId,
+                fromType: "savings",
+                toType: "spend",
+                amount: getSaveWalletBalance.balance.toNumber(),
+                type: "goal_completion"
+            })
+        }
+
+        const completedGoal = await prisma.savingsGoal.update({
+            where: {
+                id: goalId
+            },
+            data: {
+                isCompleted: true,
+                status: "COMPLETED",
+                completedAt: new Date()
+            }
+        })
+
+        return completedGoal
+
+
     }
 }

@@ -1,10 +1,12 @@
 import type { TransactionType, WalletType } from "@prisma/client";
 import prisma from "../lib/prisma.js";
+import { Prisma } from "@prisma/client";
+import { calculateWalletSplits, DEFAULT_WALLET_SPLIT_CONFIG } from "../services/split.service.js";
 
 
 interface TransferInterface {
     userId: string,
-    receiverWalletId: string,
+    receiverUserId: string,
     amount: number
 }
 
@@ -56,7 +58,7 @@ const walletService = {
 
 const transferService = {
     async transfer(data: TransferInterface) {
-        const { userId, receiverWalletId, amount } = data;
+        const { userId, receiverUserId, amount } = data;
 
         if (!amount || Number.isNaN(amount) || amount <= 0) {
             const error = new Error("Enter a valid amount") as any;
@@ -64,20 +66,20 @@ const transferService = {
             throw error;
         }
 
-        if (!receiverWalletId) {
-            const error = new Error("Receiver wallet not provided") as any;
+        if (!receiverUserId) {
+            const error = new Error("Receiver not provided") as any;
             error.statusCode = 400;
             throw error;
         }
 
-        // Pre-fetch sender's spend wallet ID to validate self-transfer outside transaction
+        if (userId === receiverUserId) {
+            const error = new Error("Self transfer not supported") as any;
+            error.statusCode = 400;
+            throw error;
+        }
+
         const senderWalletCheck = await prisma.wallet.findUnique({
-            where: {
-                userId_type: {
-                    userId,
-                    type: 'spend'
-                }
-            },
+            where: { userId_type: { userId, type: "spend" } },
             select: { id: true }
         });
 
@@ -87,24 +89,22 @@ const transferService = {
             throw error;
         }
 
-        if (senderWalletCheck.id === receiverWalletId) {
-            const error = new Error("Self transfer not supported") as any;
-            error.statusCode = 400;
+        const receiverCheck = await prisma.user.findUnique({
+            where: { id: receiverUserId },
+            select: { id: true }
+        });
+
+        if (!receiverCheck) {
+            const error = new Error("Receiver not found") as any;
+            error.statusCode = 404;
             throw error;
         }
 
-        // Generate the unique transfer reference outside of the transaction block
         const transferReference = crypto.randomUUID();
 
         const result = await prisma.$transaction(async (tx) => {
-            // Find Sender Wallet of type 'spend'
             const senderWallet = await tx.wallet.findUnique({
-                where: {
-                    userId_type: {
-                        userId,
-                        type: 'spend'
-                    }
-                }
+                where: { userId_type: { userId, type: "spend" } }
             });
 
             if (!senderWallet) {
@@ -113,20 +113,7 @@ const transferService = {
                 throw error;
             }
 
-            // Find Receiver Wallet
-            const receiverWallet = await tx.wallet.findUnique({
-                where: { id: receiverWalletId }
-            });
-
-            if (!receiverWallet) {
-                const error = new Error("Receiver wallet not found") as any;
-                error.statusCode = 404;
-                throw error;
-            }
-
-            const senderBalanceNum = senderWallet.balance.toNumber();
-
-            if (amount > senderBalanceNum) {
+            if (senderWallet.balance.toNumber() < amount) {
                 const error = new Error("Insufficient funds") as any;
                 error.statusCode = 400;
                 throw error;
@@ -138,50 +125,85 @@ const transferService = {
                 data: { balance: { decrement: amount } }
             });
 
-            // Credit receiver
-            const updatedReceiverWallet = await tx.wallet.update({
-                where: { id: receiverWalletId },
-                data: { balance: { increment: amount } }
+            // Fetch receiver split config or fall back to default
+            const receiverSplitConfig = await tx.walletSplitConfig.findUnique({
+                where: { userId: receiverUserId }
             });
 
-            // Create Sender DEBIT transaction
+            const config = receiverSplitConfig ?? {
+                spendPercent: new Prisma.Decimal(DEFAULT_WALLET_SPLIT_CONFIG.spendPercent),
+                savingsPercent: new Prisma.Decimal(DEFAULT_WALLET_SPLIT_CONFIG.savingsPercent),
+                emergencyPercent: new Prisma.Decimal(DEFAULT_WALLET_SPLIT_CONFIG.emergencyPercent),
+                flexPercent: new Prisma.Decimal(DEFAULT_WALLET_SPLIT_CONFIG.flexPercent),
+            };
+
+            // Calculate allocations
+            const allocations = calculateWalletSplits(
+                new Prisma.Decimal(amount),
+                config
+            );
+
+            // Fetch all receiver wallets and map by type
+            const receiverWallets = await tx.wallet.findMany({
+                where: { userId: receiverUserId }
+            });
+
+            const receiverWalletMap = new Map(
+                receiverWallets.map(w => [w.type, w])
+            );
+
+            // Credit each receiver wallet and create credit records
+            for (const allocation of allocations) {
+                const receiverWallet = receiverWalletMap.get(allocation.walletType);
+
+                if (!receiverWallet) {
+                    throw new Error(`Receiver ${allocation.walletType} wallet not found`);
+                }
+
+                await tx.wallet.update({
+                    where: { id: receiverWallet.id },
+                    data: { balance: { increment: allocation.amount } }
+                });
+
+                await tx.transaction.create({
+                    data: {
+                        userId: receiverUserId,
+                        walletId: receiverWallet.id,
+                        type: "split_credit",
+                        amount: allocation.amount,
+                        status: "success",
+                        reference: `${transferReference}-${allocation.walletType}`,
+                        senderWalletId: senderWallet.id,
+                        receiverWalletId: receiverWallet.id,
+                    }
+                });
+            }
+
+            // Create single debit record for sender
             await tx.transaction.create({
                 data: {
                     userId,
                     walletId: senderWallet.id,
-                    type: 'transfer',
+                    type: "transfer",
                     amount: -amount,
-                    status: 'success',
+                    status: "success",
                     reference: transferReference,
                     senderWalletId: senderWallet.id,
-                    receiverWalletId: receiverWallet.id,
-                }
-            });
-
-            // Create Receiver CREDIT transaction
-            await tx.transaction.create({
-                data: {
-                    userId: receiverWallet.userId,
-                    walletId: receiverWallet.id,
-                    type: 'transfer',
-                    amount: amount,
-                    status: 'success',
-                    reference: `${transferReference}-rx`,
-                    senderWalletId: senderWallet.id,
-                    receiverWalletId: receiverWallet.id,
+                    receiverWalletId: null,
                 }
             });
 
             return {
                 reference: transferReference,
                 senderBalance: updatedSenderWallet.balance,
-                receiverBalance: updatedReceiverWallet.balance
+                allocations
             };
-        });
+        }
+        );
 
         return result;
     }
-}
+};
 
 const internalWalletTransferService = {
     async internalWalletTransfer(data: internalWalletTransferInterface) {
@@ -288,7 +310,11 @@ const internalWalletTransferService = {
             }
 
 
-        });
+        },
+            {
+                timeout: 15000
+            }
+        );
 
         return result
 

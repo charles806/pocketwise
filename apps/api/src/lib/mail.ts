@@ -99,3 +99,29 @@ export const sendWaitlistEmail = async (email: string) => {
     throw err;
   }
 };
+
+export const sendSavingsNotificationEmail = async (
+  email: string,
+  subject: string,
+  html: string
+) => {
+  try {
+    if (MAIL_SERVICE === "resend") {
+      const { data, error } = await resend.emails.send({
+        from: "PocketWise <onboarding@resend.dev>",
+        to: email,
+        subject,
+        html,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
+    }
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    throw error;
+  }
+};

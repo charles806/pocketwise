@@ -36,11 +36,11 @@ export const transfer = async (req: Request, res: Response) => {
         if (!userId)
             return sendError(res, "Unauthorized", 401);
 
-        const { receiverWalletId, amount } = req.body;
+        const { receiverUserId, amount } = req.body;
 
         const result = await transferService.transfer({
             userId,
-            receiverWalletId,
+            receiverUserId,
             amount: Number(amount)
         });
 

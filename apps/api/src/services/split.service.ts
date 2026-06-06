@@ -1,73 +1,90 @@
-import type { Decimal } from "@prisma/client/runtime/library";
-import { WalletType } from "@prisma/client";
-
-type WalletSplitConfig = Readonly<Record<WalletType, number>>;
+import type { WalletSplitConfig } from "@prisma/client";
+import { Prisma, WalletType } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
 
 type WalletAllocation = {
     walletType: WalletType;
-    amount: number; // in Naira
-};
-const WALLET_SPLIT_CONFIG: Record<WalletType, number> = {
-    spend: 0.5,
-    savings: 0.3,
-    emergency: 0.1,
-    flex: 0.1,
+    amount: number;
 };
 
-// Validate percentages sum to 1
-const validateSum = (config: WalletSplitConfig): void => {
-    const sum = Object.values(config).reduce((acc, pct) => acc + pct, 0);
+export const DEFAULT_WALLET_SPLIT_CONFIG = {
+    spendPercent: 50,
+    savingsPercent: 30,
+    emergencyPercent: 10,
+    flexPercent: 10,
+} as const;
 
-    if (Math.abs(sum - 1) > 1e-9) {
-        throw new Error(`Percentages must sum to 1 (got ${sum})`);
+type WalletSplitConfigInput = Pick<
+    WalletSplitConfig,
+    | "spendPercent"
+    | "savingsPercent"
+    | "emergencyPercent"
+    | "flexPercent"
+>;
+
+export function calculateWalletSplits(
+    amount: Prisma.Decimal,
+    config: WalletSplitConfigInput
+): WalletAllocation[] {
+    if (amount.lte(0)) {
+        throw Object.assign(
+            new Error("Amount must be greater than zero"),
+            { statusCode: 400 }
+        );
     }
-};
 
-validateSum(WALLET_SPLIT_CONFIG);
+    // Convert Naira to Kobo for precision-safe calculations
+    const totalKobo = amount
+        .mul(100)
+        .toDecimalPlaces(0)
+        .toNumber();
 
-export function calculateWalletSplits(amount: Decimal): WalletAllocation[] {
-    if (!amount || amount.isNaN()) {
-        throw Object.assign(new Error("Invalid amount"), { statusCode: 400 });
-    }
-
-    const amountNumber = amount.toNumber();
-
-    if (amountNumber <= 0) {
-        throw Object.assign(new Error("Amount must be greater than zero"), {
-            statusCode: 400,
-        });
-    }
-
-    // Convert to kobo for precision safety
-    const totalKobo = Math.round(amountNumber * 100);
-
-    const entries = Object.entries(WALLET_SPLIT_CONFIG) as [
-        WalletType,
-        number
-    ][];
+    const entries = [
+        {
+            walletType: WalletType.spend,
+            percentage: config.spendPercent.toNumber() / 100,
+        },
+        {
+            walletType: WalletType.savings,
+            percentage: config.savingsPercent.toNumber() / 100,
+        },
+        {
+            walletType: WalletType.emergency,
+            percentage: config.emergencyPercent.toNumber() / 100,
+        },
+        {
+            walletType: WalletType.flex,
+            percentage: config.flexPercent.toNumber() / 100,
+        },
+    ] as const;
 
     let remainingKobo = totalKobo;
 
-    const allocations: { walletType: WalletType; kobo: number }[] = [];
+    const allocations: {
+        walletType: WalletType;
+        kobo: number;
+    }[] = [];
 
     for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
-        if (!entry) continue;
+        const entry = entries[i]!;
 
-        const [walletType, percentage] = entry;
         const isLast = i === entries.length - 1;
 
         let walletKobo: number;
 
         if (isLast) {
+            // Assign any remainder to the last wallet
             walletKobo = remainingKobo;
         } else {
-            walletKobo = Math.floor(totalKobo * percentage);
+            walletKobo = Math.floor(
+                totalKobo * entry.percentage
+            );
+
             remainingKobo -= walletKobo;
         }
 
         allocations.push({
-            walletType,
+            walletType: entry.walletType,
             kobo: walletKobo,
         });
     }

@@ -18,8 +18,6 @@ import {
   CreditCard,
   BarChart3,
   Sparkles as SparklesIcon,
-  // CheckCircle2,
-  DollarSign,
   ShoppingCart,
 } from "lucide-react";
 
@@ -501,7 +499,7 @@ const features = [
           <img
             src="/1.jpg"
             alt="End manual budgeting"
-            className="w-full cursor-pointer max-h-[360px] object-cover object-center"
+            className="w-full cursor-pointer max-h-90 object-cover object-center"
           />
         </div>
       </div>

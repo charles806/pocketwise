@@ -13,6 +13,8 @@ import savingsGoalRouter from "./routes/savings-goal.routes.js";
 import keepAliveRouter from "./routes/keep-alive.routes.js";
 import { keepAliveService } from "./services/keep-alive.service.js";
 import { keepAliveMonitor } from "./utils/keep-alive-monitor.js";
+import walletSplitRouter from "./routes/wallet-split.routes.js";
+import { startGoalCompletionJob } from "./jobs/goal-completion.job.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -53,8 +55,10 @@ app.use("/api/v1/wallets", walletRouter);
 app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/webhooks", webhookRoutes);
 app.use("/api/v1/savings-goals", savingsGoalRouter);
+app.use("/api/v1/wallet-split", walletSplitRouter)
 //Internal Routes
 app.use("/api/internal/keep-alive", keepAliveRouter);
+
 //Error Handling Middleware
 app.use(errorMiddleware);
 
@@ -82,6 +86,9 @@ function startKeepAliveCron(): void {
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
   startKeepAliveCron();
+  setTimeout(() => {
+    startGoalCompletionJob()
+  }, 5000)
 });
 
 export default app;
