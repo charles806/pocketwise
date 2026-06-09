@@ -15,6 +15,8 @@ import { keepAliveService } from "./services/keep-alive.service.js";
 import { keepAliveMonitor } from "./utils/keep-alive-monitor.js";
 import walletSplitRouter from "./routes/wallet-split.routes.js";
 import { startGoalCompletionJob } from "./jobs/goal-completion.job.js";
+import notificationsRouter from "./features/notifications/notification.routes.js";
+import internalTransferRouter from "./routes/internal-transfer.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -56,6 +58,8 @@ app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/webhooks", webhookRoutes);
 app.use("/api/v1/savings-goals", savingsGoalRouter);
 app.use("/api/v1/wallet-split", walletSplitRouter)
+app.use("/api/v1/notifications", notificationsRouter)
+app.use("/api/v1/wallets/internal-transfer", internalTransferRouter)
 //Internal Routes
 app.use("/api/internal/keep-alive", keepAliveRouter);
 

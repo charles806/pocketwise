@@ -119,6 +119,13 @@ export const sendSavingsNotificationEmail = async (
       }
 
       return data;
+    } else {
+      await transporter.sendMail({
+        from: `"PocketWise" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject,
+        html,
+      });
     }
   } catch (error) {
     console.error("Failed to send email:", error);

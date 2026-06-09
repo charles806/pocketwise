@@ -182,6 +182,7 @@ enum TransactionType {
   fee
   referral_credit
   goal_completion
+  internal_transfer
 }
 
 enum TransactionStatus {

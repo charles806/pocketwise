@@ -2,6 +2,8 @@ import type { TransactionType, WalletType } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import { Prisma } from "@prisma/client";
 import { calculateWalletSplits, DEFAULT_WALLET_SPLIT_CONFIG } from "../services/split.service.js";
+import { notificationService } from "../features/notifications/notification.service.js";
+import { savingsGoalService } from "./saving-goal.service.js";
 
 
 interface TransferInterface {
@@ -16,6 +18,7 @@ interface internalWalletTransferInterface {
     toType: WalletType,
     amount: number,
     type: TransactionType
+    reason?: string | undefined
 }
 
 const walletService = {
@@ -179,6 +182,11 @@ const transferService = {
                 });
             }
 
+            savingsGoalService.checkAndUpdateGoal(receiverUserId)
+
+            notificationService.notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
+            notificationService.notifyWalletSplit(receiverUserId, amount, allocations)
+
             // Create single debit record for sender
             await tx.transaction.create({
                 data: {
@@ -207,7 +215,7 @@ const transferService = {
 
 const internalWalletTransferService = {
     async internalWalletTransfer(data: internalWalletTransferInterface) {
-        const { userId, fromType, toType, amount, type } = data
+        const { userId, fromType, toType, amount, type, reason } = data
 
         if (!amount || Number.isNaN(amount) || amount <= 0) {
             const error = new Error("Transfer amount must be greater than zero") as any;
@@ -239,7 +247,6 @@ const internalWalletTransferService = {
             const fromWallet = wallets.find(
                 wallets => wallets.type === data.fromType
             )
-
 
             const toWallet = wallets.find(
                 wallets => wallets.type === data.toType
@@ -286,6 +293,7 @@ const internalWalletTransferService = {
                     reference: reference,
                     senderWalletId: deductWallet.id,
                     receiverWalletId: addWallet.id,
+                    reason: reason ?? null
                 }
             });
 
@@ -300,6 +308,7 @@ const internalWalletTransferService = {
                     reference: `${reference}-rx`,
                     senderWalletId: deductWallet.id,
                     receiverWalletId: addWallet.id,
+                    reason: reason ?? null
                 }
             });
 
@@ -309,7 +318,6 @@ const internalWalletTransferService = {
                 toWalletBalance: addWallet.balance
             }
 
-
         },
             {
                 timeout: 15000
@@ -317,8 +325,6 @@ const internalWalletTransferService = {
         );
 
         return result
-
-
     }
 }
 

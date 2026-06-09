@@ -1,3 +1,4 @@
+import { notificationService } from "../features/notifications/notification.service.js";
 import prisma from "../lib/prisma.js";
 import { calculateDaysRemaining, calculateProgress } from "../utils/goal.utils.js";
 import type { CreateSavingsGoalInput, UpdateSavingsGoalInput } from "../validators/savings-goal.validator.js";
@@ -31,11 +32,15 @@ export const savingsGoalService = {
             }
         })
 
+        notificationService.notifyGoalCreated(userId, data.title, Number(createGoal.targetAmount))
+
         return {
             message: "Savings goal created successfully",
             result: createGoal
 
         }
+
+
     },
 
     async getSavingsGoals(userId: string) {
@@ -85,6 +90,8 @@ export const savingsGoalService = {
             )
         })
 
+        notificationService.notifyGoalUpdated(userId, update.title)
+
         return update
     },
 
@@ -110,6 +117,8 @@ export const savingsGoalService = {
                 deletedAt: new Date()
             }
         })
+
+        notificationService.notifyGoalDeleted(userId, checkGoal.title)
 
         return softDelete
     },
@@ -158,8 +167,57 @@ export const savingsGoalService = {
             }
         })
 
+        notificationService.notifyGoalCompleted(userId, getGoal.title, getSaveWalletBalance.balance.toNumber())
+
         return completedGoal
 
 
+    },
+    async checkAndUpdateGoal(userId: string) {
+        const activeGoal = await prisma.savingsGoal.findFirst({
+            where: {
+                userId,
+                isCompleted: false,
+                status: "ACTIVE",
+                deletedAt: null
+            }
+        })
+
+        if (!activeGoal) return
+
+        const saveWallet = await prisma.wallet.findUnique({
+            where: {
+                userId_type: {
+                    userId,
+                    type: "savings"
+                }
+            }
+        })
+
+        if (!saveWallet) {
+            console.warn(`[GoalProgress] Savings wallet not found for user: ${userId}`)
+            return
+        }
+
+        const previousCurrentAmount = activeGoal.currentAmount.toNumber()
+
+        await prisma.savingsGoal.update({
+            where: { id: activeGoal.id },
+            data: { currentAmount: saveWallet.balance }
+        })
+
+        const targetAmount = activeGoal.targetAmount.toNumber()
+        const newCurrentAmount = saveWallet.balance.toNumber()
+
+        const previousProgress = calculateProgress(previousCurrentAmount, targetAmount)
+        const newProgress = calculateProgress(newCurrentAmount, targetAmount)
+
+        const milestones = [25, 50, 75] as const
+
+        for (const milestone of milestones) {
+            if (previousProgress < milestone && newProgress >= milestone) {
+                notificationService.notifyGoalProgress(userId, activeGoal.title, milestone)
+            }
+        }
     }
 }
