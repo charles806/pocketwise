@@ -26,15 +26,12 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   onReceive,
   onTopUp,
 }) => {
-  // Format the total balance with commas and two decimal places (Updated to en-NG)
-  const formattedTotalBalance = new Intl.NumberFormat("en-NG", {
+  const safeLocale = "en-NG";
+  const safeBalance = totalBalance ?? 0;
+  const formattedTotalBalance = new Intl.NumberFormat(safeLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(totalBalance);
-
-  // Determine display text and styling for monthly change
-  // const isMonthlyChangePositive = monthlyChange >= 0;
-  const safeLocale = "en-NG";
+  }).format(safeBalance);
 
   // const monthlyChangeFormatted = new Intl.NumberFormat(safeLocale, {
   //     minimumFractionDigits: 2,

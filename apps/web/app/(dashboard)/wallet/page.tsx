@@ -14,12 +14,12 @@ import WalletSkeleton from "./UI/WalletSkeleton";
 const Wallet = () => {
   const { accessToken, isLoading: authLoading } = useAuth();
 
-  const { data, isLoading } = useWallet(accessToken);
+  const { data, isLoading, isFetching } = useWallet(accessToken);
 
   const balance = data?.totalBalance;
   const wallets = data?.wallets;
 
-  if (authLoading || (!data && isLoading)) return <WalletSkeleton />;
+  if (authLoading || !data) return <WalletSkeleton />;
 
   return (
     <>
