@@ -1,56 +1,34 @@
-"use client"
-import React, { useEffect, useState } from "react";
+"use client";
+import React from "react";
+import { useWallet } from "../../../hooks/useWallet";
 import { useAuth } from "../../../context/AuthContext";
 import { WalletHeader } from "./UI/Header";
 import { GoalModal } from "./UI/GoalModal";
 import BalanceCard from "./UI/BalanceCard";
 import WalletCards from "./UI/WalletCard";
-// import SpendingOverview from "./UI/SpendingOverView";
 import RecentTransactions from "./UI/RecentTransactions";
+import WalletSkeleton from "./UI/WalletSkeleton";
 
-
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL
+// const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const Wallet = () => {
-  const [balance, setBalance] = useState<number>(0)
-  const [wallets, setWallets] = useState<any[] | null>(null)
-  const { accessToken } = useAuth()
+  const { accessToken, isLoading: authLoading } = useAuth();
 
-  useEffect(() => {
-    const getWallet = async () => {
-      if (!accessToken) return;
-      const url = `${API_BASE}/api/v1/wallets`
-      try {
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          },
-          credentials: "include"
-        })
+  const { data, isLoading } = useWallet(accessToken);
 
-        if (!response.ok) {
-          console.log(" No session found (401/404)");
-          return
-        }
+  const balance = data?.totalBalance;
+  const wallets = data?.wallets;
 
-        const { data } = await response.json()
-        setBalance(data.totalBalance)
-        setWallets(data.wallets)
+  if (authLoading || (!data && isLoading)) return <WalletSkeleton />;
 
-
-      } catch (error) {
-        console.error("Error fetching wallets", error)
-      }
-    }
-    getWallet()
-  }, [accessToken])
   return (
     <>
       <WalletHeader />
       <GoalModal />
-      <main className="min-h-screen mt-5! flex flex-col gap-8" style={{ backgroundColor: "#f8fafc" }}>
-
+      <main
+        className="min-h-screen mt-5! flex flex-col gap-5 sm:gap-8"
+        style={{ backgroundColor: "#f8fafc" }}
+      >
         {/* Balance Card */}
         <div className="BalanceCaed">
           <BalanceCard totalBalance={balance} />
@@ -62,10 +40,9 @@ const Wallet = () => {
         </div>
 
         {/* Recent Transactions */}
-        <div className="recentTransaction pb-12">
+        <div className="recentTransaction pb-8 sm:pb-12">
           <RecentTransactions />
         </div>
-
       </main>
     </>
   );

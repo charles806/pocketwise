@@ -6,6 +6,7 @@ import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
 import { Toaster } from "../components/UI/Toaster";
 import "./globals.css";
+import Providers from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -85,15 +86,16 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-
-        <ToastProvider>
-          <Toaster />
-          <AuthProvider>
-            <main id="main-content" className="">
-              {children}
-            </main>
-          </AuthProvider>
-        </ToastProvider>
+        <Providers>
+          <ToastProvider>
+            <Toaster />
+            <AuthProvider>
+              <main id="main-content" className="">
+                {children}
+              </main>
+            </AuthProvider>
+          </ToastProvider>
+        </Providers>
         <Script
           id="structured-data"
           type="application/ld+json"
@@ -102,16 +104,16 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              "name": "Pocketwise",
-              "url": "https://pocketwise.xyz",
-              "description":
+              name: "Pocketwise",
+              url: "https://pocketwise.xyz",
+              description:
                 "Automatically split deposits into Spend, Savings, and Flex wallets. Build financial discipline without willpower—designed for Nigerian youth and students.",
-              "applicationCategory": "FinanceApplication",
-              "operatingSystem": "Web",
-              "offers": {
+              applicationCategory: "FinanceApplication",
+              operatingSystem: "Web",
+              offers: {
                 "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "NGN",
+                price: "0",
+                priceCurrency: "NGN",
               },
             }),
           }}

@@ -12,14 +12,13 @@ export const WalletHeader = () => {
   const router = useRouter();
   const { user } = useAuth();
 
-const greeting = Greeting()
+  const greeting = Greeting();
 
   return (
-
-    <header className="flex items-center justify-between px-6 h-20 border-b border-gray-200 bg-white sticky top-0 z-10">
+    <header className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-20 border-b border-gray-200 bg-white sticky top-0 z-10">
       {/* Left */}
-      <div className="flex items-center gap-3">
-        <div className="partOne relative w-11 h-11 rounded-full overflow-hidden bg-gray-100 cursor-pointer shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="partOne relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-gray-100 cursor-pointer shrink-0">
           <Image
             src={userS}
             alt="User profile picture"
@@ -35,7 +34,6 @@ const greeting = Greeting()
           <h5 className="text-base font-semibold text-gray-900">
             {user?.firstName} <span className="inline-block">👋</span>
           </h5>
-
         </div>
       </div>
 
