@@ -5,11 +5,24 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
+const INACTIVITY_LIMIT = 45 * 60 * 1000; // 45 minutes
+
+const setSessionCookie = () => {
+  const date = new Date();
+  date.setTime(date.getTime() + INACTIVITY_LIMIT);
+  document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
+};
+
+const clearSessionCookie = () => {
+  document.cookie =
+    "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+};
 
 interface User {
   id: string;
@@ -46,9 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     setUser(null);
     setAccessToken(null);
-    // Clear session flag cookie for middleware
-    document.cookie =
-      "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    clearSessionCookie();
 
     fetch(`${API_BASE}/api/v1/auth/logout`, {
       method: "POST",
@@ -56,6 +67,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }).catch(() => {});
     router.push("/login");
   }, [router]);
+
+  // ── Inactivity Timer ──────────────────────────────────────────────
+  const inactivityRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityRef.current) clearTimeout(inactivityRef.current);
+    inactivityRef.current = setTimeout(() => {
+      logout();
+    }, INACTIVITY_LIMIT);
+  }, [logout]);
 
   const refreshSession = useCallback(async () => {
     try {
@@ -73,10 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (data.success && data.data?.accessToken) {
         setAccessToken(data.data.accessToken);
-        // Set session flag cookie for middleware (expires in 7 days to match refresh token)
-        const date = new Date();
-        date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
-        document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
+        setSessionCookie();
 
         const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
           headers: {
@@ -133,11 +151,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (data.success && data.data?.accessToken) {
           setAccessToken(data.data.accessToken);
-          
-          // Set session flag cookie for middleware
-          const date = new Date();
-          date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
-          document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
+          setSessionCookie();
 
           const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
             headers: {
@@ -153,7 +167,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 "[AuthContext] initAuth: Success! User:",
                 meData.data,
                 "Access Token:",
-                data.data.accessToken
+                data.data.accessToken,
               );
               setUser(meData.data);
             }
@@ -173,11 +187,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log("[AuthContext] Setting user data:", userData);
     setAccessToken(token);
     setUser(userData);
-    // Set session flag cookie for middleware
-    const date = new Date();
-    date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
-    document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
+    setSessionCookie();
   }, []);
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    resetInactivityTimer();
+
+    const events = [
+      "mousedown",
+      "keydown",
+      "touchstart",
+      "scroll",
+      "mousemove",
+    ];
+
+    const handleActivity = () => {
+      setSessionCookie();
+      resetInactivityTimer();
+    };
+
+    events.forEach((event) => window.addEventListener(event, handleActivity));
+
+    return () => {
+      if (inactivityRef.current) clearTimeout(inactivityRef.current);
+      events.forEach((event) =>
+        window.removeEventListener(event, handleActivity),
+      );
+    };
+  }, [accessToken, resetInactivityTimer]);
 
   return (
     <AuthContext.Provider
