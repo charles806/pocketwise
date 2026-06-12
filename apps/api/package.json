@@ -30,6 +30,7 @@
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^6.19.3",
     "@types/bcrypt": "^6.0.0",
+    "@upstash/redis": "^1.38.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

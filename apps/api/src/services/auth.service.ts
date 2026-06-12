@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../lib/mail.js";
 import { generateMockAccountNumber } from "../utils/account.js";
+import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 
 interface SignupInput {
   firstName: string;
@@ -207,6 +208,10 @@ const authService = {
   },
 
   async me(userId: string) {
+    const cacheKey = CACHE_KEYS.userProfile(userId);
+    const cached = await cache.get<object>(cacheKey);
+    if (cached) return cached;
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -231,14 +236,21 @@ const authService = {
       throw error;
     }
 
-    return {
+    const result = {
       ...user,
       requiresPinSetup: !user.transferPin,
       transferPin: undefined,
     };
+
+    await cache.set(cacheKey, result, TTL.USER_PROFILE);
+    return result;
   },
 
   async lookupUser(type: string, value: string) {
+    const cacheKey = CACHE_KEYS.userLookup(type, value);
+    const cached = await cache.get<object>(cacheKey);
+    if (cached) return cached;
+
     let user;
     switch (type) {
       case "account":
@@ -272,6 +284,7 @@ const authService = {
       throw error;
     }
 
+    await cache.set(cacheKey, user, TTL.LOOKUP);
     return user;
   },
 
@@ -289,6 +302,7 @@ const authService = {
       },
     });
 
+    await cache.del(CACHE_KEYS.userProfile(userId));
     return user;
   },
 
@@ -312,6 +326,7 @@ const authService = {
       data: { transferPin: hashedPin },
     });
 
+    await cache.del(CACHE_KEYS.userProfile(userId));
     return { success: true, message: "PIN set successfully" };
   },
 
@@ -342,6 +357,7 @@ const authService = {
       data: { transferPin: hashedPin },
     });
 
+    await cache.del(CACHE_KEYS.userProfile(userId));
     return { success: true, message: "PIN changed successfully" };
   },
 };

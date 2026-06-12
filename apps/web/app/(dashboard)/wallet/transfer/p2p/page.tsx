@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { WalletHeader } from "../../UI/Header";
 import { useAuth } from "../../../../../context/AuthContext";
 import { CheckCircle, XCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { useToast } from "../../../../../context/ToastContext";
 
 type Step = "lookup" | "transfer" | "success";
 
@@ -17,6 +18,7 @@ interface Recipient {
 const Page = () => {
   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
+  const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("lookup");
   const [activeTab, setActiveTab] = useState("account");
@@ -80,7 +82,7 @@ const Page = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Recipient not found");
+        toast(data.message || "Recipient not found");
         return;
       }
 
@@ -98,7 +100,7 @@ const Page = () => {
     setError("");
 
     if (!amount || Number(amount) <= 0) {
-      setError("Enter a valid amount");
+      toast("Enter a valid amount");
       return;
     }
 
@@ -126,14 +128,14 @@ const Page = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Transfer failed");
+        toast(data.message || "Transfer failed");
         return;
       }
 
       setTransferRef(data.data?.reference || "");
       setStep("success");
     } catch {
-      setError("Network error. Please try again.");
+      toast("Network error. Please try again.");
     } finally {
       setLoading(false);
     }

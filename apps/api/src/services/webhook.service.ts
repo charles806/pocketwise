@@ -5,6 +5,7 @@ import {
   DEFAULT_WALLET_SPLIT_CONFIG,
 } from "./split.service.js";
 import crypto from "crypto";
+import { cache, CACHE_KEYS } from "../lib/cache.js";
 
 interface AnchorDepositPayload {
   event: string;
@@ -111,6 +112,9 @@ export const webhookService = {
           });
         }
       });
+
+      cache.del(CACHE_KEYS.userWallets(userId));
+      cache.delMany(`txns:${userId}:page:*`);
 
       return {
         success: true,

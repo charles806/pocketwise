@@ -1,61 +1,67 @@
-import type { NotificationCategory } from "@prisma/client"
-import prisma from "../../lib/prisma.js"
-import { sendSavingsNotificationEmail } from "../../lib/mail.js"
-
+import type { NotificationCategory } from "@prisma/client";
+import prisma from "../../lib/prisma.js";
+import { sendSavingsNotificationEmail } from "../../lib/mail.js";
+import { cache, CACHE_KEYS, TTL } from "../../lib/cache.js";
 
 interface NotificationInterface {
-    userId: string
-    title: string
-    message: string
-    category: NotificationCategory
-    emailHtml: string
-    subject: string
+  userId: string;
+  title: string;
+  message: string;
+  category: NotificationCategory;
+  emailHtml: string;
+  subject: string;
 }
 
 export const notificationService = {
-    async sendNotification(data: NotificationInterface) {
-        try {
-            const { userId, title, message, category, emailHtml, subject } = data
+  async sendNotification(data: NotificationInterface) {
+    try {
+      const { userId, title, message, category, emailHtml, subject } = data;
 
-            const user = await prisma.user.findUnique({
-                where: {
-                    id: userId
-                },
-                select: {
-                    email: true,
-                    firstName: true
-                }
-            })
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          email: true,
+          firstName: true,
+        },
+      });
 
-            if (!user) {
-                console.warn(`[Notification] User not found: ${userId}`)
-                return
-            }
+      if (!user) {
+        console.warn(`[Notification] User not found: ${userId}`);
+        return;
+      }
 
-            const result = await Promise.all([
-                prisma.notification.create({
-                    data: {
-                        userId: userId,
-                        title: title,
-                        message: message,
-                        category: category
-                    }
-                }),
-                sendSavingsNotificationEmail(user.email, subject, emailHtml)
-            ])
-            return result
-        } catch (error) {
-            console.error(`[Notification] Failed to send notification:`, error)
-        }
-    },
+      const result = await Promise.all([
+        prisma.notification.create({
+          data: {
+            userId: userId,
+            title: title,
+            message: message,
+            category: category,
+          },
+        }),
+        sendSavingsNotificationEmail(user.email, subject, emailHtml),
+      ]);
 
-    async notifyGoalCreated(userId: string, goalTitle: string, targetAmount: number) {
-        const formatAmount = targetAmount.toLocaleString("en-NG")
+      await cache.del(CACHE_KEYS.notifications(userId));
+      return result;
+    } catch (error) {
+      console.error(`[Notification] Failed to send notification:`, error);
+    }
+  },
 
-        const title = "🎯 New Savings Goal Created"
-        const message = `Your goal "${goalTitle}" is officially live! You're saving up to ₦${formatAmount}. Every kobo counts — let's get it! 💪`
+  async notifyGoalCreated(
+    userId: string,
+    goalTitle: string,
+    targetAmount: number,
+  ) {
+    const formatAmount = targetAmount.toLocaleString("en-NG");
 
-        const emailHtml = `
+    const title = "🎯 New Savings Goal Created";
+    const message = `Your goal "${goalTitle}" is officially live! You're saving up to ₦${formatAmount}. Every kobo counts — let's get it! 💪`;
+
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
   
   <div style="background:#4f46e5; padding:30px; text-align:center;">
@@ -74,25 +80,23 @@ export const notificationService = {
   </div>
 
 </div>
-        `
+        `;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "GOAL",
-            subject: title,
-            emailHtml
-        })
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "GOAL",
+      subject: title,
+      emailHtml,
+    });
+  },
 
+  async notifyGoalUpdated(userId: string, goalTitle: string) {
+    const title = "✏️ Savings Goal Updated";
+    const message = `Your goal "${goalTitle}" has been updated. Your changes are saved and you're still on track. Keep pushing! 🚀`;
 
-    },
-
-    async notifyGoalUpdated(userId: string, goalTitle: string) {
-        const title = "✏️ Savings Goal Updated"
-        const message = `Your goal "${goalTitle}" has been updated. Your changes are saved and you're still on track. Keep pushing! 🚀`
-
-        const emailHtml = `
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
     <div style="background:#4f46e5; padding:30px; text-align:center;">
         <h1 style="color:white; margin:0;">Goal Updated ✏️</h1>
@@ -106,23 +110,23 @@ export const notificationService = {
     <div style="background:#f8fafc; padding:20px; text-align:center;">
         <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
     </div>
-</div>`
+</div>`;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "GOAL",
-            subject: title,
-            emailHtml
-        })
-    },
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "GOAL",
+      subject: title,
+      emailHtml,
+    });
+  },
 
-    async notifyGoalDeleted(userId: string, goalTitle: string) {
-        const title = "🗑️ Savings Goal Removed"
-        const message = `Your goal "${goalTitle}" has been removed. No worries — every great plan evolves. Start a new one whenever you're ready.`
+  async notifyGoalDeleted(userId: string, goalTitle: string) {
+    const title = "🗑️ Savings Goal Removed";
+    const message = `Your goal "${goalTitle}" has been removed. No worries — every great plan evolves. Start a new one whenever you're ready.`;
 
-        const emailHtml = `
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
     <div style="background:#0f172a; padding:30px; text-align:center;">
         <h1 style="color:white; margin:0;">Goal Removed 🗑️</h1>
@@ -136,24 +140,28 @@ export const notificationService = {
     <div style="background:#f8fafc; padding:20px; text-align:center;">
         <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
     </div>
-</div>`
+</div>`;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "GOAL",
-            subject: title,
-            emailHtml
-        })
-    },
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "GOAL",
+      subject: title,
+      emailHtml,
+    });
+  },
 
-    async notifyGoalCompleted(userId: string, goalTitle: string, amountTransferred: number) {
-        const formattedAmount = amountTransferred.toLocaleString("en-NG")
-        const title = "🎉 Goal Smashed! Money's in Your Spend Wallet"
-        const message = `You did it! "${goalTitle}" is complete. ₦${formattedAmount} has been moved to your Spend Wallet. Time to enjoy what you worked for! 🥂`
+  async notifyGoalCompleted(
+    userId: string,
+    goalTitle: string,
+    amountTransferred: number,
+  ) {
+    const formattedAmount = amountTransferred.toLocaleString("en-NG");
+    const title = "🎉 Goal Smashed! Money's in Your Spend Wallet";
+    const message = `You did it! "${goalTitle}" is complete. ₦${formattedAmount} has been moved to your Spend Wallet. Time to enjoy what you worked for! 🥂`;
 
-        const emailHtml = `
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
     <div style="background:#4f46e5; padding:40px; text-align:center;">
         <h1 style="color:white; margin:0; font-size:28px;">You Smashed It! 🎉</h1>
@@ -171,48 +179,52 @@ export const notificationService = {
     <div style="background:#f8fafc; padding:20px; text-align:center;">
         <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
     </div>
-</div>`
+</div>`;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "GOAL",
-            subject: title,
-            emailHtml
-        })
-    },
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "GOAL",
+      subject: title,
+      emailHtml,
+    });
+  },
 
-    async notifyGoalProgress(userId: string, goalTitle: string, progressPercent: 25 | 50 | 75) {
-        const milestoneMap = {
-            25: {
-                emoji: "🌱",
-                heading: "You're 25% There!",
-                color: "#d97706",
-                bgColor: "#fffbeb",
-                line: "A solid start. The hardest part is beginning — and you've already done that."
-            },
-            50: {
-                emoji: "🔥",
-                heading: "Halfway to Your Goal!",
-                color: "#4f46e5",
-                bgColor: "#eef2ff",
-                line: "You're right in the middle — and that's exactly where momentum builds. Don't stop now."
-            },
-            75: {
-                emoji: "⚡",
-                heading: "75% Done — Almost There!",
-                color: "#059669",
-                bgColor: "#ecfdf5",
-                line: "You're in the final stretch. Stay consistent — the finish line is closer than you think."
-            }
-        }
+  async notifyGoalProgress(
+    userId: string,
+    goalTitle: string,
+    progressPercent: 25 | 50 | 75,
+  ) {
+    const milestoneMap = {
+      25: {
+        emoji: "🌱",
+        heading: "You're 25% There!",
+        color: "#d97706",
+        bgColor: "#fffbeb",
+        line: "A solid start. The hardest part is beginning — and you've already done that.",
+      },
+      50: {
+        emoji: "🔥",
+        heading: "Halfway to Your Goal!",
+        color: "#4f46e5",
+        bgColor: "#eef2ff",
+        line: "You're right in the middle — and that's exactly where momentum builds. Don't stop now.",
+      },
+      75: {
+        emoji: "⚡",
+        heading: "75% Done — Almost There!",
+        color: "#059669",
+        bgColor: "#ecfdf5",
+        line: "You're in the final stretch. Stay consistent — the finish line is closer than you think.",
+      },
+    };
 
-        const milestone = milestoneMap[progressPercent]
-        const title = `${milestone.emoji} ${milestone.heading}`
-        const message = `You're ${progressPercent}% of the way to your "${goalTitle}" goal. ${milestone.line}`
+    const milestone = milestoneMap[progressPercent];
+    const title = `${milestone.emoji} ${milestone.heading}`;
+    const message = `You're ${progressPercent}% of the way to your "${goalTitle}" goal. ${milestone.line}`;
 
-        const emailHtml = `
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
     <div style="background:${milestone.color}; padding:30px; text-align:center;">
         <h1 style="color:white; margin:0;">${milestone.emoji} ${milestone.heading}</h1>
@@ -228,31 +240,37 @@ export const notificationService = {
     <div style="background:#f8fafc; padding:20px; text-align:center;">
         <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
     </div>
-</div>`
+</div>`;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "GOAL",
-            subject: title,
-            emailHtml
-        })
-    },
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "GOAL",
+      subject: title,
+      emailHtml,
+    });
+  },
 
-    async notifyWalletSplit(userId: string, amount: number, allocations: { walletType: string, amount: number }[]) {
-        const formattedTotal = amount.toLocaleString("en-NG")
-        const title = "💰 Money Landed — Your Wallets Have Been Topped Up"
-        const message = `₦${formattedTotal} just hit your account and has been split across your wallets according to your config. Check your breakdown inside the app.`
+  async notifyWalletSplit(
+    userId: string,
+    amount: number,
+    allocations: { walletType: string; amount: number }[],
+  ) {
+    const formattedTotal = amount.toLocaleString("en-NG");
+    const title = "💰 Money Landed — Your Wallets Have Been Topped Up";
+    const message = `₦${formattedTotal} just hit your account and has been split across your wallets according to your config. Check your breakdown inside the app.`;
 
-        const walletColors: Record<string, string> = {
-            spend: "#4f46e5",
-            savings: "#059669",
-            emergency: "#d97706",
-            flex: "#db2777"
-        }
+    const walletColors: Record<string, string> = {
+      spend: "#4f46e5",
+      savings: "#059669",
+      emergency: "#d97706",
+      flex: "#db2777",
+    };
 
-        const allocationRows = allocations.map(a => `
+    const allocationRows = allocations
+      .map(
+        (a) => `
         <tr>
             <td style="padding:10px; text-transform:capitalize; color:#0f172a; font-weight:500;">
                 <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${walletColors[a.walletType] ?? "#4f46e5"}; margin-right:8px;"></span>
@@ -262,9 +280,11 @@ export const notificationService = {
                 ₦${a.amount.toLocaleString("en-NG")}
             </td>
         </tr>
-    `).join("")
+    `,
+      )
+      .join("");
 
-        const emailHtml = `
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
     <div style="background:#4f46e5; padding:30px; text-align:center;">
         <h1 style="color:white; margin:0;">Money Landed 💰</h1>
@@ -289,24 +309,28 @@ export const notificationService = {
     <div style="background:#f8fafc; padding:20px; text-align:center;">
         <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
     </div>
-</div>`
+</div>`;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "TRANSACTION",
-            subject: title,
-            emailHtml
-        })
-    },
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "TRANSACTION",
+      subject: title,
+      emailHtml,
+    });
+  },
 
-    async notifyTransferReceived(userId: string, amount: number, senderName: string) {
-        const formattedAmount = amount.toLocaleString("en-NG")
-        const title = "📩 You Just Received Money"
-        const message = `₦${formattedAmount} from ${senderName} just landed in your account and has been split across your wallets. Check your breakdown inside the app.`
+  async notifyTransferReceived(
+    userId: string,
+    amount: number,
+    senderName: string,
+  ) {
+    const formattedAmount = amount.toLocaleString("en-NG");
+    const title = "📩 You Just Received Money";
+    const message = `₦${formattedAmount} from ${senderName} just landed in your account and has been split across your wallets. Check your breakdown inside the app.`;
 
-        const emailHtml = `
+    const emailHtml = `
 <div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
     <div style="background:#4f46e5; padding:30px; text-align:center;">
         <h1 style="color:white; margin:0;">Money Received 📩</h1>
@@ -323,50 +347,59 @@ export const notificationService = {
     <div style="background:#f8fafc; padding:20px; text-align:center;">
         <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
     </div>
-</div>`
+</div>`;
 
-        return this.sendNotification({
-            userId,
-            title,
-            message,
-            category: "TRANSACTION",
-            subject: title,
-            emailHtml
-        })
-    },
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "TRANSACTION",
+      subject: title,
+      emailHtml,
+    });
+  },
 
-    async getNotifications(userId: string) {
-        const notifications = await prisma.notification.findMany({
-            where: { userId },
-            orderBy: { createdAt: "desc" }
-        })
-        return notifications
-    },
+  async getNotifications(userId: string) {
+    const cacheKey = CACHE_KEYS.notifications(userId);
+    const cached = await cache.get<object>(cacheKey);
+    if (cached) return cached;
 
-    async markOneAsRead(userId: string, notificationId: string) {
-        const result = await prisma.notification.updateMany({
-            where: {
-                id: notificationId,
-                userId: userId
-            },
-            data: { isRead: true }
-        })
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
 
-        if (result.count === 0) {
-            throw new Error("Notification not found")
-        }
+    await cache.set(cacheKey, notifications, TTL.NOTIFICATIONS);
+    return notifications;
+  },
 
-        return result
-    },
+  async markOneAsRead(userId: string, notificationId: string) {
+    const result = await prisma.notification.updateMany({
+      where: {
+        id: notificationId,
+        userId: userId,
+      },
+      data: { isRead: true },
+    });
 
-    async markAllAsRead(userId: string) {
-        const result = await prisma.notification.updateMany({
-            where: {
-                userId: userId,
-                isRead: false
-            },
-            data: { isRead: true }
-        })
-        return result
+    if (result.count === 0) {
+      throw new Error("Notification not found");
     }
-}
+
+    await cache.del(CACHE_KEYS.notifications(userId));
+    return result;
+  },
+
+  async markAllAsRead(userId: string) {
+    const result = await prisma.notification.updateMany({
+      where: {
+        userId: userId,
+        isRead: false,
+      },
+      data: { isRead: true },
+    });
+
+    await cache.del(CACHE_KEYS.notifications(userId));
+    return result;
+  },
+};
