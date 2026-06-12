@@ -44,6 +44,7 @@ const login = async (req: Request, res: Response) => {
     sendSuccess(res, "Login successful", {
       accessToken: result.accessToken,
       user: result.user,
+      requiresPinSetup: result.requiresPinSetup,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error logging in";
@@ -119,10 +120,47 @@ const updateGoal = async (req: Request, res: Response) => {
     const result = await authService.updateGoal(userId, goal);
     sendSuccess(res, "Goal updated successfuly", result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Error updating goal";
+    const message =
+      error instanceof Error ? error.message : "Error updating goal";
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
 };
 
-export { signUp, login, refresh, logout, me, updateGoal };
+const setupPin = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+
+    const { pin } = req.body;
+    const result = await authService.setupPin(userId, pin);
+    sendSuccess(res, result.message, result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error setting up PIN";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const changePin = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+
+    const { currentPin, newPin } = req.body;
+    const result = await authService.changePin(userId, currentPin, newPin);
+    sendSuccess(res, result.message, result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error changing PIN";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+export { signUp, login, refresh, logout, me, updateGoal, setupPin, changePin };

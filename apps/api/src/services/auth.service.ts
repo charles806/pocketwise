@@ -2,6 +2,7 @@ import prisma from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../lib/mail.js";
+import { generateMockAccountNumber } from "../utils/account.js";
 
 interface SignupInput {
   firstName: string;
@@ -12,6 +13,7 @@ interface SignupInput {
   dateOfBirth: string;
   password: string;
   primaryGoal?: string;
+  accountNumber: string;
 }
 
 interface LoginInput {
@@ -30,6 +32,7 @@ const authService = {
       dateOfBirth,
       password,
       primaryGoal,
+      accountNumber,
     } = data;
 
     const email = rawEmail.toLowerCase();
@@ -50,7 +53,9 @@ const authService = {
     }
 
     if (age < 16) {
-      const error = new Error("You must be at least 16 years old to create an account") as any;
+      const error = new Error(
+        "You must be at least 16 years old to create an account",
+      ) as any;
       error.statusCode = 400;
       throw error;
     }
@@ -63,6 +68,7 @@ const authService = {
           lastName,
           userName,
           email,
+          accountNumber: generateMockAccountNumber(),
           phone: phoneNumber || null,
           passwordHash: passwordHash,
           dateOfBirth: dob,
@@ -115,7 +121,21 @@ const authService = {
     const email = data.email.toLowerCase();
     const { password } = data;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
+        passwordHash: true,
+        isSimulationMode: true,
+        onboardingComplete: true,
+        primaryGoal: true,
+        transferPin: true,
+      },
+    });
     if (!user) {
       const error = new Error("Invalid credentials") as any;
       error.statusCode = 401;
@@ -154,6 +174,7 @@ const authService = {
         onboardingComplete: user.onboardingComplete,
         primaryGoal: user.primaryGoal,
       },
+      requiresPinSetup: !user.transferPin,
     };
   },
 
@@ -223,10 +244,63 @@ const authService = {
         id: true,
         onboardingComplete: true,
         primaryGoal: true,
-      }
+      },
     });
 
     return user;
+  },
+
+  async setupPin(userId: string, pin: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      const error = new Error("User not found") as any;
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (user.transferPin) {
+      const error = new Error("PIN already set up") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const hashedPin = await bcrypt.hash(pin, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { transferPin: hashedPin },
+    });
+
+    return { success: true, message: "PIN set successfully" };
+  },
+
+  async changePin(userId: string, currentPin: string, newPin: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      const error = new Error("User not found") as any;
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (!user.transferPin) {
+      const error = new Error("PIN not set up") as any;
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const isValid = await bcrypt.compare(currentPin, user.transferPin);
+    if (!isValid) {
+      const error = new Error("Current PIN is incorrect") as any;
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const hashedPin = await bcrypt.hash(newPin, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { transferPin: hashedPin },
+    });
+
+    return { success: true, message: "PIN changed successfully" };
   },
 };
 

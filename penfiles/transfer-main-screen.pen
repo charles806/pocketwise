@@ -1,0 +1,2072 @@
+{
+  "version": "2.13",
+  "children": [
+    {
+      "type": "rectangle",
+      "id": "pFOhW",
+      "x": -440,
+      "y": -779,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "w.jpeg",
+        "mode": "fill"
+      },
+      "width": 1152,
+      "height": 1536
+    },
+    {
+      "type": "frame",
+      "id": "N5RTIB",
+      "x": 792,
+      "y": -779,
+      "name": "Screen 1 - Transfer Home",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$background",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": [
+        24,
+        16
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "ngGUQ",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 56,
+          "stroke": [
+            "#000000ff",
+            "#00000033"
+          ],
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 16,
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "YyhxA",
+              "name": "Header Left",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "kWhPA",
+                  "name": "Avatar",
+                  "fill": "$primary-light",
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "frame",
+                  "id": "eTdnp",
+                  "name": "Header Left Text",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HJ5ZI",
+                      "name": "Greeting",
+                      "fill": "$text-secondary",
+                      "content": "Good Morning",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TBkvr",
+                      "name": "User Name",
+                      "fill": "$text-primary",
+                      "content": "Chidi 👋",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "I3aQj",
+              "name": "Header Right",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "V1k8I",
+                  "name": "Notification Button",
+                  "fill": "$surface",
+                  "width": 40,
+                  "height": 40,
+                  "stroke": "$border",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "AYPPY",
+                  "name": "Profile Avatar",
+                  "fill": "$primary",
+                  "width": 40,
+                  "height": 40
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "rjAmP",
+          "name": "Send Money Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "D5f4x",
+              "name": "Send Money Title",
+              "fill": "$text-primary",
+              "content": "Send Money",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "TADgt",
+              "name": "Transfer Options Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ULf6K",
+                  "name": "Action 1 - PocketWise to PocketWise",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "padding": [
+                    12,
+                    0
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "vgGkX",
+                      "name": "Action 1 Left",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yuIiP",
+                          "name": "Action 1 Title",
+                          "fill": "$text-primary",
+                          "content": "PocketWise to PocketWise",
+                          "fontFamily": "Plus Jakarta Sans",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "s3ydc",
+                          "name": "Action 1 Subtitle",
+                          "fill": "$text-secondary",
+                          "content": "Send money to another PocketWise user",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "miJcp",
+                      "name": "Action 1 Arrow",
+                      "fill": "#00000000",
+                      "width": 24,
+                      "height": 24,
+                      "stroke": "$text-secondary",
+                      "strokeWidth": 2
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "JiYHs",
+                  "name": "Divider",
+                  "fill": "$border",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "N8XAPF",
+                  "name": "Action 2 - Send to Any Bank Account",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "padding": [
+                    12,
+                    0
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "VfcEi",
+                      "name": "Action 2 Left",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eZR4N",
+                          "name": "Action 2 Title",
+                          "fill": "$text-primary",
+                          "content": "Send to Any Bank Account",
+                          "fontFamily": "Plus Jakarta Sans",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "PmL2N",
+                      "name": "Action 2 Arrow",
+                      "fill": "#00000000",
+                      "width": 24,
+                      "height": 24,
+                      "stroke": "$text-secondary",
+                      "strokeWidth": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "pl48L",
+          "name": "Recent Transfers Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "cEVwV",
+              "name": "Recent Title",
+              "fill": "$text-primary",
+              "content": "Recent",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 20,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "vx9aJ",
+              "name": "Recent Empty State",
+              "width": "fill_container",
+              "height": 200,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 16,
+              "padding": [
+                48,
+                24
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "LwdoF",
+                  "name": "Empty Icon Circle",
+                  "fill": "$primary-light",
+                  "width": 64,
+                  "height": 64,
+                  "stroke": "#00000000"
+                },
+                {
+                  "type": "text",
+                  "id": "Dy5wH",
+                  "name": "Empty State Title",
+                  "fill": "$text-primary",
+                  "content": "Nothing to See",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 18,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "g0jaXB",
+                  "name": "Empty State Subtitle",
+                  "fill": "$text-secondary",
+                  "content": "Your recent transfers will appear here",
+                  "textAlign": "center",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "O9Zq5",
+      "x": 1262,
+      "y": -779,
+      "name": "Screen 2 - PocketWise to PocketWise",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$background",
+      "layout": "vertical",
+      "padding": [
+        0,
+        16,
+        24,
+        16
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "V5H9P",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 64,
+          "gap": 16,
+          "padding": [
+            12,
+            0
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "T1Vo4f",
+              "name": "Header Left",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "o5V6g",
+                  "name": "Back Button",
+                  "fill": "$surface",
+                  "width": 40,
+                  "height": 40,
+                  "stroke": "$border",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "text",
+                  "id": "lt4DK",
+                  "name": "Page Title",
+                  "fill": "$text-primary",
+                  "content": "Send Money",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "L1ITV",
+              "name": "Header Right Spacer",
+              "width": 40,
+              "height": 40
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jQND8",
+          "name": "Top Spacer",
+          "width": "fill_container",
+          "height": 32
+        },
+        {
+          "type": "frame",
+          "id": "RvxhP",
+          "name": "Transfer Card Container",
+          "width": "fill_container",
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "wpTgk",
+              "name": "Transfer Card",
+              "width": 358,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "padding": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H9Xk8",
+                  "name": "Card Title Wrapper",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    24,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ErjCg",
+                      "name": "Card Title",
+                      "fill": "$text-primary",
+                      "content": "PocketWise to PocketWise",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "L8XJn",
+                  "name": "Recipient Identifier Row",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    0,
+                    24,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "eZjXV",
+                      "name": "Identifier Account Number",
+                      "fill": "$primary-light",
+                      "cornerRadius": 9999,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        16
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kOlOD",
+                          "name": "Identifier Account Number Text",
+                          "fill": "$primary",
+                          "content": "Account Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "I6S4nP",
+                      "name": "Identifier Phone Number",
+                      "fill": "$surface",
+                      "cornerRadius": 9999,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        16
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "k78G2t",
+                          "name": "Identifier Phone Number Text",
+                          "fill": "$text-secondary",
+                          "content": "Phone Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NGGqp",
+                      "name": "Identifier Username",
+                      "fill": "$surface",
+                      "cornerRadius": 9999,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        16
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Vb4iW",
+                          "name": "Identifier Username Text",
+                          "fill": "$text-secondary",
+                          "content": "Username",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "d6AjQp",
+                  "name": "Account Number Input Container",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    0,
+                    24,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fmGQu",
+                      "name": "Input Label",
+                      "fill": "$text-primary",
+                      "content": "Account Number",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lEU7m",
+                      "name": "Input Field",
+                      "width": "fill_container",
+                      "height": 52,
+                      "fill": "$surface",
+                      "cornerRadius": 10,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "QLu4O",
+                          "name": "Input Placeholder",
+                          "fill": "$text-secondary",
+                          "content": "Enter Account Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PeQ3L",
+                  "name": "Recipient Preview",
+                  "width": "fill_container",
+                  "fill": "$primary-light",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Tv6fj",
+                      "name": "Preview Label",
+                      "fill": "$primary",
+                      "content": "Recipient Preview",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YI4oo",
+                      "name": "Preview Account Name",
+                      "fill": "$text-primary",
+                      "content": "Account Name",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Z1pqg",
+                      "name": "Preview Account Number",
+                      "fill": "$text-secondary",
+                      "content": "Account Number",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Icmp5",
+          "name": "Bottom Spacer",
+          "width": "fill_container",
+          "height": "fill_container"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tpNjw",
+      "x": 1732,
+      "y": -779,
+      "name": "Screen 1 - Transfer Home (768)",
+      "clip": true,
+      "width": 768,
+      "height": 1024,
+      "fill": "$background",
+      "layout": "vertical",
+      "gap": 32,
+      "padding": [
+        24,
+        32
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "HaMFo",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 56,
+          "gap": 16,
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Y5RkB",
+              "name": "Header Left",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "AwbTx",
+                  "name": "Avatar",
+                  "fill": "$primary-light",
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "frame",
+                  "id": "l74Yk",
+                  "name": "Header Left Text",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "R6HVLk",
+                      "name": "Greeting",
+                      "fill": "$text-secondary",
+                      "content": "Good Morning",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "x2S8dO",
+                      "name": "User Name",
+                      "fill": "$text-primary",
+                      "content": "Chidi 👋",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ycDQQ",
+              "name": "Header Right",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "QayQC",
+                  "name": "Notification Button",
+                  "fill": "$surface",
+                  "width": 40,
+                  "height": 40,
+                  "stroke": "$border",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "i2UjzR",
+                  "name": "Profile Avatar",
+                  "fill": "$primary",
+                  "width": 40,
+                  "height": 40
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "u4ljx",
+          "name": "Send Money Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "m0ogKA",
+              "name": "Send Money Title",
+              "fill": "$text-primary",
+              "content": "Send Money",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "SZBvZ",
+              "name": "Transfer Options Container",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "MYOVU",
+                  "name": "Transfer Options Card",
+                  "width": 600,
+                  "fill": "$surface",
+                  "cornerRadius": 16,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "jDnRt",
+                      "name": "Action 1 - PocketWise to PocketWise",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "padding": [
+                        16,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "vldqQ",
+                          "name": "Action 1 Left",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "LrfGs",
+                              "name": "Action 1 Title",
+                              "fill": "$text-primary",
+                              "content": "PocketWise to PocketWise",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "AjeCV",
+                              "name": "Action 1 Subtitle",
+                              "fill": "$text-secondary",
+                              "content": "Send money to another PocketWise user",
+                              "fontFamily": "DM Sans",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "e4egHB",
+                          "name": "Action 1 Arrow",
+                          "fill": "#00000000",
+                          "width": 24,
+                          "height": 24,
+                          "stroke": "$text-secondary",
+                          "strokeWidth": 2
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "O5owb",
+                      "name": "Divider",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wfwde",
+                      "name": "Action 2 - Send to Any Bank Account",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "padding": [
+                        16,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "u1FVv",
+                          "name": "Action 2 Left",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "p7uqO",
+                              "name": "Action 2 Title",
+                              "fill": "$text-primary",
+                              "content": "Send to Any Bank Account",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "LgjOF",
+                          "name": "Action 2 Arrow",
+                          "fill": "#00000000",
+                          "width": 24,
+                          "height": 24,
+                          "stroke": "$text-secondary",
+                          "strokeWidth": 2
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "I2OJDS",
+          "name": "Recent Transfers Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "oUJA3",
+              "name": "Recent Title",
+              "fill": "$text-primary",
+              "content": "Recent",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 20,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "oidR2",
+              "name": "Recent Empty State Container",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "SIYyg",
+                  "name": "Recent Empty State",
+                  "width": 600,
+                  "height": 240,
+                  "fill": "$surface",
+                  "cornerRadius": 16,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    56,
+                    32
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "nixif",
+                      "name": "Empty Icon Circle",
+                      "fill": "$primary-light",
+                      "width": 64,
+                      "height": 64,
+                      "stroke": "#00000000"
+                    },
+                    {
+                      "type": "text",
+                      "id": "G1pms",
+                      "name": "Empty State Title",
+                      "fill": "$text-primary",
+                      "content": "Nothing to See",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "c0RuA",
+                      "name": "Empty State Subtitle",
+                      "fill": "$text-secondary",
+                      "content": "Your recent transfers will appear here",
+                      "textAlign": "center",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "eLkaS",
+      "x": 2625,
+      "y": -779,
+      "name": "Screen 1 - Transfer Home (1024)",
+      "clip": true,
+      "width": 1024,
+      "height": 768,
+      "fill": "$background",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": [
+        20,
+        48
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "hBMHf",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 56,
+          "gap": 16,
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "V30DEe",
+              "name": "Header Left",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "d8Nio1",
+                  "name": "Avatar",
+                  "fill": "$primary-light",
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "frame",
+                  "id": "qRoaO",
+                  "name": "Header Left Text",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "rrwPP",
+                      "name": "Greeting",
+                      "fill": "$text-secondary",
+                      "content": "Good Morning",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "tItiw",
+                      "name": "User Name",
+                      "fill": "$text-primary",
+                      "content": "Chidi 👋",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rWP9o",
+              "name": "Header Right",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "flgn7",
+                  "name": "Notification Button",
+                  "fill": "$surface",
+                  "width": 40,
+                  "height": 40,
+                  "stroke": "$border",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "ygyjv",
+                  "name": "Profile Avatar",
+                  "fill": "$primary",
+                  "width": 40,
+                  "height": 40
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "P1Vniz",
+          "name": "Send Money Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "FMuoE",
+              "name": "Send Money Title",
+              "fill": "$text-primary",
+              "content": "Send Money",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "BKehQ",
+              "name": "Transfer Options Container",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "B6ZpM",
+                  "name": "Transfer Options Card",
+                  "width": 600,
+                  "fill": "$surface",
+                  "cornerRadius": 16,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Bmy0D",
+                      "name": "Action 1 - PocketWise to PocketWise",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "padding": [
+                        16,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "rUlCp",
+                          "name": "Action 1 Left",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "zkJ5b",
+                              "name": "Action 1 Title",
+                              "fill": "$text-primary",
+                              "content": "PocketWise to PocketWise",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "X7uoI",
+                              "name": "Action 1 Subtitle",
+                              "fill": "$text-secondary",
+                              "content": "Send money to another PocketWise user",
+                              "fontFamily": "DM Sans",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "GGYj2",
+                          "name": "Action 1 Arrow",
+                          "fill": "#00000000",
+                          "width": 24,
+                          "height": 24,
+                          "stroke": "$text-secondary",
+                          "strokeWidth": 2
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "Su0J0",
+                      "name": "Divider",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "aQfNv",
+                      "name": "Action 2 - Send to Any Bank Account",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "padding": [
+                        16,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "YFq8Y",
+                          "name": "Action 2 Left",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "jaQlX",
+                              "name": "Action 2 Title",
+                              "fill": "$text-primary",
+                              "content": "Send to Any Bank Account",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "DLLlF",
+                          "name": "Action 2 Arrow",
+                          "fill": "#00000000",
+                          "width": 24,
+                          "height": 24,
+                          "stroke": "$text-secondary",
+                          "strokeWidth": 2
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xF4mq",
+          "name": "Recent Transfers Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "XT2s2",
+              "name": "Recent Title",
+              "fill": "$text-primary",
+              "content": "Recent",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 20,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "o0kq83",
+              "name": "Recent Empty State Container",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "l6sKh",
+                  "name": "Recent Empty State",
+                  "width": 600,
+                  "height": 180,
+                  "fill": "$surface",
+                  "cornerRadius": 16,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    48,
+                    32
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "RH6I6",
+                      "name": "Empty Icon Circle",
+                      "fill": "$primary-light",
+                      "width": 64,
+                      "height": 64,
+                      "stroke": "#00000000"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EAV8G",
+                      "name": "Empty State Title",
+                      "fill": "$text-primary",
+                      "content": "Nothing to See",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ijqLs",
+                      "name": "Empty State Subtitle",
+                      "fill": "$text-secondary",
+                      "content": "Your recent transfers will appear here",
+                      "textAlign": "center",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lU5yd",
+      "x": 3864,
+      "y": -779,
+      "name": "Screen 2 - PocketWise to PocketWise (768)",
+      "clip": true,
+      "width": 768,
+      "height": 1024,
+      "fill": "$background",
+      "layout": "vertical",
+      "padding": [
+        0,
+        32,
+        24,
+        32
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "uiTJI",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 64,
+          "gap": 16,
+          "padding": [
+            12,
+            0
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "yLRAO",
+              "name": "Header Left",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "M23Qy",
+                  "name": "Back Button",
+                  "fill": "$surface",
+                  "width": 40,
+                  "height": 40,
+                  "stroke": "$border",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "text",
+                  "id": "QRaAH",
+                  "name": "Page Title",
+                  "fill": "$text-primary",
+                  "content": "Send Money",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "Lhxru",
+              "name": "Header Right Spacer",
+              "width": 40,
+              "height": 40
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "LaBkR",
+          "name": "Top Spacer",
+          "width": "fill_container",
+          "height": 48
+        },
+        {
+          "type": "frame",
+          "id": "iTBQv",
+          "name": "Transfer Card Container",
+          "width": "fill_container",
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "RRkV1",
+              "name": "Transfer Card",
+              "width": 600,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "jQClO",
+                  "name": "Card Title Wrapper",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "X6akZ",
+                      "name": "Card Title",
+                      "fill": "$text-primary",
+                      "content": "PocketWise to PocketWise",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "f8d0H",
+                  "name": "Recipient Identifier Row",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZTAuD",
+                      "name": "Identifier Account Number",
+                      "fill": "$primary-light",
+                      "cornerRadius": 9999,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "JGpaa",
+                          "name": "Identifier Account Number Text",
+                          "fill": "$primary",
+                          "content": "Account Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rIRaW",
+                      "name": "Identifier Phone Number",
+                      "fill": "$surface",
+                      "cornerRadius": 9999,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Js5SR",
+                          "name": "Identifier Phone Number Text",
+                          "fill": "$text-secondary",
+                          "content": "Phone Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WAOHo",
+                      "name": "Identifier Username",
+                      "fill": "$surface",
+                      "cornerRadius": 9999,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "f69Nd",
+                          "name": "Identifier Username Text",
+                          "fill": "$text-secondary",
+                          "content": "Username",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "IlwMz",
+                  "name": "Account Number Input Container",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "eVTcw",
+                      "name": "Input Label",
+                      "fill": "$text-primary",
+                      "content": "Account Number",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "n7jAKY",
+                      "name": "Input Field",
+                      "width": "fill_container",
+                      "height": 56,
+                      "fill": "$surface",
+                      "cornerRadius": 10,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "M5kag",
+                          "name": "Input Placeholder",
+                          "fill": "$text-secondary",
+                          "content": "Enter Account Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "BvDII",
+                  "name": "Recipient Preview",
+                  "width": "fill_container",
+                  "fill": "$primary-light",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "IBWcx",
+                      "name": "Preview Label",
+                      "fill": "$primary",
+                      "content": "Recipient Preview",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "fd6lE",
+                      "name": "Preview Account Name",
+                      "fill": "$text-primary",
+                      "content": "Account Name",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "VkVG5",
+                      "name": "Preview Account Number",
+                      "fill": "$text-secondary",
+                      "content": "Account Number",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zYJaP",
+          "name": "Bottom Spacer",
+          "width": "fill_container",
+          "height": "fill_container"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ceMiR",
+      "x": 4712,
+      "y": -779,
+      "name": "Screen 2 - PocketWise to PocketWise (1204)",
+      "clip": true,
+      "width": 1204,
+      "height": 768,
+      "fill": "$background",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "OaUA5",
+          "x": 48,
+          "y": 0,
+          "name": "Top Spacer",
+          "width": "fill_container(1108)",
+          "height": 64
+        },
+        {
+          "type": "frame",
+          "id": "a5HBrt",
+          "x": 48,
+          "y": 64,
+          "name": "Header",
+          "width": 202,
+          "height": 56,
+          "gap": 16,
+          "padding": [
+            8,
+            0
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Bz4pt",
+              "name": "Header Left",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "FSN5U",
+                  "name": "Back Button",
+                  "fill": "$surface",
+                  "width": 40,
+                  "height": 40,
+                  "stroke": "$border",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "text",
+                  "id": "CD45u",
+                  "name": "Page Title",
+                  "fill": "$text-primary",
+                  "content": "Send Money",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "mSYcr",
+              "name": "Header Right Spacer",
+              "width": 40,
+              "height": 40
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q9ufaO",
+          "x": 48,
+          "y": 120,
+          "name": "Transfer Card Container",
+          "width": "fill_container(1108)",
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ZX9gR",
+              "name": "Transfer Card",
+              "width": 600,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "padding": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FlkGA",
+                  "name": "Card Title Wrapper",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "exz1u",
+                      "name": "Card Title",
+                      "fill": "$text-primary",
+                      "content": "PocketWise to PocketWise",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JATed",
+                  "name": "Recipient Identifier Row",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "znNN0",
+                      "name": "Identifier Account Number",
+                      "fill": "$primary-light",
+                      "cornerRadius": 9999,
+                      "stroke": "#00000000",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Z9v9S",
+                          "name": "Identifier Account Number Text",
+                          "fill": "$primary",
+                          "content": "Account Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Im57o",
+                      "name": "Identifier Phone Number",
+                      "fill": "$surface",
+                      "cornerRadius": 9999,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DPmWj",
+                          "name": "Identifier Phone Number Text",
+                          "fill": "$text-secondary",
+                          "content": "Phone Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "A7ztvA",
+                      "name": "Identifier Username",
+                      "fill": "$surface",
+                      "cornerRadius": 9999,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EpkdM",
+                          "name": "Identifier Username Text",
+                          "fill": "$text-secondary",
+                          "content": "Username",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "knJ6G",
+                  "name": "Account Number Input Container",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    0,
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "h1BfU3",
+                      "name": "Input Label",
+                      "fill": "$text-primary",
+                      "content": "Account Number",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QrbkU",
+                      "name": "Input Field",
+                      "width": "fill_container",
+                      "height": 56,
+                      "fill": "$surface",
+                      "cornerRadius": 10,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": [
+                        0,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kcrqU",
+                          "name": "Input Placeholder",
+                          "fill": "$text-secondary",
+                          "content": "Enter Account Number",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "l5j5C",
+                  "name": "Recipient Preview",
+                  "width": "fill_container",
+                  "fill": "$primary-light",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "f9VsAr",
+                      "name": "Preview Label",
+                      "fill": "$primary",
+                      "content": "Recipient Preview",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rXqdZ",
+                      "name": "Preview Account Name",
+                      "fill": "$text-primary",
+                      "content": "Account Name",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "J6dwP",
+                      "name": "Preview Account Number",
+                      "fill": "$text-secondary",
+                      "content": "Account Number",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "background": {
+      "type": "color",
+      "value": "#f8fafc"
+    },
+    "border": {
+      "type": "color",
+      "value": "#e2e8f0"
+    },
+    "dark-bg": {
+      "type": "color",
+      "value": "#020617"
+    },
+    "dark-surface": {
+      "type": "color",
+      "value": "#0f172a"
+    },
+    "emergency": {
+      "type": "color",
+      "value": "#d97706"
+    },
+    "emergency-bg-light": {
+      "type": "color",
+      "value": "#fffbeb"
+    },
+    "flex": {
+      "type": "color",
+      "value": "#db2777"
+    },
+    "flex-bg-light": {
+      "type": "color",
+      "value": "#fdf2f8"
+    },
+    "primary": {
+      "type": "color",
+      "value": "#4f46e5"
+    },
+    "primary-dark": {
+      "type": "color",
+      "value": "#3730a3"
+    },
+    "primary-light": {
+      "type": "color",
+      "value": "#eef2ff"
+    },
+    "savings": {
+      "type": "color",
+      "value": "#059669"
+    },
+    "savings-bg-light": {
+      "type": "color",
+      "value": "#ecfdf5"
+    },
+    "spend": {
+      "type": "color",
+      "value": "#4f46e5"
+    },
+    "spend-bg-light": {
+      "type": "color",
+      "value": "#eef2ff"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#ffffff"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#0f172a"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#475569"
+    }
+  }
+}

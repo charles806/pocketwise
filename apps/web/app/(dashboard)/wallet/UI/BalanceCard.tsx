@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Send, Download, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface BalanceCardProps {
   /** The total account balance */
@@ -22,10 +23,10 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   totalBalance,
   // monthlyChange,
   currencySymbol = "₦",
-  onSend,
   onReceive,
   onTopUp,
 }) => {
+  const router = useRouter();
   const safeLocale = "en-NG";
   const safeBalance = totalBalance ?? 0;
   const formattedTotalBalance = new Intl.NumberFormat(safeLocale, {
@@ -71,7 +72,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
         {/* Action Buttons */}
         <div className="flex justify-between gap-2 sm:gap-3">
           <button
-            onClick={onSend}
+            onClick={() => router.push("/wallet/transfer")}
             className="flex-1 cursor-pointer flex flex-col items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-4 bg-white/10 hover:bg-white/20 active:bg-white/10 backdrop-blur-md text-white rounded-2xl font-medium transition-all duration-200 active:scale-95 border border-white/5"
             aria-label="Send money"
           >

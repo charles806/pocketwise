@@ -35,7 +35,7 @@ export const ResponsiveNav = () => {
       <div className="hidden md:flex items-center gap-4">
 
         {/* TABLET (icons only) */}
-        <div className="lg:hidden flex items-center gap-3">
+        <div className="lg:hidden flex items-center gap-3 sticky top-0 z-10">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.path;
@@ -62,7 +62,7 @@ export const ResponsiveNav = () => {
         </div>
 
         {/* DESKTOP (icon + label) */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4 sticky top-0 z-10">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.path;

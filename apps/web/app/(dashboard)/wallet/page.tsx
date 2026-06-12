@@ -14,7 +14,7 @@ import WalletSkeleton from "./UI/WalletSkeleton";
 const Wallet = () => {
   const { accessToken, isLoading: authLoading } = useAuth();
 
-  const { data, isLoading, isFetching } = useWallet(accessToken);
+  const { data } = useWallet(accessToken);
 
   const balance = data?.totalBalance;
   const wallets = data?.wallets;
