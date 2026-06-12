@@ -5,6 +5,7 @@ import {
   refresh,
   logout,
   me,
+  lookupUser,
   updateGoal,
   setupPin,
   changePin,
@@ -21,6 +22,7 @@ router.post("/login", validate(loginSchema), login);
 router.post("/refresh", refresh);
 router.post("/logout", logout);
 router.get("/me", authMiddleware, me);
+router.get("/lookup", authMiddleware, lookupUser);
 router.patch("/goal", authMiddleware, updateGoal);
 router.post("/setup-pin", authMiddleware, validate(setupPinSchema), setupPin);
 router.post(

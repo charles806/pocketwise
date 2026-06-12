@@ -33,6 +33,7 @@ interface User {
   isSimulationMode?: boolean;
   onboardingComplete?: boolean;
   primaryGoal?: string | null;
+  requiresPinSetup?: boolean;
 }
 
 interface AuthContextType {
@@ -55,6 +56,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Tracks whether setAuth was just called (signup/login from this tab).
+  // When true, the auto-redirect effect is skipped so the calling page
+  // (e.g. register → /onboarding) can handle its own navigation.
+  const justAuthenticatedRef = useRef(false);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -117,9 +122,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [logout]);
 
-  // Auto-redirect if session is recovered and user is on auth page
+  // Auto-redirect if session is recovered and user is on auth page.
+  // This only applies when returning to /login or /register with an
+  // existing session (e.g. refresh token still valid). It does NOT
+  // run when the user just signed up / logged in from this tab,
+  // because the calling code handles its own redirect (e.g. to /onboarding).
   useEffect(() => {
     if (!isLoading && user) {
+      // Skip if setAuth was just called — let the caller navigate
+      if (justAuthenticatedRef.current) {
+        justAuthenticatedRef.current = false;
+        return;
+      }
+
       const path = window.location.pathname;
       const searchParams = new URLSearchParams(window.location.search);
       const redirectTo = searchParams.get("from") || "/wallet";
@@ -185,6 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const setAuth = useCallback((token: string, userData: User) => {
     console.log("[AuthContext] Setting user data:", userData);
+    justAuthenticatedRef.current = true;
     setAccessToken(token);
     setUser(userData);
     setSessionCookie();

@@ -58,7 +58,7 @@ export const WalletHeader = () => {
           className="w-9 h-9 rounded-full bg-[#4f46e5] text-white flex items-center justify-center text-sm font-semibold cursor-pointer"
           onClick={() => router.push("/profile")}
         >
-          {user?.lastName?.charAt(0)}
+          {user?.firstName?.charAt(0)}
         </div>
       </div>
     </header>

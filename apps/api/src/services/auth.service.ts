@@ -221,8 +221,50 @@ const authService = {
         onboardingComplete: true,
         primaryGoal: true,
         createdAt: true,
+        transferPin: true,
       },
     });
+
+    if (!user) {
+      const error = new Error("User not found") as any;
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return {
+      ...user,
+      requiresPinSetup: !user.transferPin,
+      transferPin: undefined,
+    };
+  },
+
+  async lookupUser(type: string, value: string) {
+    let user;
+    switch (type) {
+      case "account":
+        user = await prisma.user.findUnique({
+          where: { accountNumber: value },
+          select: { id: true, firstName: true, lastName: true, userName: true },
+        });
+        break;
+      case "phone":
+        user = await prisma.user.findUnique({
+          where: { phone: value },
+          select: { id: true, firstName: true, lastName: true, userName: true },
+        });
+        break;
+      case "username":
+        user = await prisma.user.findFirst({
+          where: { userName: { equals: value, mode: "insensitive" } },
+          select: { id: true, firstName: true, lastName: true, userName: true },
+        });
+        break;
+      default: {
+        const error = new Error("Invalid search type") as any;
+        error.statusCode = 400;
+        throw error;
+      }
+    }
 
     if (!user) {
       const error = new Error("User not found") as any;

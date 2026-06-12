@@ -3,6 +3,7 @@ import React from "react";
 import { useWallet } from "../../../hooks/useWallet";
 import { useAuth } from "../../../context/AuthContext";
 import { WalletHeader } from "./UI/Header";
+import { PinSetupModal } from "./UI/PinSetupModal";
 import { GoalModal } from "./UI/GoalModal";
 import BalanceCard from "./UI/BalanceCard";
 import WalletCards from "./UI/WalletCard";
@@ -24,6 +25,7 @@ const Wallet = () => {
   return (
     <>
       <WalletHeader />
+      <PinSetupModal />
       <GoalModal />
       <main
         className="min-h-screen mt-5! flex flex-col gap-5 sm:gap-8"

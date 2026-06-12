@@ -17,33 +17,30 @@ model Waitlist {
 }
 
 model User {
-  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email              String             @unique
-  phone              String?            @unique
-  passwordHash       String             @map("password_hash")
-  dateOfBirth        DateTime           @map("date_of_birth")
-  kycTier            Int                @default(1) @map("kyc_tier")
-  isSimulationMode   Boolean            @default(false) @map("is_simulation_mode")
-  onboardingComplete Boolean            @default(false) @map("onboarding_complete")
-  createdAt          DateTime           @default(now()) @map("created_at")
-  updatedAt          DateTime           @default(now()) @updatedAt @map("updated_at")
-
-  firstName          String             @map("first_name")
-  lastName           String             @map("last_name")
-  userName           String             @unique @map("username")
-accountNumber String? @unique @map("account_number")
-  primaryGoal        String?            @map("primary_goal")
-  transferPin        String?            @map("transfer_pin")
-
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String        @unique
+  phone              String?       @unique
+  passwordHash       String        @map("password_hash")
+  dateOfBirth        DateTime      @map("date_of_birth")
+  kycTier            Int           @default(1) @map("kyc_tier")
+  isSimulationMode   Boolean       @default(false) @map("is_simulation_mode")
+  onboardingComplete Boolean       @default(false) @map("onboarding_complete")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @default(now()) @updatedAt @map("updated_at")
+  firstName          String
+  lastName           String
+  userName           String
+  accountNumber      String?       @unique
   aiInsights         AIInsight[]
   kycRecords         KycRecord[]
-  referrals          Referral[]         @relation("ReferrerReferrals")
+  referrals          Referral[]    @relation("ReferrerReferrals")
   savingsGoals       SavingsGoal[]
   transactions       Transaction[]
   wallets            Wallet[]
-  notifications      Notification[]
-
-  walletSplitConfig  WalletSplitConfig?
+  notifications Notification[]
+  primaryGoal        String?       @map("primary_goal")
+  transferPin        String?       @map("transfer_pin")
+  walletSplitConfig WalletSplitConfig?
 
   @@map("users")
 }

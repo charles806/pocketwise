@@ -109,6 +109,32 @@ const me = async (req: Request, res: Response) => {
   }
 };
 
+const lookupUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+
+    const { type, value } = req.query;
+
+    if (!type || !value) {
+      return sendError(res, "Search type and value are required", 400);
+    }
+
+    const result = await authService.lookupUser(
+      type as string,
+      value as string,
+    );
+    sendSuccess(res, "User found", result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error looking up user";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
 const updateGoal = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -163,4 +189,14 @@ const changePin = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, login, refresh, logout, me, updateGoal, setupPin, changePin };
+export {
+  signUp,
+  login,
+  refresh,
+  logout,
+  me,
+  lookupUser,
+  updateGoal,
+  setupPin,
+  changePin,
+};

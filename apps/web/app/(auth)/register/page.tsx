@@ -207,7 +207,7 @@ export default function SignUp() {
 
       const signupData = data.data as SignupResponse;
       setAuth(signupData.accessToken, signupData.user);
-      router.push("/wallet");
+      router.push("/onboarding");
     } catch (error) {
       console.error("[Register] Network error:", error);
       toast("Unable to connect. Check your internet connection.", {
