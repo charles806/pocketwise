@@ -1,5 +1,4 @@
-"use client";
-import React from "react";
+import React, { useState } from "react";
 import logo from "../../../icon.png";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
@@ -10,24 +9,82 @@ import {
   Users,
   Shield,
   Banknote,
+  Target,
+  Brain,
+  Sparkles,
 } from "lucide-react";
 
 interface StepThreeProps {
-  onComplete: () => void;
+  onComplete: (goal: string | null) => void;
   onPrev: () => void;
   onSkip: () => void;
 }
 
+type Goal = {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  bg: string;
+  border: string;
+  text: string;
+};
+
+const goalsList: Goal[] = [
+  {
+    id: "save_more",
+    label: "Save more every month",
+    description: "Build consistent savings habits automatically",
+    icon: <Target className="w-5 h-5" />,
+    color: "bg-emerald-500 text-white",
+    bg: "border-emerald-500 bg-emerald-50/30",
+    border: "border-emerald-500",
+    text: "text-emerald-700",
+  },
+  {
+    id: "emergency_fund",
+    label: "Build emergency fund",
+    description: "Have money ready when life surprises you",
+    icon: <Shield className="w-5 h-5" />,
+    color: "bg-amber-500 text-white",
+    bg: "border-amber-500 bg-amber-50/30",
+    border: "border-amber-500",
+    text: "text-amber-700",
+  },
+  {
+    id: "spend_mindfully",
+    label: "Spend more mindfully",
+    description: "Know where every naira goes before it disappears",
+    icon: <Brain className="w-5 h-5" />,
+    color: "bg-indigo-500 text-white",
+    bg: "border-indigo-500 bg-indigo-50/30",
+    border: "border-indigo-500",
+    text: "text-indigo-700",
+  },
+  {
+    id: "all",
+    label: "All of the above",
+    description: "Build complete financial discipline from day one",
+    icon: <Sparkles className="w-5 h-5" />,
+    color: "bg-pink-500 text-white",
+    bg: "border-pink-500 bg-pink-50/30",
+    border: "border-pink-500",
+    text: "text-pink-700",
+  },
+];
+
 const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
   const shouldReduceMotion = useReducedMotion();
+  const [selectedGoal, setSelectedGoal] = useState<string | null>("all");
 
   return (
     <div className="flex flex-col lg:flex-row w-full max-w-7xl min-h-150 lg:min-h-175 bg-white lg:rounded-4xl shadow-2xl overflow-hidden border border-slate-100 ring-1 ring-black/5">
-      <div className="flex flex-col w-full lg:w-[55%] p-8 lg:p-16 justify-between bg-white">
+      <div className="flex flex-col w-full lg:w-[55%] p-8 lg:p-12 justify-between bg-white">
         <motion.div
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center mb-12 lg:mb-0"
+          className="flex justify-between items-center mb-8 lg:mb-0"
         >
           <div className="flex items-center gap-3">
             <div className="p-1.5 bg-white rounded-xl border cursor-pointer border-slate-200 shadow-sm">
@@ -46,7 +103,7 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
           <motion.button
             whileTap={shouldReduceMotion ? undefined : { scale: 0.95 }}
             onClick={onSkip}
-            className="text-slate-500 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg font-medium text-sm transition-colors outline-none"
+            className="text-slate-500 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg font-medium text-sm transition-colors outline-none cursor-pointer"
           >
             Skip
           </motion.button>
@@ -55,15 +112,15 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
         <motion.div
           initial="hidden"
           animate="visible"
-          className="flex flex-col gap-8 max-w-lg mx-auto lg:mx-0"
+          className="flex flex-col gap-6 max-w-lg mx-auto lg:mx-0 w-full"
         >
           <motion.div
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex w-fit items-center bg-(--primary-light) border border-indigo-100 rounded-full px-4 py-1 gap-2"
+            className="flex w-fit items-center bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1 gap-2"
           >
-            <div className="size-1.5 bg-(--primary) rounded-full" />
-            <span className="text-(--primary) font-sans text-[10px] font-bold tracking-widest uppercase">
+            <div className="size-1.5 bg-indigo-600 rounded-full" />
+            <span className="text-indigo-600 font-sans text-[10px] font-bold tracking-widest uppercase">
               Step 3 of 3
             </span>
           </motion.div>
@@ -72,17 +129,49 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="space-y-4"
+            className="space-y-2"
           >
-            <h1 className="text-slate-900 font-sans text-4xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
-              Built for <br />
-              <span className="text-(--primary)">Nigerian hustle 🇳🇬</span>
+            <h1 className="text-slate-900 font-sans text-3xl lg:text-4xl font-extrabold leading-tight tracking-tight">
+              What's your #1 <span className="text-indigo-600">money goal?</span>
             </h1>
-            <p className="text-slate-500 font-sans text-lg lg:text-xl leading-relaxed">
-              Take control of your money. PocketWise helps you spend smarter,
-              save consistently, and stay financially disciplined. Be among the
-              first to build your financial future with PocketWise.
+            <p className="text-slate-500 font-sans text-sm lg:text-base leading-relaxed">
+              Your AI coach will personalise tips and splits based on this.
             </p>
+          </motion.div>
+
+          {/* Goal Cards Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full"
+          >
+            {goalsList.map((goal) => {
+              const isSelected = selectedGoal === goal.id;
+              return (
+                <button
+                  key={goal.id}
+                  onClick={() => setSelectedGoal(goal.id)}
+                  className={`flex flex-col p-4 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer ${
+                    isSelected
+                      ? goal.bg
+                      : "border-slate-100 hover:border-slate-200 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`p-2 rounded-xl ${isSelected ? goal.color : "bg-slate-50 text-slate-500"}`}>
+                      {goal.icon}
+                    </div>
+                    <span className={`font-bold font-sans text-sm ${isSelected ? goal.text : "text-slate-800"}`}>
+                      {goal.label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed font-sans">
+                    {goal.description}
+                  </p>
+                </button>
+              );
+            })}
           </motion.div>
         </motion.div>
 
@@ -100,19 +189,19 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
           </button>
 
           <div className="flex items-center gap-1.5">
-            <div className="size-1.5 bg-(--primary) rounded-full" />
-            <div className="size-1.5 bg-(--primary) rounded-full" />
-            <div className="size-1.5 bg-(--primary) rounded-full" />
+            <div className="size-1.5 bg-indigo-600 rounded-full" />
+            <div className="size-1.5 bg-indigo-600 rounded-full" />
+            <div className="size-1.5 bg-indigo-600 rounded-full" />
           </div>
 
           <motion.button
             whileHover={shouldReduceMotion ? undefined : { scale: 1.02, x: 5 }}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            onClick={onComplete}
-            className="flex items-center bg-(--primary) hover:bg-(--primary-dark) cursor-pointer text-white shadow-xl shadow-indigo-200 rounded-2xl px-8 py-4 gap-3 transition-colors group"
+            onClick={() => onComplete(selectedGoal)}
+            className="flex items-center bg-indigo-600 hover:bg-indigo-700 cursor-pointer text-white shadow-xl shadow-indigo-200 rounded-2xl px-8 py-4 gap-3 transition-colors group"
             aria-label="Get started"
           >
-            <span className="font-bold text-base">Get Started</span>
+            <span className="font-bold text-base cursor-pointer">Get Started</span>
             <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
           </motion.button>
         </motion.div>

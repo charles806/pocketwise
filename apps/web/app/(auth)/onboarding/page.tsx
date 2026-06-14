@@ -6,17 +6,43 @@ import StepTwo from "./components/StepTwo";
 import StepThree from "./components/StepThree";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingAnimation from "./components/LoadingAnimation";
+import { useAuth } from "../../../context/AuthContext";
+import { useWallet } from "../../../hooks/useWallet";
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [isCompleting, setIsCompleting] = useState(false);
   const router = useRouter();
 
+  const { accessToken, refreshSession } = useAuth();
+
+  // Prefetch wallet data in background during onboarding so that it's cached!
+  useWallet(accessToken);
+
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  const handleComplete = () => {
+  const handleComplete = async (goal: string | null = null) => {
     setIsCompleting(true);
+    if (accessToken) {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/auth/goal`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ goal }),
+        });
+        if (response.ok) {
+          await refreshSession();
+        }
+      } catch (err) {
+        console.error("Error saving onboarding goal:", err);
+      }
+    }
   };
 
   useEffect(() => {
@@ -50,20 +76,20 @@ const Onboarding = () => {
         >
           <div className="w-full max-w-7xl mx-auto">
             {step === 1 && (
-              <StepOne onNext={nextStep} onSkip={handleComplete} />
+              <StepOne onNext={nextStep} onSkip={() => handleComplete(null)} />
             )}
             {step === 2 && (
               <StepTwo
                 onNext={nextStep}
                 onPrev={prevStep}
-                onSkip={handleComplete}
+                onSkip={() => handleComplete(null)}
               />
             )}
             {step === 3 && (
               <StepThree
                 onComplete={handleComplete}
                 onPrev={prevStep}
-                onSkip={handleComplete}
+                onSkip={() => handleComplete(null)}
               />
             )}
           </div>

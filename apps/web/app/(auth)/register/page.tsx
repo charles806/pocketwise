@@ -18,12 +18,16 @@ import { useToast } from "../../../context/ToastContext";
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface SignupResponse {
-  message: string;
   accessToken: string;
-  refreshToken: string;
   user: {
     id: string;
     email: string;
+    firstName: string;
+    lastName: string;
+    userName: string;
+    isSimulationMode: boolean;
+    onboardingComplete: boolean;
+    primaryGoal: string | null;
   };
 }
 
