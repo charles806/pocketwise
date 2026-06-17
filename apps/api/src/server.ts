@@ -16,6 +16,8 @@ import { completeGoalsController } from "./controller/goal-completion.controller
 import walletSplitRouter from "./routes/wallet-split.routes.js";
 import notificationsRouter from "./features/notifications/notification.routes.js";
 import internalTransferRouter from "./routes/internal-transfer.routes.js";
+import bankRecipientRouter from "./routes/bank-recipent.routes.js";
+import p2pRecipientRouter from "./routes/p2p-recipient.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -56,6 +58,8 @@ app.use("/api/v1/savings-goals", savingsGoalRouter);
 app.use("/api/v1/wallet-split", walletSplitRouter);
 app.use("/api/v1/notifications", notificationsRouter);
 app.use("/api/v1/wallets/internal-transfer", internalTransferRouter);
+app.use("/api/v1/wallets/recent-recipients", bankRecipientRouter);
+app.use("/api/v1/wallets/recent-p2p-recipients", p2pRecipientRouter);
 //Internal Routes
 app.use("/api/internal/keep-alive", keepAliveRouter);
 app.get(

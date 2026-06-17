@@ -18,7 +18,10 @@ export interface Toast {
 
 interface ToastContextType {
   toasts: Toast[];
-  toast: (message: string, options?: { type?: ToastType; title?: string }) => void;
+  toast: (
+    message: string,
+    options?: { type?: ToastType; title?: string },
+  ) => void;
   dismissToast: (id: string) => void;
 }
 
@@ -38,6 +41,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const type = options?.type ?? "info";
       const title = options?.title;
 
+      if (type === "error") console.error(message);
+      else if (type === "warning") console.warn(message);
+
       // Prevent duplicate toasts (same type + message)
       setToasts((prev) => {
         const isDuplicate = prev.some(
@@ -50,7 +56,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
         // Respect max visible toasts — drop the oldest if over limit
         const updated =
-          prev.length >= MAX_TOASTS ? prev.slice(prev.length - MAX_TOASTS + 1) : prev;
+          prev.length >= MAX_TOASTS
+            ? prev.slice(prev.length - MAX_TOASTS + 1)
+            : prev;
 
         return [...updated, newToast];
       });

@@ -50,9 +50,9 @@ export const webhookService = {
       return { success: true, message: "Webhook already processed" };
     }
 
-    if (event === "deposit.success" && data.status === "success") {
+    if (event === "nip.inbound.completed") {
       const userId = data.userId;
-      const amount = data.amount;
+      const amount = Number(data.amount) / 100;
 
       const split = calculateWalletSplits(new Prisma.Decimal(amount), {
         spendPercent: new Prisma.Decimal(

@@ -157,7 +157,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
 
         if (!response.ok) {
-          console.log("[AuthContext] initAuth: No session found (401/404)");
+          const path = window.location.pathname;
+          if (path !== "/login" && path !== "/register") {
+            router.push("/login");
+          }
           setIsLoading(false);
           return;
         }

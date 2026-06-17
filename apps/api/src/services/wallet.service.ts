@@ -7,12 +7,14 @@ import {
 } from "../services/split.service.js";
 import { notificationService } from "../features/notifications/notification.service.js";
 import { savingsGoalService } from "./saving-goal.service.js";
+import { p2pRecipientService } from "./p2p-recipient.service.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 
 interface TransferInterface {
   userId: string;
   receiverUserId: string;
   amount: number;
+  reason?: string;
 }
 
 interface internalWalletTransferInterface {
@@ -76,7 +78,7 @@ const walletService = {
 
 const transferService = {
   async transfer(data: TransferInterface) {
-    const { userId, receiverUserId, amount } = data;
+    const { userId, receiverUserId, amount, reason } = data;
 
     if (!amount || Number.isNaN(amount) || amount <= 0) {
       const error = new Error("Enter a valid amount") as any;
@@ -109,7 +111,7 @@ const transferService = {
 
     const receiverCheck = await prisma.user.findUnique({
       where: { id: receiverUserId },
-      select: { id: true },
+      select: { id: true, firstName: true, lastName: true, userName: true },
     });
 
     if (!receiverCheck) {
@@ -205,19 +207,6 @@ const transferService = {
         });
       }
 
-      savingsGoalService.checkAndUpdateGoal(receiverUserId);
-
-      notificationService.notifyTransferReceived(
-        receiverUserId,
-        amount,
-        "A PocketWise user",
-      );
-      notificationService.notifyWalletSplit(
-        receiverUserId,
-        amount,
-        allocations,
-      );
-
       // Create single debit record for sender
       await tx.transaction.create({
         data: {
@@ -225,6 +214,7 @@ const transferService = {
           walletId: senderWallet.id,
           type: "transfer",
           amount: -amount,
+          reason: reason || null,
           status: "success",
           reference: transferReference,
           senderWalletId: senderWallet.id,
@@ -239,10 +229,28 @@ const transferService = {
       };
     });
 
+    savingsGoalService.checkAndUpdateGoal(receiverUserId).catch(() => {});
+    notificationService
+      .notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
+      .catch(() => {});
+    notificationService
+      .notifyWalletSplit(receiverUserId, amount, result.allocations)
+      .catch(() => {});
+
     cache.del(CACHE_KEYS.userWallets(userId));
     cache.del(CACHE_KEYS.userWallets(receiverUserId));
     cache.delMany(`txns:${userId}:page:*`);
     cache.delMany(`txns:${receiverUserId}:page:*`);
+
+    p2pRecipientService
+      .upsertRecipient({
+        userId,
+        recipientUserId: receiverUserId,
+        recipientFirstName: receiverCheck.firstName,
+        recipientLastName: receiverCheck.lastName,
+        recipientUserName: receiverCheck.userName,
+      })
+      .catch(() => {});
 
     return result;
   },

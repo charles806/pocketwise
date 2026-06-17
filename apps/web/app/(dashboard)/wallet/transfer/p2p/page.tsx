@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { WalletHeader } from "../../UI/Header";
 import { useAuth } from "../../../../../context/AuthContext";
-import { CheckCircle, XCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { CheckCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "../../../../../context/ToastContext";
 
 type Step = "lookup" | "transfer" | "success";
@@ -14,6 +14,15 @@ interface Recipient {
   lastName: string;
   userName: string;
 }
+
+interface RecentRecipient {
+  recipientUserId: string;
+  recipientFirstName: string;
+  recipientLastName: string;
+  recipientUserName: string;
+  lastSentAt: string;
+}
+
 
 const Page = () => {
   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -26,9 +35,30 @@ const Page = () => {
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [amount, setAmount] = useState("");
   const [pin, setPin] = useState("");
+  const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [transferRef, setTransferRef] = useState("");
+  const [recentRecipients, setRecentRecipients] = useState<RecentRecipient[]>(
+    [],
+  );
+  const [recentLoading, setRecentLoading] = useState(true);
+
+  useEffect(() => {
+    if (!accessToken) return;
+    setRecentLoading(true);
+    fetch(`${API_BASE}/api/v1/wallets/recent-p2p-recipients`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setRecentRecipients(data.data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setRecentLoading(false));
+  }, [accessToken, API_BASE]);
 
   const formConfig = {
     account: {
@@ -57,12 +87,10 @@ const Page = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setInputValue("");
-    setError("");
   };
 
   const handleLookup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
 
     if (!inputValue.trim()) return;
 
@@ -89,7 +117,7 @@ const Page = () => {
       setRecipient(data.data);
       setStep("transfer");
     } catch {
-      setError("Network error. Please try again.");
+      toast("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -97,7 +125,6 @@ const Page = () => {
 
   const handleTransfer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
 
     if (!amount || Number(amount) <= 0) {
       toast("Enter a valid amount");
@@ -105,7 +132,12 @@ const Page = () => {
     }
 
     if (!pin || pin.length < 4) {
-      setError("Enter your 4-digit transfer PIN");
+      toast("Enter your 4-digit transfer PIN");
+      return;
+    }
+
+    if (!reason.trim()) {
+      toast("Please enter a reason for this transfer");
       return;
     }
 
@@ -121,6 +153,7 @@ const Page = () => {
         body: JSON.stringify({
           receiverUserId: recipient!.id,
           amount: Number(amount),
+          reason: reason.trim() || undefined,
           pin,
         }),
       });
@@ -146,9 +179,9 @@ const Page = () => {
     setInputValue("");
     setAmount("");
     setPin("");
+    setReason("");
     setRecipient(null);
     setTransferRef("");
-    setError("");
   };
 
   return (
@@ -172,13 +205,6 @@ const Page = () => {
             <h4 className="text-lg font-bold text-slate-900 min-[480px]:text-xl sm:text-2xl">
               Pocketwise to Pocketwise
             </h4>
-
-            {error && (
-              <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                <XCircle className="h-4 w-4 shrink-0" />
-                {error}
-              </div>
-            )}
 
             {step === "lookup" && (
               <>
@@ -224,6 +250,7 @@ const Page = () => {
                   </button>
                 </div>
 
+        
                 <div className="mt-8 border-t border-slate-100 pt-6">
                   <form
                     className="mx-auto flex w-full max-w-md flex-col gap-5"
@@ -286,6 +313,19 @@ const Page = () => {
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder="0.00"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-slate-700 min-[480px]:text-sm">
+                        Reason
+                      </label>
+                      <input
+                        type="text"
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="What's this for?"
                         className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                       />
                     </div>

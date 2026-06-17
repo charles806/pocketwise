@@ -1,4 +1,3 @@
-// utils/account.ts
 export function generateMockAccountNumber(): string {
   // NUBAN format - 10 digits, starts with a realistic prefix
   const prefix = "92"; // mock prefix

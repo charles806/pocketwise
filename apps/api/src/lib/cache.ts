@@ -1,24 +1,40 @@
-// src/lib/cache.ts
 import { redis } from "./redis.js";
 
 export const cache = {
   async get<T>(key: string): Promise<T | null> {
-    const data = await redis.get(key);
-    return data as T | null;
+    try {
+      const data = await redis.get(key);
+      return data as T | null;
+    } catch (error) {
+      console.error(`Cache get error for key "${key}":`, error);
+      return null;
+    }
   },
 
   async set(key: string, value: unknown, ttlSeconds: number) {
-    await redis.setex(key, ttlSeconds, JSON.stringify(value));
+    try {
+      await redis.setex(key, ttlSeconds, JSON.stringify(value));
+    } catch (error) {
+      console.error(`Cache set error for key "${key}":`, error);
+    }
   },
 
   async del(key: string) {
-    await redis.del(key);
+    try {
+      await redis.del(key);
+    } catch (error) {
+      console.error(`Cache del error for key "${key}":`, error);
+    }
   },
 
   async delMany(pattern: string) {
-    const keys = await redis.keys(pattern);
-    if (keys.length > 0) {
-      await redis.del(...keys);
+    try {
+      const keys = await redis.keys(pattern);
+      if (keys.length > 0) {
+        await redis.del(...keys);
+      }
+    } catch (error) {
+      console.error(`Cache delMany error for pattern "${pattern}":`, error);
     }
   },
 };
@@ -33,6 +49,7 @@ export const CACHE_KEYS = {
   transactions: (userId: string, page: number) => `txns:${userId}:page:${page}`,
   savingsGoals: (userId: string) => `goals:${userId}`,
   notifications: (userId: string) => `notifs:${userId}`,
+  p2pRecipients: (userId: string) => `p2p:recipients:${userId}`,
   waitlistCount: () => `waitlist:count`,
   waitlistAll: () => `waitlist:all`,
 };
@@ -45,6 +62,7 @@ export const TTL = {
   AI_INSIGHTS: 604800, // 7 days
   LOOKUP: 600, // 10 minutes
   TRANSACTIONS: 120, // 2 minutes
+  P2P_RECIPIENTS: 120, // 2 minutes
   SAVINGS_GOALS: 300, // 5 minutes
   NOTIFICATIONS: 60, // 1 minute
   WAITLIST: 600, // 10 minutes
