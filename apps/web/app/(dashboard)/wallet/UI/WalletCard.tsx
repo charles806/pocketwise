@@ -1,6 +1,11 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Lock } from "lucide-react";
 import { formatNaira } from "../../../../libs/utils";
+import { useAuth } from "../../../../context/AuthContext";
+import EmergencyUnlockModal from "./EmergencyUnlockModal";
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface WalletItemProps {
   label: string;
@@ -59,6 +64,70 @@ const WalletItem = ({
   );
 };
 
+const EmergencyWalletItem = ({ balance }: { balance: string }) => {
+  const { accessToken } = useAuth();
+  const [isUnlocked, setIsUnlocked] = useState<boolean | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const checkStatus = useCallback(async () => {
+    if (!accessToken) return;
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/v1/wallets/emergency-unlock/status`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        const { data } = await res.json();
+        setIsUnlocked(data.isUnlocked);
+      }
+    } catch {
+      // fail silently
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    checkStatus();
+  }, [checkStatus]);
+
+  const handleClick = () => {
+    if (isUnlocked === false) setShowModal(true);
+  };
+
+  const handleModalDone = () => {
+    setIsUnlocked(true);
+    setShowModal(false);
+    checkStatus();
+  };
+
+  const handleModalClose = () => setShowModal(false);
+
+  return (
+    <div className="relative" onClick={handleClick}>
+      <WalletItem
+        label="Emergency"
+        percentage="10%"
+        balance={balance}
+        dotColor="#d97706"
+        balanceColor="#d97706"
+      />
+      {isUnlocked === false && (
+        <div className="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-emergency flex items-center justify-center shadow-md">
+          <Lock className="w-3 h-3 text-white" />
+        </div>
+      )}
+      {showModal && (
+        <EmergencyUnlockModal
+          onDone={handleModalDone}
+          onClose={handleModalClose}
+        />
+      )}
+    </div>
+  );
+};
+
 const WalletCards = ({ wallets }: WalletCardsProps) => {
   const getBalance = (type: string) => {
     if (!wallets) return "₦0.00";
@@ -94,13 +163,7 @@ const WalletCards = ({ wallets }: WalletCardsProps) => {
           dotColor="#059669"
           balanceColor="#059669"
         />
-        <WalletItem
-          label="Emergency"
-          percentage="10%"
-          balance={getBalance("emergency")}
-          dotColor="#d97706"
-          balanceColor="#d97706"
-        />
+        <EmergencyWalletItem balance={getBalance("emergency")} />
         <WalletItem
           label="Flex"
           percentage="10%"

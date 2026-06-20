@@ -3,7 +3,6 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
-  ChartPie,
   History,
   Target,
   CreditCard,
@@ -17,7 +16,7 @@ type NavItemType = {
 
 const navItems: NavItemType[] = [
   { icon: Home, label: "Home", path: "/wallet" },
-  { icon: ChartPie, label: "Analytics", path: "/analytics" },
+  // { icon: ChartPie, label: "Analytics", path: "/analytics" },
   { icon: History, label: "History", path: "/history" },
   { icon: Target, label: "Goals", path: "/goals" },
   { icon: CreditCard, label: "Card", path: "/card" },
