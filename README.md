@@ -43,7 +43,7 @@ The **50/30/10/10 Split** — every deposit is automatically divided into four w
 ## Features
 
 ### MVP (Core)
-- ⚡ **Auto-split on deposit** — every incoming deposit is split 70/30/10/10 atomically
+- ⚡ **Auto-split on deposit** — every incoming deposit is split 50/30/10/10 atomically
 - 📝 **Reason-required transfers** — every spend requires a stated reason, enforced at API level
 - 🔒 **Emergency wallet lock** — locked by default; override requires explicit friction
 - 🎯 **Savings goals** — create goals with automated weekly contribution tracking from the Savings wallet
@@ -52,8 +52,7 @@ The **50/30/10/10 Split** — every deposit is automatically divided into four w
 - 🏦 **Real money** — powered by Anchor BaaS, no simulated balances
 
 ### Age Gate
-- **18+** — real money features (Anchor BaaS, KYC, transfers)
-- **13–17** — simulation/learning mode only (no real funds, no regulatory complexity)
+- **16+** — real money features (Anchor BaaS, KYC, transfers)
 
 ---
 

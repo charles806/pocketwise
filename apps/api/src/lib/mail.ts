@@ -1,25 +1,23 @@
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
 
-// Resend Configuration (Keep for later)
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
-// Nodemailer Configuration (For use without domain)
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const getTransporter = () =>
+  nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 
-// Toggle this to "resend" once you have a verified domain
-const MAIL_SERVICE = process.env.MAIL_SERVICE;
+const getMailService = () => process.env.MAIL_SERVICE;
 
 export const sendWelcomeEmail = async (email: string, firstName: string) => {
   try {
-    if (MAIL_SERVICE === "resend") {
-      await resend.emails.send({
+    if (getMailService() === "resend") {
+      await getResend().emails.send({
         from: "PocketWise <onboarding@resend.dev>",
         to: email,
         subject: "Welcome to PocketWise",
@@ -33,7 +31,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
                 `,
       });
     } else {
-      await transporter.sendMail({
+      await getTransporter().sendMail({
         from: `"PocketWise" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Welcome to PocketWise",
@@ -54,8 +52,8 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
 
 export const sendWaitlistEmail = async (email: string) => {
   try {
-    if (MAIL_SERVICE === "resend") {
-      const { data, error } = await resend.emails.send({
+    if (getMailService() === "resend") {
+      const { data, error } = await getResend().emails.send({
         from: "PocketWise <onboarding@resend.dev>",
         to: email,
         subject: "You're on the waitlist 🚀",
@@ -77,7 +75,7 @@ export const sendWaitlistEmail = async (email: string) => {
       }
       return data;
     } else {
-      const info = await transporter.sendMail({
+      const info = await getTransporter().sendMail({
         from: `"PocketWise" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "You're on the waitlist 🚀",
@@ -103,11 +101,11 @@ export const sendWaitlistEmail = async (email: string) => {
 export const sendSavingsNotificationEmail = async (
   email: string,
   subject: string,
-  html: string
+  html: string,
 ) => {
   try {
-    if (MAIL_SERVICE === "resend") {
-      const { data, error } = await resend.emails.send({
+    if (getMailService() === "resend") {
+      const { data, error } = await getResend().emails.send({
         from: "PocketWise <onboarding@resend.dev>",
         to: email,
         subject,
@@ -120,7 +118,7 @@ export const sendSavingsNotificationEmail = async (
 
       return data;
     } else {
-      await transporter.sendMail({
+      return await getTransporter().sendMail({
         from: `"PocketWise" <${process.env.EMAIL_USER}>`,
         to: email,
         subject,
