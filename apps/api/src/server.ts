@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express, { type Request, type Response } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { sendSuccess, sendError } from "./utils/response.js";
@@ -19,8 +19,6 @@ import internalTransferRouter from "./routes/internal-transfer.routes.js";
 import bankRecipientRouter from "./routes/bank-recipent.routes.js";
 import p2pRecipientRouter from "./routes/p2p-recipient.routes.js";
 import emergencyUnlockRouter from "./routes/emergency-unlock.routes.js";
-
-dotenv.config();
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const app = express();
@@ -61,7 +59,7 @@ app.use("/api/v1/notifications", notificationsRouter);
 app.use("/api/v1/wallets/internal-transfer", internalTransferRouter);
 app.use("/api/v1/wallets/recent-recipients", bankRecipientRouter);
 app.use("/api/v1/wallets/recent-p2p-recipients", p2pRecipientRouter);
-app.use("/api/v1/wallets/emergency-unlock", emergencyUnlockRouter)
+app.use("/api/v1/wallets/emergency-unlock", emergencyUnlockRouter);
 //Internal Routes
 app.use("/api/internal/keep-alive", keepAliveRouter);
 app.get(
