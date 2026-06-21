@@ -1,5 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap");
-@import "../../../packages/tailwind-config/theme.css";
+@import "tailwindcss";
+
+@theme {
+  --font-jakarta: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #4f46e5;
+  --color-primary-dark: #3730a3;
+  --color-primary-light: #eef2ff;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-foreground: #0f172a;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-secondary: #475569;
+  --color-spend: #4f46e5;
+  --color-savings: #059669;
+  --color-emergency: #d97706;
+  --color-flex: #db2777;
+  --color-dark-bg: #020617;
+  --color-dark-surface: #0f172a;
+
+  --shadow-card:
+    0 4px 24px rgba(79, 70, 229, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
 
 :root {
   /* --- PRIMARY PIVOT --- */
