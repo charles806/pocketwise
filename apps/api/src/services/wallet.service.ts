@@ -237,10 +237,8 @@ const transferService = {
       .notifyWalletSplit(receiverUserId, amount, result.allocations)
       .catch(() => {});
 
-    cache.del(CACHE_KEYS.userWallets(userId));
-    cache.del(CACHE_KEYS.userWallets(receiverUserId));
-    cache.delMany(`txns:${userId}:page:*`);
-    cache.delMany(`txns:${receiverUserId}:page:*`);
+    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => {});
+    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => {});
 
     p2pRecipientService
       .upsertRecipient({

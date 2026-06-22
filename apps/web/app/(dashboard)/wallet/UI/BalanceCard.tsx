@@ -34,21 +34,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
     maximumFractionDigits: 2,
   }).format(safeBalance);
 
-  // const monthlyChangeFormatted = new Intl.NumberFormat(safeLocale, {
-  //     minimumFractionDigits: 2,
-  //     maximumFractionDigits: 2,
-  // }).format(Math.abs(monthlyChange));
-
-  // const monthlyChangeDisplay = isMonthlyChangePositive
-  //     ? `${currencySymbol}${monthlyChangeFormatted}`
-  //     : `-${currencySymbol}${monthlyChangeFormatted}`;
-
-  // const monthlyChangeColor = isMonthlyChangePositive
-  //     ? 'text-emerald-300'
-  //     : monthlyChange < 0
-  //         ? 'text-red-300'
-  //         : 'text-gray-300';
-
+  
   return (
     <div
       className="sm:w-full max-w-[95%] sm:max-w-[90%] mx-auto bg-linear-to-br from-[#4f46e5] to-primary-dark rounded-4xl shadow-lg border border-white/10 cursor-pointer"

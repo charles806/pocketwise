@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { getTranactions } from "../controller/transaction.controller.js";
+import { getTransactions } from "../controller/transaction.controller.js";
 
-const transactionRouter = Router()
+const transactionRouter = Router();
 
-transactionRouter.get("/", authMiddleware, getTranactions)
+transactionRouter.get("/", authMiddleware, getTransactions);
 
-export default transactionRouter
+export default transactionRouter;

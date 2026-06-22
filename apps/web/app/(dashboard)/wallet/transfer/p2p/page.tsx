@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { WalletHeader } from "../../UI/Header";
 import { useAuth } from "../../../../../context/AuthContext";
+import { useWallet } from "../../../../../hooks/useWallet";
 import { CheckCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "../../../../../context/ToastContext";
 
@@ -23,10 +24,10 @@ interface RecentRecipient {
   lastSentAt: string;
 }
 
-
 const Page = () => {
   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
+  const { refetch } = useWallet(accessToken);
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("lookup");
@@ -166,6 +167,7 @@ const Page = () => {
       }
 
       setTransferRef(data.data?.reference || "");
+      refetch();
       setStep("success");
     } catch {
       toast("Network error. Please try again.");
@@ -250,7 +252,6 @@ const Page = () => {
                   </button>
                 </div>
 
-        
                 <div className="mt-8 border-t border-slate-100 pt-6">
                   <form
                     className="mx-auto flex w-full max-w-md flex-col gap-5"
