@@ -89,9 +89,8 @@ export const RecentTransactions = () => {
           return;
         }
 
-        const { data } = await response.json();
-        // API returns an object containing { transaction: [...] }
-        setTransactions(data.transaction || []);
+        const body = await response.json();
+        setTransactions(body.data?.transactions || []);
       } catch (error) {
         console.error(error);
       }

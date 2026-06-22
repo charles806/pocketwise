@@ -94,7 +94,7 @@ The **50/30/10/10 Split** — every deposit is automatically divided into four w
 | Service   | Usage                                        |
 |-----------|----------------------------------------------|
 | Vercel    | Frontend hosting (Next.js native)            |
-| Railway   | Backend API hosting (Node/Express)           |
+| Vercel   | Backend API hosting (Node/Express)           |
 | Neon      | PostgreSQL database (serverless, auto-scaling)|
 | GitHub    | Version control — `main` + `dev` branches    |
 
@@ -279,7 +279,7 @@ All API responses follow a consistent structure:
 | Tier   | Requirements        | Limit              | Notes                          |
 |--------|---------------------|--------------------|--------------------------------|
 | Tier 1 | Phone + email       | Basic transactions | Signup only; no transfers above ₦50k |
-| Tier 2 | BVN verification    | Up to ₦500k/month  | Required before withdrawals    |
+| Tier 2 | NIN verification    | Up to ₦500k/month  | Required before withdrawals    |
 | Tier 3 | BVN + NIN           | Above ₦500k/month  | High-volume users only         |
 
 ---

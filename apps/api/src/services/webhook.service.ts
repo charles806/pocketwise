@@ -114,7 +114,6 @@ export const webhookService = {
       });
 
       cache.del(CACHE_KEYS.userWallets(userId));
-      cache.delMany(`txns:${userId}:page:*`);
 
       return {
         success: true,

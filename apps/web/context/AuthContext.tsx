@@ -43,6 +43,7 @@ interface AuthContextType {
   setAuth: (token: string, userData: User) => void;
   logout: () => void;
   refreshSession: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -237,6 +238,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, [accessToken, resetInactivityTimer]);
 
+  const refreshUser = useCallback(async () => {
+    if (!accessToken) return;
+    try {
+      const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        credentials: "include",
+      });
+      if (meResponse.ok) {
+        const meData = await meResponse.json();
+        if (meData.data) {
+          setUser(meData.data);
+        }
+      }
+    } catch {
+      // silent fail — non-critical, UI will just show old balance until next refresh
+    }
+  }, [accessToken]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -246,6 +265,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAuth,
         logout,
         refreshSession,
+        refreshUser,
       }}
     >
       {children}

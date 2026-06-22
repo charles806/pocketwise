@@ -7,9 +7,12 @@ export const middleware = async (request: NextRequest) => {
   // Instead, we check a lightweight session flag set by the client after login.
   const token = request.cookies.get("auth_session")?.value;
 
-  const iswallet = request.nextUrl.pathname.startsWith("/wallet");
+  const isDashboard =
+    request.nextUrl.pathname.startsWith("/wallet") ||
+    request.nextUrl.pathname.startsWith("/goals") ||
+    request.nextUrl.pathname.startsWith("/transactions");
 
-  if (!token && iswallet) {
+  if (!token && isDashboard) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
@@ -18,5 +21,5 @@ export const middleware = async (request: NextRequest) => {
 };
 
 export const config = {
-  matcher: ["/wallet/:path*"],
+  matcher: ["/wallet/:path*", "/goals/:path*", "/transactions/:path*"],
 };

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { WalletHeader } from "../../UI/Header";
 import { useAuth } from "../../../../../context/AuthContext";
+import { useWallet } from "../../../../../hooks/useWallet";
 import { useToast } from "../../../../../context/ToastContext";
 import { ArrowLeft, Loader2, Search, CheckCircle, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,7 @@ interface Bank {
 const Page = () => {
   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
+  const { refetch } = useWallet(accessToken);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -132,6 +134,7 @@ const Page = () => {
         return;
       }
       setTransferRef(data.data?.reference || data.reference || "");
+      refetch();
       setStep("success");
     } catch {
       toast("Network error. Please try again.");

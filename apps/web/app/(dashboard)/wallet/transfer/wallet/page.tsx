@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { WalletHeader } from "../../UI/Header";
 import { useAuth } from "../../../../../context/AuthContext";
+import { useWallet } from "../../../../../hooks/useWallet";
 import { useToast } from "../../../../../context/ToastContext";
 import {
   ArrowLeft,
@@ -49,7 +50,8 @@ const WALLET_META: Record<
 
 const Page = () => {
   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
-  const { accessToken } = useAuth();
+  const { accessToken, refreshUser } = useAuth();
+  const { refetch } = useWallet(accessToken);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -158,6 +160,18 @@ const Page = () => {
         return;
       }
       setTransferRef(data.data?.reference || data.reference || "");
+      refetch();
+
+      // Refetch wallets so balances are accurate on this page going forward
+      const refreshed = await fetch(`${API_BASE}/api/v1/wallets`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        credentials: "include",
+      });
+      const refreshedData = await refreshed.json();
+      setWallets(
+        refreshedData.data?.wallets || refreshedData.wallets || refreshedData,
+      );
+
       setStep("success");
     } catch {
       toast("Network error. Please try again.");
@@ -340,7 +354,7 @@ const Page = () => {
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
                           placeholder="0.00"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm text-slate-900 transition-all focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                         />
                       </div>
                       {Number(amount) > sourceWallet.balance && (
@@ -365,7 +379,7 @@ const Page = () => {
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="What's this for?"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                       />
                     </div>
 
@@ -382,7 +396,7 @@ const Page = () => {
                           setPin(e.target.value.replace(/\D/g, ""))
                         }
                         placeholder="Enter your 4-digit PIN"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                       />
                     </div>
 

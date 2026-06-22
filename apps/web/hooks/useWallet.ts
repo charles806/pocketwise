@@ -16,11 +16,13 @@ const fetchWallet = async (accessToken: string) => {
 };
 
 export const useWallet = (accessToken: string | null) => {
-  return useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["wallet", accessToken],
     queryFn: () => fetchWallet(accessToken!),
     enabled: !!accessToken,
     staleTime: 1000 * 60 * 2,
     placeholderData: (prev) => prev,
   });
+
+  return { data, refetch };
 };

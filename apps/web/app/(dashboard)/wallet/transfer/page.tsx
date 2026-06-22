@@ -38,8 +38,8 @@ const Transfer = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.data?.transaction)) {
-          setTransactions(data.data.transaction);
+        if (data.success && Array.isArray(data.data?.transactions)) {
+          setTransactions(data.data.transactions);
         }
       })
       .catch(() => {})
