@@ -200,7 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initAuth();
-  }, []);
+  }, [router]);
 
   const setAuth = useCallback((token: string, userData: User) => {
     console.log("[AuthContext] Setting user data:", userData);
@@ -237,6 +237,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
     };
   }, [accessToken, resetInactivityTimer]);
+
+  // Intercept 401 responses globally and redirect to login
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const originalFetch = window.fetch;
+
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+
+      if (response.status === 401) {
+        const input = args[0];
+        const requestUrl =
+          typeof input === "string"
+            ? input
+            : input instanceof Request
+              ? input.url
+              : "";
+
+        if (API_BASE && requestUrl.startsWith(API_BASE)) {
+          const pathname = window.location.pathname;
+          if (pathname !== "/login" && pathname !== "/register") {
+            logout();
+          }
+        }
+      }
+
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [accessToken, logout]);
 
   const refreshUser = useCallback(async () => {
     if (!accessToken) return;

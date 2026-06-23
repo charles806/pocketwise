@@ -56,7 +56,7 @@ const Page = () => {
       }
     };
     fetchBanks();
-  }, []);
+  }, [API_BASE, accessToken, toast]);
 
   const filteredBanks = banks.filter((b) =>
     b.bankName.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -90,7 +90,7 @@ const Page = () => {
     } else {
       setVerifiedName("");
     }
-  }, [accountNumber, selectedBank]);
+  }, [API_BASE, accessToken, accountNumber, selectedBank, toast]);
 
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,7 +186,7 @@ const Page = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search for a bank..."
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                     />
                   </div>
 
@@ -256,7 +256,7 @@ const Page = () => {
                           setAccountNumber(e.target.value.replace(/\D/g, ""))
                         }
                         placeholder="Enter 10-digit account number"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                       />
                     </div>
 
@@ -325,7 +325,7 @@ const Page = () => {
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
                           placeholder="0.00"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                         />
                       </div>
                       <p className="text-xs text-slate-400">
@@ -342,7 +342,7 @@ const Page = () => {
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="What's this for?"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                       />
                     </div>
 
@@ -359,7 +359,7 @@ const Page = () => {
                           setPin(e.target.value.replace(/\D/g, ""))
                         }
                         placeholder="Enter your 4-digit PIN"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                       />
                     </div>
 

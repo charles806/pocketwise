@@ -113,7 +113,7 @@ const StepOne = ({ onNext, onSkip }: StepOneProps) => {
           >
             <div className="size-1.5 bg-indigo-600 rounded-full" />
             <span className="text-indigo-600 font-sans text-[10px] font-bold tracking-widest uppercase">
-              Step 1 of 3
+              Step 1 of 4
             </span>
           </motion.div>
 
@@ -156,6 +156,7 @@ const StepOne = ({ onNext, onSkip }: StepOneProps) => {
         >
           <div className="flex items-center gap-1.5">
             <div className="w-8 h-1.5 bg-indigo-600 rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
             <div className="size-1.5 bg-slate-200 rounded-full" />
             <div className="size-1.5 bg-slate-200 rounded-full" />
           </div>

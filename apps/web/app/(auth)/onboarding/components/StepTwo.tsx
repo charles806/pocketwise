@@ -86,7 +86,7 @@ const StepTwo = ({ onNext, onPrev, onSkip }: StepTwoProps) => {
           >
             <div className="size-1.5 bg-(--primary) rounded-full" />
             <span className="text-(--primary) font-sans text-[10px] font-bold tracking-widest uppercase">
-              Step 2 of 3
+              Step 2 of 4
             </span>
           </motion.div>
 
@@ -144,6 +144,7 @@ const StepTwo = ({ onNext, onPrev, onSkip }: StepTwoProps) => {
           <div className="flex items-center gap-1.5">
             <div className="size-1.5 bg-(--primary) rounded-full" />
             <div className="size-1.5 bg-(--primary) rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
             <div className="size-1.5 bg-slate-200 rounded-full" />
           </div>
 

@@ -121,7 +121,7 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
           >
             <div className="size-1.5 bg-indigo-600 rounded-full" />
             <span className="text-indigo-600 font-sans text-[10px] font-bold tracking-widest uppercase">
-              Step 3 of 3
+              Step 3 of 4
             </span>
           </motion.div>
 
@@ -132,7 +132,8 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
             className="space-y-2"
           >
             <h1 className="text-slate-900 font-sans text-3xl lg:text-4xl font-extrabold leading-tight tracking-tight">
-              What's your #1 <span className="text-indigo-600">money goal?</span>
+              What's your #1{" "}
+              <span className="text-indigo-600">money goal?</span>
             </h1>
             <p className="text-slate-500 font-sans text-sm lg:text-base leading-relaxed">
               Your AI coach will personalise tips and splits based on this.
@@ -159,10 +160,14 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div className={`p-2 rounded-xl ${isSelected ? goal.color : "bg-slate-50 text-slate-500"}`}>
+                    <div
+                      className={`p-2 rounded-xl ${isSelected ? goal.color : "bg-slate-50 text-slate-500"}`}
+                    >
                       {goal.icon}
                     </div>
-                    <span className={`font-bold font-sans text-sm ${isSelected ? goal.text : "text-slate-800"}`}>
+                    <span
+                      className={`font-bold font-sans text-sm ${isSelected ? goal.text : "text-slate-800"}`}
+                    >
                       {goal.label}
                     </span>
                   </div>
@@ -192,6 +197,7 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
             <div className="size-1.5 bg-indigo-600 rounded-full" />
             <div className="size-1.5 bg-indigo-600 rounded-full" />
             <div className="size-1.5 bg-indigo-600 rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
           </div>
 
           <motion.button
@@ -201,7 +207,9 @@ const StepThree = ({ onComplete, onPrev, onSkip }: StepThreeProps) => {
             className="flex items-center bg-indigo-600 hover:bg-indigo-700 cursor-pointer text-white shadow-xl shadow-indigo-200 rounded-2xl px-8 py-4 gap-3 transition-colors group"
             aria-label="Get started"
           >
-            <span className="font-bold text-base cursor-pointer">Get Started</span>
+            <span className="font-bold text-base cursor-pointer">
+              Get Started
+            </span>
             <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
           </motion.button>
         </motion.div>

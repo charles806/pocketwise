@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import StepOne from "./components/StepOne";
 import StepTwo from "./components/StepTwo";
 import StepThree from "./components/StepThree";
+import StepFour from "./components/StepFour";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingAnimation from "./components/LoadingAnimation";
 import { useAuth } from "../../../context/AuthContext";
@@ -14,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const router = useRouter();
 
   const { accessToken, refreshSession } = useAuth();
@@ -21,7 +23,7 @@ const Onboarding = () => {
   // Prefetch wallet data in background during onboarding so that it's cached!
   useWallet(accessToken);
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleComplete = async (goal: string | null = null) => {
@@ -43,6 +45,11 @@ const Onboarding = () => {
         console.error("Error saving onboarding goal:", err);
       }
     }
+  };
+
+  const handleGoalSelected = (goal: string | null) => {
+    setSelectedGoal(goal);
+    setStep(4);
   };
 
   useEffect(() => {
@@ -87,9 +94,16 @@ const Onboarding = () => {
             )}
             {step === 3 && (
               <StepThree
-                onComplete={handleComplete}
+                onComplete={handleGoalSelected}
                 onPrev={prevStep}
                 onSkip={() => handleComplete(null)}
+              />
+            )}
+            {step === 4 && (
+              <StepFour
+                onPrev={() => setStep(3)}
+                onSkip={() => handleComplete(selectedGoal)}
+                onComplete={() => handleComplete(selectedGoal)}
               />
             )}
           </div>
