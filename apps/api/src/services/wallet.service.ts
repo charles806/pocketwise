@@ -9,6 +9,7 @@ import { notificationService } from "../features/notifications/notification.serv
 import { savingsGoalService } from "./saving-goal.service.js";
 import { p2pRecipientService } from "./p2p-recipient.service.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
+import { EmergencyUnlockService } from "./emergency-unlock.service.js";
 
 interface TransferInterface {
   userId: string;
@@ -229,16 +230,16 @@ const transferService = {
       };
     });
 
-    savingsGoalService.checkAndUpdateGoal(receiverUserId).catch(() => {});
+    savingsGoalService.checkAndUpdateGoal(receiverUserId).catch(() => { });
     notificationService
       .notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
-      .catch(() => {});
+      .catch(() => { });
     notificationService
       .notifyWalletSplit(receiverUserId, amount, result.allocations)
-      .catch(() => {});
+      .catch(() => { });
 
-    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => {});
-    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => {});
+    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => { });
+    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => { });
 
     p2pRecipientService
       .upsertRecipient({
@@ -248,7 +249,7 @@ const transferService = {
         recipientLastName: receiverCheck.lastName,
         recipientUserName: receiverCheck.userName,
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return result;
   },
@@ -266,7 +267,10 @@ const internalWalletTransferService = {
       throw error;
     }
 
+
     const reference = crypto.randomUUID();
+
+    let emergencyRequestId: string | undefined = undefined;
 
     const result = await prisma.$transaction(
       async (tx) => {
@@ -298,6 +302,31 @@ const internalWalletTransferService = {
 
         if (!fromWallet) {
           throw new Error(`${data.fromType} wallet not found`);
+        }
+
+        function formatUnlockTime(unlocksAt: Date): string {
+          const diffMs = new Date(unlocksAt).getTime() - Date.now();
+          if (diffMs <= 0) return "any moment now";
+          const hours = Math.floor(diffMs / (1000 * 60 * 60));
+          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+          if (hours > 0) return `${hours}h ${minutes}m`;
+          if (minutes > 0) return `${minutes} minutes`;
+          return "less than a minute";
+        }
+
+        if (fromWallet.type === "emergency") {
+          const status = await EmergencyUnlockService.checkUnlockStatus(userId)
+          if (!status.isUnlocked) {
+            throw Object.assign(
+              new Error(
+                status.reason === "cooling_down"
+                  ? `Your emergency wallet unlocks in ${formatUnlockTime(status.unlocksAt!)}`
+                  : "Request an unlock before transferring from your emergency wallet"
+              ),
+              { statusCode: 403 }
+            );
+          }
+          emergencyRequestId = status.requestId
         }
 
         if (!toWallet) {
@@ -366,6 +395,10 @@ const internalWalletTransferService = {
         timeout: 15000,
       },
     );
+
+    if (emergencyRequestId) {
+      await EmergencyUnlockService.markRequestCompleted(emergencyRequestId);
+    }
 
     cache.del(CACHE_KEYS.userWallets(userId));
 
