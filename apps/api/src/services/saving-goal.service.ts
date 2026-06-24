@@ -10,6 +10,7 @@ import type {
 } from "../validators/savings-goal.validator.js";
 import { internalWalletTransferService } from "./wallet.service.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
+import { walletHelper } from "../helper/wallet-helpers.js";
 
 export const savingsGoalService = {
   async createSavingsGoal(userId: string, data: CreateSavingsGoalInput) {
@@ -167,13 +168,26 @@ export const savingsGoalService = {
     if (!getGoal) throw new Error("Goal not found");
     if (!getSaveWalletBalance) throw new Error("Save wallet not found");
 
-    if (getSaveWalletBalance.balance.toNumber() > 0) {
+    const progressPercent =
+      (getGoal.currentAmount.toNumber() / getGoal.targetAmount.toNumber()) *
+      100;
+
+    if (progressPercent < 80) {
+      const error = new Error(
+        `You need at least 80% of your goal saved to complete it. You're at ${Math.floor(progressPercent)}%.`,
+      ) as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (getGoal.currentAmount.toNumber() > 0) {
       await internalWalletTransferService.internalWalletTransfer({
         userId: userId,
         fromType: "savings",
         toType: "spend",
-        amount: getSaveWalletBalance.balance.toNumber(),
+        amount: getGoal.currentAmount.toNumber(),
         type: "goal_completion",
+        skipAllocationGuard: true,
       });
     }
 
@@ -191,56 +205,61 @@ export const savingsGoalService = {
     notificationService.notifyGoalCompleted(
       userId,
       getGoal.title,
-      getSaveWalletBalance.balance.toNumber(),
+      getGoal.currentAmount.toNumber(),
     );
 
     await cache.del(CACHE_KEYS.savingsGoals(userId));
     return completedGoal;
   },
-  async checkAndUpdateGoal(userId: string) {
-    const activeGoal = await prisma.savingsGoal.findFirst({
+
+  async contributeToGoal(userId: string, goalId: string, amount: number) {
+    const findGoal = await prisma.savingsGoal.findFirst({
       where: {
-        userId,
-        isCompleted: false,
+        id: goalId,
+        userId: userId,
         status: "ACTIVE",
         deletedAt: null,
       },
     });
 
-    if (!activeGoal) return;
+    if (!findGoal) {
+      const error = new Error("No Goal found") as any;
+      error.statusCode = 404;
+      throw error;
+    }
 
-    const saveWallet = await prisma.wallet.findUnique({
+    if (amount <= 0) {
+      const error = new Error("Low Amount") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (amount > (await walletHelper.getUnallocatedSavings(userId))) {
+      const error = new Error("Insufficient unallocated savings. ") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const previousProgress = calculateProgress(
+      findGoal.currentAmount.toNumber(),
+      findGoal.targetAmount.toNumber(),
+    );
+
+    const update = await prisma.savingsGoal.update({
       where: {
-        userId_type: {
-          userId,
-          type: "savings",
+        id: goalId,
+      },
+      data: {
+        currentAmount: {
+          increment: amount,
         },
       },
     });
 
-    if (!saveWallet) {
-      console.warn(
-        `[GoalProgress] Savings wallet not found for user: ${userId}`,
-      );
-      return;
-    }
-
-    const previousCurrentAmount = activeGoal.currentAmount.toNumber();
-
-    await prisma.savingsGoal.update({
-      where: { id: activeGoal.id },
-      data: { currentAmount: saveWallet.balance },
-    });
-
-    await cache.del(CACHE_KEYS.savingsGoals(userId));
-    const targetAmount = activeGoal.targetAmount.toNumber();
-    const newCurrentAmount = saveWallet.balance.toNumber();
-
-    const previousProgress = calculateProgress(
-      previousCurrentAmount,
-      targetAmount,
+    const newProgress = calculateProgress(
+      update.currentAmount.toNumber(),
+      update.targetAmount.toNumber(),
     );
-    const newProgress = calculateProgress(newCurrentAmount, targetAmount);
 
     const milestones = [25, 50, 75] as const;
 
@@ -248,10 +267,14 @@ export const savingsGoalService = {
       if (previousProgress < milestone && newProgress >= milestone) {
         notificationService.notifyGoalProgress(
           userId,
-          activeGoal.title,
+          findGoal.title,
           milestone,
         );
       }
     }
+
+    await cache.del(CACHE_KEYS.savingsGoals(userId));
+
+    return update;
   },
 };

@@ -6,10 +6,10 @@ import {
   DEFAULT_WALLET_SPLIT_CONFIG,
 } from "../services/split.service.js";
 import { notificationService } from "../features/notifications/notification.service.js";
-import { savingsGoalService } from "./saving-goal.service.js";
 import { p2pRecipientService } from "./p2p-recipient.service.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 import { EmergencyUnlockService } from "./emergency-unlock.service.js";
+import { walletHelper } from "../helper/wallet-helpers.js";
 
 interface TransferInterface {
   userId: string;
@@ -25,6 +25,7 @@ interface internalWalletTransferInterface {
   amount: number;
   type: TransactionType;
   reason?: string | undefined;
+  skipAllocationGuard?: boolean;
 }
 
 const walletService = {
@@ -83,6 +84,14 @@ const transferService = {
 
     if (!amount || Number.isNaN(amount) || amount <= 0) {
       const error = new Error("Enter a valid amount") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!data.reason || !data.reason.trim()) {
+      const error = new Error(
+        "Please provide a reason for this transfer",
+      ) as any;
       error.statusCode = 400;
       throw error;
     }
@@ -229,17 +238,15 @@ const transferService = {
         allocations,
       };
     });
-
-    savingsGoalService.checkAndUpdateGoal(receiverUserId).catch(() => { });
     notificationService
       .notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
-      .catch(() => { });
+      .catch(() => {});
     notificationService
       .notifyWalletSplit(receiverUserId, amount, result.allocations)
-      .catch(() => { });
+      .catch(() => {});
 
-    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => { });
-    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => { });
+    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => {});
+    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => {});
 
     p2pRecipientService
       .upsertRecipient({
@@ -249,7 +256,7 @@ const transferService = {
         recipientLastName: receiverCheck.lastName,
         recipientUserName: receiverCheck.userName,
       })
-      .catch(() => { });
+      .catch(() => {});
 
     return result;
   },
@@ -267,14 +274,12 @@ const internalWalletTransferService = {
       throw error;
     }
 
-
     const reference = crypto.randomUUID();
 
     let emergencyRequestId: string | undefined = undefined;
 
     const result = await prisma.$transaction(
       async (tx) => {
-        // Lock both wallet rows
         await tx.$queryRaw`
         SELECT id
         FROM wallets
@@ -315,18 +320,18 @@ const internalWalletTransferService = {
         }
 
         if (fromWallet.type === "emergency") {
-          const status = await EmergencyUnlockService.checkUnlockStatus(userId)
+          const status = await EmergencyUnlockService.checkUnlockStatus(userId);
           if (!status.isUnlocked) {
             throw Object.assign(
               new Error(
                 status.reason === "cooling_down"
                   ? `Your emergency wallet unlocks in ${formatUnlockTime(status.unlocksAt!)}`
-                  : "Request an unlock before transferring from your emergency wallet"
+                  : "Request an unlock before transferring from your emergency wallet",
               ),
-              { statusCode: 403 }
+              { statusCode: 403 },
             );
           }
-          emergencyRequestId = status.requestId
+          emergencyRequestId = status.requestId;
         }
 
         if (!toWallet) {
@@ -335,6 +340,18 @@ const internalWalletTransferService = {
 
         if (fromWallet.balance.toNumber() < amount) {
           throw new Error("Insufficient funds");
+        }
+
+        if (fromWallet.type === "savings" && !data.skipAllocationGuard) {
+          const unallocatedSavings =
+            await walletHelper.getUnallocatedSavings(userId);
+          if (amount > unallocatedSavings) {
+            const error = new Error(
+              `You can't transfer this much from Savings — ₦${unallocatedSavings} is allocated to your goals. Cancel a goal first to free it up.`,
+            ) as any;
+            error.statusCode = 400;
+            throw error;
+          }
         }
 
         const deductWallet = await tx.wallet.update({
