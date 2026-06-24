@@ -10,7 +10,7 @@ import WalletCards from "./UI/WalletCard";
 import RecentTransactions from "./UI/RecentTransactions";
 import WalletSkeleton from "./UI/WalletSkeleton";
 
-// const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 
 const Wallet = () => {
   const { accessToken, isLoading: authLoading } = useAuth();

@@ -5,6 +5,7 @@ import {
   updateSavingsGoalSchema,
 } from "../validators/savings-goal.validator.js";
 import { savingsGoalService } from "../services/saving-goal.service.js";
+import { walletHelper } from "../helper/wallet-helpers.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 
 const uuidParamSchema = z.string().uuid("Invalid goal ID format");
@@ -150,6 +151,111 @@ export const deleteSavingsGoalController = async (
       error instanceof Error ? error.message : "Failed to delete savings goal",
       500,
       error,
+    );
+  }
+};
+
+export const getUnallocatedSavingsController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+    const unallocatedSavings = await walletHelper.getUnallocatedSavings(userId);
+    return sendSuccess(res, "Unallocated savings fetched", {
+      unallocatedSavings,
+    });
+  } catch (error) {
+    return sendError(
+      res,
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch unallocated savings",
+      (error as any)?.statusCode || 500,
+    );
+  }
+};
+
+export const completeGoalController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+
+    const { id: goalId } = req.params;
+
+    if (!goalId || typeof goalId !== "string") {
+      return sendError(res, "Goal ID is required", 400);
+    }
+
+    const goalIdResult = uuidParamSchema.safeParse(goalId);
+
+    if (!goalIdResult.success) {
+      return sendError(
+        res,
+        "Invalid goal ID format",
+        400,
+        goalIdResult.error.flatten(),
+      );
+    }
+
+    const result = await savingsGoalService.completeGoal(
+      goalIdResult.data,
+      userId,
+    );
+
+    return sendSuccess(res, "Goal completed successfully", result, 200);
+  } catch (error) {
+    return sendError(
+      res,
+      error instanceof Error ? error.message : "Failed to complete goal",
+      (error as any)?.statusCode || 500,
+    );
+  }
+};
+
+export const contributeToGoalController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized", 401);
+    }
+
+    const { id: goalId } = req.params;
+
+    if (!goalId || typeof goalId !== "string") {
+      return sendError(res, "Goal ID is required", 400);
+    }
+
+    const { amount } = req.body;
+
+    if (
+      amount === undefined ||
+      typeof amount !== "number" ||
+      Number.isNaN(amount)
+    ) {
+      return sendError(res, "Please provide a valid amount", 400);
+    }
+
+    const result = await savingsGoalService.contributeToGoal(
+      userId,
+      goalId,
+      amount,
+    );
+
+    return sendSuccess(res, "Contribution successful", result, 200);
+  } catch (error) {
+    return sendError(
+      res,
+      error instanceof Error ? error.message : "Failed to process contribution",
+      (error as any)?.statusCode || 500,
     );
   }
 };
