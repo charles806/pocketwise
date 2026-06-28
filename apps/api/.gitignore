@@ -1,3 +1,4 @@
 .env
 schema.sql
 /src/generated/prisma
+firebase-service-account.json

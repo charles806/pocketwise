@@ -153,7 +153,7 @@ const Page = () => {
   const [unallocatedSavings, setUnallocatedSavings] = useState(0);
   const [contributingGoal, setContributingGoal] = useState<Goal | null>(null);
   const [confirmGoal, setConfirmGoal] = useState<Goal | null>(null);
-  const [completingIds, setCompletingIds] = useState<Set<string>>(new Set());
+  const [completingIds] = useState<Set<string>>(new Set());
 
   const fetchGoals = useCallback(() => {
     if (!accessToken) return;
@@ -228,41 +228,6 @@ const Page = () => {
     setConfirmGoal(goal);
   };
 
-  const handleConfirmComplete = async () => {
-    if (!confirmGoal) return;
-    const goal = confirmGoal;
-    const current = Number(goal.currentAmount);
-
-    setCompletingIds((prev) => new Set(prev).add(goal.id));
-    setConfirmGoal(null);
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/savings-goals/${goal.id}/complete`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${accessToken}` },
-          credentials: "include",
-        },
-      );
-      const data = await res.json();
-      if (!res.ok) {
-        toast(data.message || "Failed to complete goal", { type: "error" });
-        return;
-      }
-      toast(
-        `${formatNaira(current).replace("NGN", "₦")} moved to Spend wallet!`,
-      );
-      handleRefresh();
-    } catch {
-      toast("Network error. Please try again.", { type: "error" });
-    } finally {
-      setCompletingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(goal.id);
-        return next;
-      });
-    }
-  };
 
   return (
     <>

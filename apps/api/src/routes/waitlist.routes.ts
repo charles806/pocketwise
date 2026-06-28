@@ -14,8 +14,8 @@ import { validate } from "../middleware/validate.middleware.js";
 
 const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-  const adminSecret = process.env.ADMIN_SECRET || "pocketwise_admin_dev_2026"; // Fallback for dev if not set properly
-  if (!authHeader || authHeader !== `Bearer ${adminSecret}`) {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret || !authHeader || authHeader !== `Bearer ${adminSecret}`) {
     res.status(401).json({ success: false, message: "Unauthorized" });
     return;
   }

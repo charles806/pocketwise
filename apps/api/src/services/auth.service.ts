@@ -184,6 +184,7 @@ const authService = {
       const decoded = jwt.verify(
         refreshToken,
         process.env.JWT_REFRESH_SECRET!,
+        { algorithms: ["HS256"] },
       ) as any;
 
       const user = await prisma.user.findUnique({ where: { id: decoded.id } });

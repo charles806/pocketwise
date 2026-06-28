@@ -26,7 +26,9 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_ACCESS_SECRET);
+    const decoded = jwt.verify(token, JWT_ACCESS_SECRET, {
+      algorithms: ["HS256"],
+    });
     req.user = decoded as any;
     next();
   } catch {

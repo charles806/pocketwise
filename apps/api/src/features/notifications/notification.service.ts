@@ -62,25 +62,55 @@ export const notificationService = {
     const message = `Your goal "${goalTitle}" is officially live! You're saving up to ₦${formatAmount}. Every kobo counts — let's get it! 💪`;
 
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-  
-  <div style="background:#4f46e5; padding:30px; text-align:center;">
-    <h1 style="color:white; margin:0;">Goal Unlocked 🎯</h1>
-  </div>
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #059669; padding:0;">
 
-  <div style="background:#ffffff; padding:30px;">
-    <p>Hey there,</p>
-    <p>You just created a new savings goal — <strong>${goalTitle}</strong>.</p>
-    <p>Target: <strong style="color:#059669;">₦${formatAmount}</strong></p>
-    <p>Every deposit brings you closer. Stay consistent and you'll get there! 💪</p>
-  </div>
+        <div style="background:#ecfdf5; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">Goal Unlocked 🎯</h1>
+        </div>
 
-  <div style="background:#f5f5f5; padding:20px; text-align:center;">
-    <small style="color:#999;">PocketWise</small>
-  </div>
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
 
-</div>
-        `;
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 12px;">You just created a new savings goal — <strong style="color:#059669;">${goalTitle}</strong>.</p>
+
+          <div style="background:#ecfdf5; border-left:4px solid #059669; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#059669; font-weight:700; font-size:18px;">Target: ₦${formatAmount}</p>
+          </div>
+
+          <p style="margin:0 0 12px;">Every deposit brings you closer. Stay consistent and you'll get there! 💪</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
@@ -97,20 +127,55 @@ export const notificationService = {
     const message = `Your goal "${goalTitle}" has been updated. Your changes are saved and you're still on track. Keep pushing! 🚀`;
 
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-    <div style="background:#4f46e5; padding:30px; text-align:center;">
-        <h1 style="color:white; margin:0;">Goal Updated ✏️</h1>
-    </div>
-    <div style="background:#ffffff; padding:30px;">
-        <p>Hey there,</p>
-        <p>Your savings goal <strong>${goalTitle}</strong> has been updated successfully.</p>
-        <p style="color:#475569;">Your changes are locked in. Stay focused and keep building toward your target.</p>
-        <p>You've got this. 💪</p>
-    </div>
-    <div style="background:#f8fafc; padding:20px; text-align:center;">
-        <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
-    </div>
-</div>`;
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
+
+        <div style="background:#eef2ff; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">Goal Updated ✏️</h1>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 12px;">Your savings goal <strong style="color:#4f46e5;">${goalTitle}</strong> has been updated successfully.</p>
+
+          <div style="background:#eef2ff; border-left:4px solid #4f46e5; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#475569; font-size:14px;">Your changes are locked in. Stay focused and keep building toward your target.</p>
+          </div>
+
+          <p style="margin:0;">You've got this. 💪</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
@@ -127,20 +192,55 @@ export const notificationService = {
     const message = `Your goal "${goalTitle}" has been removed. No worries — every great plan evolves. Start a new one whenever you're ready.`;
 
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-    <div style="background:#0f172a; padding:30px; text-align:center;">
-        <h1 style="color:white; margin:0;">Goal Removed 🗑️</h1>
-    </div>
-    <div style="background:#ffffff; padding:30px;">
-        <p>Hey there,</p>
-        <p>Your savings goal <strong>${goalTitle}</strong> has been removed from your account.</p>
-        <p style="color:#475569;">That's okay — the best financial plans adapt. When you're ready to set a new target, we'll be right here.</p>
-        <p>Start fresh anytime. 🌱</p>
-    </div>
-    <div style="background:#f8fafc; padding:20px; text-align:center;">
-        <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
-    </div>
-</div>`;
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #475569; padding:0;">
+
+        <div style="background:#f8fafc; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">Goal Removed 🗑️</h1>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 12px;">Your savings goal <strong style="color:#475569;">${goalTitle}</strong> has been removed from your account.</p>
+
+          <div style="background:#f8fafc; border-left:4px solid #475569; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#475569; font-size:14px;">That's okay — the best financial plans adapt. When you're ready to set a new target, we'll be right here.</p>
+          </div>
+
+          <p style="margin:0;">Start fresh anytime. 🌱</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
@@ -162,24 +262,58 @@ export const notificationService = {
     const message = `You did it! "${goalTitle}" is complete. ₦${formattedAmount} has been moved to your Spend Wallet. Time to enjoy what you worked for! 🥂`;
 
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-    <div style="background:#4f46e5; padding:40px; text-align:center;">
-        <h1 style="color:white; margin:0; font-size:28px;">You Smashed It! 🎉</h1>
-        <p style="color:#eef2ff; margin-top:10px;">Your savings goal is complete</p>
-    </div>
-    <div style="background:#ffffff; padding:30px;">
-        <p>Hey there,</p>
-        <p>Your goal <strong>${goalTitle}</strong> has officially been completed. 🏆</p>
-        <p>We've moved <strong style="color:#059669;">₦${formattedAmount}</strong> straight into your Spend Wallet — it's yours to use.</p>
-        <div style="background:#ecfdf5; border-left:4px solid #059669; padding:15px; margin:20px 0; border-radius:4px;">
-            <p style="margin:0; color:#059669; font-weight:bold;">₦${formattedAmount} transferred to Spend Wallet ✅</p>
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #059669; padding:0;">
+
+        <div style="background:#ecfdf5; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:24px; font-weight:700; color:#0f172a; margin:16px 0 4px; letter-spacing:-0.3px;">You Smashed It! 🎉</h1>
+          <p style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:15px; color:#059669; font-weight:600; margin:0;">Goal complete</p>
         </div>
-        <p style="color:#475569;">This is what discipline looks like. Set your next goal and keep the momentum going.</p>
-    </div>
-    <div style="background:#f8fafc; padding:20px; text-align:center;">
-        <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
-    </div>
-</div>`;
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 12px;">Your goal <strong style="color:#059669;">${goalTitle}</strong> has officially been completed. 🏆</p>
+
+          <div style="background:#f0fdf4; border:2px solid #059669; border-radius:12px; padding:20px; margin:20px 0; text-align:center;">
+            <p style="margin:0 0 4px; color:#059669; font-size:13px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Transferred to Spend Wallet</p>
+            <p style="margin:0; color:#059669; font-size:28px; font-weight:700; letter-spacing:-0.5px;">₦${formattedAmount}</p>
+            <p style="margin:8px 0 0; color:#059669; font-size:14px;">✅ Ready to use</p>
+          </div>
+
+          <p style="margin:0 0 12px;">This is what discipline looks like. Set your next goal and keep the momentum going.</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
@@ -224,23 +358,71 @@ export const notificationService = {
     const title = `${milestone.emoji} ${milestone.heading}`;
     const message = `You're ${progressPercent}% of the way to your "${goalTitle}" goal. ${milestone.line}`;
 
+    const progressWidth = progressPercent;
+
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-    <div style="background:${milestone.color}; padding:30px; text-align:center;">
-        <h1 style="color:white; margin:0;">${milestone.emoji} ${milestone.heading}</h1>
-    </div>
-    <div style="background:#ffffff; padding:30px;">
-        <p>Hey there,</p>
-        <p>You've hit <strong style="color:${milestone.color};">${progressPercent}%</strong> on your goal — <strong>${goalTitle}</strong>.</p>
-        <div style="background:${milestone.bgColor}; border-left:4px solid ${milestone.color}; padding:15px; margin:20px 0; border-radius:4px;">
-            <p style="margin:0; color:${milestone.color}; font-weight:bold;">${progressPercent}% Complete ${milestone.emoji}</p>
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid ${milestone.color}; padding:0;">
+
+        <div style="background:${milestone.bgColor}; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">${milestone.emoji} ${milestone.heading}</h1>
         </div>
-        <p style="color:#475569;">${milestone.line}</p>
-    </div>
-    <div style="background:#f8fafc; padding:20px; text-align:center;">
-        <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
-    </div>
-</div>`;
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 20px;">You've hit <strong style="color:${milestone.color}; font-size:17px;">${progressPercent}%</strong> on your goal — <strong style="color:#0f172a;">${goalTitle}</strong>.</p>
+
+          <div style="margin:20px 0;">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+              <tr>
+                <td style="background:#e2e8f0; border-radius:9999px; height:10px; padding:0;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="width:${progressWidth}%;">
+                    <tr>
+                      <td style="background:${milestone.color}; border-radius:9999px; height:10px;"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:8px 0 0; color:${milestone.color}; font-weight:700; font-size:16px;">${progressPercent}% Complete ${milestone.emoji}</p>
+          </div>
+
+          <div style="background:${milestone.bgColor}; border-left:4px solid ${milestone.color}; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#475569; font-size:14px;">${milestone.line}</p>
+          </div>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
@@ -272,11 +454,11 @@ export const notificationService = {
       .map(
         (a) => `
         <tr>
-            <td style="padding:10px; text-transform:capitalize; color:#0f172a; font-weight:500;">
-                <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${walletColors[a.walletType] ?? "#4f46e5"}; margin-right:8px;"></span>
-                ${a.walletType} Wallet
+            <td style="border-bottom:1px solid #f1f5f9; padding:12px 14px; color:#0f172a; font-weight:500; font-size:14px;">
+                <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${walletColors[a.walletType] ?? "#4f46e5"}; margin-right:10px; vertical-align:middle;"></span>
+                <span style="vertical-align:middle;">${a.walletType.charAt(0).toUpperCase() + a.walletType.slice(1)} Wallet</span>
             </td>
-            <td style="padding:10px; text-align:right; font-weight:bold; color:${walletColors[a.walletType] ?? "#4f46e5"};">
+            <td style="border-bottom:1px solid #f1f5f9; padding:12px 14px; text-align:right; font-weight:700; color:${walletColors[a.walletType] ?? "#4f46e5"}; font-size:15px;">
                 ₦${a.amount.toLocaleString("en-NG")}
             </td>
         </tr>
@@ -285,31 +467,64 @@ export const notificationService = {
       .join("");
 
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-    <div style="background:#4f46e5; padding:30px; text-align:center;">
-        <h1 style="color:white; margin:0;">Money Landed 💰</h1>
-        <p style="color:#eef2ff; margin-top:8px;">₦${formattedTotal} has been split across your wallets</p>
-    </div>
-    <div style="background:#ffffff; padding:30px;">
-        <p>Hey there,</p>
-        <p>Your deposit of <strong style="color:#4f46e5;">₦${formattedTotal}</strong> has arrived and been distributed according to your split config.</p>
-        <table style="width:100%; border-collapse:collapse; margin-top:20px; background:#f8fafc; border-radius:8px; overflow:hidden;">
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
+
+        <div style="background:#eef2ff; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 4px; letter-spacing:-0.3px;">Money Landed 💰</h1>
+          <p style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#4f46e5; margin:0; letter-spacing:-0.3px;">₦${formattedTotal}</p>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 20px;">Your deposit has arrived and been distributed according to your split config.</p>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden;">
             <thead>
-                <tr style="background:#eef2ff;">
-                    <th style="padding:10px; text-align:left; color:#475569; font-size:13px;">WALLET</th>
-                    <th style="padding:10px; text-align:right; color:#475569; font-size:13px;">AMOUNT</th>
-                </tr>
+              <tr>
+                <th style="background:#eef2ff; padding:10px 14px; text-align:left; color:#475569; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Wallet</th>
+                <th style="background:#eef2ff; padding:10px 14px; text-align:right; color:#475569; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Amount</th>
+              </tr>
             </thead>
             <tbody>
-                ${allocationRows}
+              ${allocationRows}
             </tbody>
-        </table>
-        <p style="color:#475569; margin-top:20px;">Your money is exactly where it should be. Keep it moving. 🚀</p>
-    </div>
-    <div style="background:#f8fafc; padding:20px; text-align:center;">
-        <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
-    </div>
-</div>`;
+          </table>
+
+          <p style="margin:20px 0 0;">Your money is exactly where it should be. Keep it moving. 🚀</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
@@ -331,23 +546,56 @@ export const notificationService = {
     const message = `₦${formattedAmount} from ${senderName} just landed in your account and has been split across your wallets. Check your breakdown inside the app.`;
 
     const emailHtml = `
-<div style="max-width:600px; margin:auto; font-family:Arial, sans-serif;">
-    <div style="background:#4f46e5; padding:30px; text-align:center;">
-        <h1 style="color:white; margin:0;">Money Received 📩</h1>
-        <p style="color:#eef2ff; margin-top:8px;">₦${formattedAmount} just hit your account</p>
-    </div>
-    <div style="background:#ffffff; padding:30px;">
-        <p>Hey there,</p>
-        <p><strong style="color:#4f46e5;">${senderName}</strong> just sent you <strong style="color:#059669;">₦${formattedAmount}</strong>.</p>
-        <div style="background:#ecfdf5; border-left:4px solid #059669; padding:15px; margin:20px 0; border-radius:4px;">
-            <p style="margin:0; color:#059669; font-weight:bold;">₦${formattedAmount} received and split across your wallets ✅</p>
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #059669; padding:0;">
+
+        <div style="background:#ecfdf5; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 4px; letter-spacing:-0.3px;">Money Received 📩</h1>
+          <p style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#059669; margin:0; letter-spacing:-0.3px;">₦${formattedAmount}</p>
         </div>
-        <p style="color:#475569;">The money has been distributed across your wallets based on your split configuration. Open the app to see the full breakdown.</p>
-    </div>
-    <div style="background:#f8fafc; padding:20px; text-align:center;">
-        <small style="color:#475569;">PocketWise — Your Smart Finance Partner</small>
-    </div>
-</div>`;
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 12px;"><strong style="color:#059669;">${senderName}</strong> just sent you <strong style="color:#059669;">₦${formattedAmount}</strong>.</p>
+
+          <div style="background:#ecfdf5; border-left:4px solid #059669; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#059669; font-weight:600; font-size:14px;">₦${formattedAmount} received and split across your wallets ✅</p>
+          </div>
+
+          <p style="margin:0;">The money has been distributed across your wallets based on your split configuration. Open the app to see the full breakdown.</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
 
     return this.sendNotification({
       userId,
