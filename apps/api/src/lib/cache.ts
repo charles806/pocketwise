@@ -49,6 +49,8 @@ export const CACHE_KEYS = {
   transactions: (userId: string, page: number) => `txns:${userId}:page:${page}`,
   savingsGoals: (userId: string) => `goals:${userId}`,
   notifications: (userId: string) => `notifs:${userId}`,
+  otpReset: (email: string) => `otp:reset:${email.toLowerCase()}`,
+  resetToken: (email: string) => `resetToken:${email.toLowerCase()}`,
   p2pRecipients: (userId: string) => `p2p:recipients:${userId}`,
   waitlistCount: () => `waitlist:count`,
   waitlistAll: () => `waitlist:all`,
@@ -57,6 +59,8 @@ export const CACHE_KEYS = {
 // TTLs in seconds
 export const TTL = {
   USER_PROFILE: 600, // 10 minutes
+  OTP: 600, // 10 minutes
+  RESET_TOKEN: 300, // 5 minutes
   WALLET_BALANCE: 30, // 30 seconds
   SPLIT_CONFIG: 3600, // 1 hour
   AI_INSIGHTS: 604800, // 7 days

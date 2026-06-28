@@ -9,11 +9,20 @@ import {
   updateGoal,
   setupPin,
   changePin,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 } from "../controller/auth.controller.js";
 import { validate } from "../middleware/validate.middleware.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { rateLimit } from "../middleware/rate-limit.middleware.js";
-import { signupSchema, loginSchema } from "../schemas/auth.schema.js";
+import {
+  signupSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  verifyOtpSchema,
+  resetPasswordSchema,
+} from "../schemas/auth.schema.js";
 import { setupPinSchema, changePinSchema } from "../schemas/pin.schema.js";
 import { updateFcmTokenController } from "../controller/updateFcmToken.controller.js";
 
@@ -51,6 +60,24 @@ router.post(
   validate(changePinSchema),
   changePin,
 );
-router.post("/fcm-token", authMiddleware, updateFcmTokenController)
+router.post("/fcm-token", authMiddleware, updateFcmTokenController);
+router.post(
+  "/forgot-password",
+  rateLimit({ windowMs: 60_000, max: 3, keyBy: "ip" }),
+  validate(forgotPasswordSchema),
+  forgotPassword,
+);
+router.post(
+  "/verify-otp",
+  rateLimit({ windowMs: 60_000, max: 5, keyBy: "ip" }),
+  validate(verifyOtpSchema),
+  verifyOtp,
+);
+router.post(
+  "/reset-password",
+  rateLimit({ windowMs: 60_000, max: 3, keyBy: "ip" }),
+  validate(resetPasswordSchema),
+  resetPassword,
+);
 
 export default router;

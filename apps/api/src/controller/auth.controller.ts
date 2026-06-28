@@ -189,6 +189,45 @@ const changePin = async (req: Request, res: Response) => {
   }
 };
 
+const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.forgotPassword(email);
+    sendSuccess(res, result.message, { success: result.success });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error processing request";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const verifyOtp = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+    const result = await authService.verifyOtp(email, otp);
+    sendSuccess(res, "OTP verified successfully", result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error verifying OTP";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, token, password } = req.body;
+    const result = await authService.resetPassword(email, token, password);
+    sendSuccess(res, result.message, { success: result.success });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error resetting password";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
 export {
   signUp,
   login,
@@ -199,4 +238,7 @@ export {
   updateGoal,
   setupPin,
   changePin,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 };

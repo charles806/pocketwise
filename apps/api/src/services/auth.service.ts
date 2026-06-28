@@ -1,7 +1,8 @@
 import prisma from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail } from "../lib/mail.js";
+import { sendWelcomeEmail, sendOtpEmail } from "../lib/mail.js";
+import crypto from "crypto";
 import { generateMockAccountNumber } from "../utils/account.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 
@@ -360,6 +361,78 @@ const authService = {
 
     await cache.del(CACHE_KEYS.userProfile(userId));
     return { success: true, message: "PIN changed successfully" };
+  },
+
+  async forgotPassword(email: string) {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { id: true, email: true, firstName: true },
+    });
+
+    if (!user) {
+      return {
+        success: true,
+        message: "If an account with that email exists, an OTP has been sent.",
+      };
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    await cache.set(CACHE_KEYS.otpReset(user.email), otp, TTL.OTP);
+
+    sendOtpEmail(user.email, otp, user.firstName).catch(console.error);
+
+    return {
+      success: true,
+      message: "If an account with that email exists, an OTP has been sent.",
+    };
+  },
+
+  async verifyOtp(email: string, otp: string) {
+    const normalizedEmail = email.toLowerCase();
+    const storedOtp = await cache.get<string>(
+      CACHE_KEYS.otpReset(normalizedEmail),
+    );
+
+    if (!storedOtp || storedOtp !== otp) {
+      const error = new Error("Invalid or expired OTP") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await cache.del(CACHE_KEYS.otpReset(normalizedEmail));
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    await cache.set(
+      CACHE_KEYS.resetToken(normalizedEmail),
+      resetToken,
+      TTL.RESET_TOKEN,
+    );
+
+    return { success: true, token: resetToken };
+  },
+
+  async resetPassword(email: string, token: string, newPassword: string) {
+    const normalizedEmail = email.toLowerCase();
+    const storedToken = await cache.get<string>(
+      CACHE_KEYS.resetToken(normalizedEmail),
+    );
+
+    if (!storedToken || storedToken !== token) {
+      const error = new Error("Invalid or expired reset token") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { email: normalizedEmail },
+      data: { passwordHash },
+    });
+
+    await cache.del(CACHE_KEYS.resetToken(normalizedEmail));
+
+    return { success: true, message: "Password reset successfully" };
   },
 };
 
