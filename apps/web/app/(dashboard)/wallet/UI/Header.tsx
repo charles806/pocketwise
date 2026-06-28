@@ -7,10 +7,12 @@ import { ResponsiveNav } from "./ResponsiveNav";
 import { Bell } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
 import { Greeting } from "../../../../libs/utils";
+import { useFcmToken } from "../../../../hooks/useFcmToken";
 
 export const WalletHeader = () => {
   const router = useRouter();
   const { user } = useAuth();
+  useFcmToken();
 
   const greeting = Greeting();
 

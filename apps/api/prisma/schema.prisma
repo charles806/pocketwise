@@ -33,6 +33,7 @@ model User {
   accountNumber      String?       @unique
   anchorCustomerId  String? @map("anchor_customer_id")
   anchorAccountId   String? @map("anchor_account_id")
+  fcmToken String? @map("fcm_token")
   aiInsights         AIInsight[]
   kycRecords         KycRecord[]
   referrals          Referral[]    @relation("ReferrerReferrals")

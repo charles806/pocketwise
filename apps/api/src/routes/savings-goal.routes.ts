@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { rateLimit } from "../middleware/rate-limit.middleware.js";
 import {
   completeGoalController,
   contributeToGoalController,
@@ -12,7 +13,14 @@ import {
 
 const savingsGoalRouter = Router();
 
-savingsGoalRouter.post("/", authMiddleware, createSavingsGoalController);
+const userLimit = rateLimit({ windowMs: 60_000, max: 10, keyBy: "user" });
+
+savingsGoalRouter.post(
+  "/",
+  authMiddleware,
+  userLimit,
+  createSavingsGoalController,
+);
 savingsGoalRouter.get("/", authMiddleware, getSavingsGoalController);
 savingsGoalRouter.patch(
   "/:goalId",
@@ -32,6 +40,7 @@ savingsGoalRouter.get(
 savingsGoalRouter.post(
   "/:id/contribute",
   authMiddleware,
+  userLimit,
   contributeToGoalController,
 );
 savingsGoalRouter.post("/:id/complete", authMiddleware, completeGoalController);

@@ -15,6 +15,7 @@
     "@repo/ui": "*",
     "@tanstack/react-query": "^5.101.0",
     "@vercel/analytics": "^2.0.1",
+    "firebase": "^12.15.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
     "next": "^16.2.3",
