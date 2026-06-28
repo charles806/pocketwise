@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import cors from "cors";
-import helmet from "helmet";
+import { default as helmet } from "helmet";
 import cookieParser from "cookie-parser";
 import { sendSuccess, sendError } from "./utils/response.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || true,
+    origin: FRONTEND_URL || true,
     credentials: true,
   }),
 );
