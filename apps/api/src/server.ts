@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import cors from "cors";
-import { default as helmet } from "helmet";
+import helmet from 'helmet';
 import cookieParser from "cookie-parser";
 import { sendSuccess, sendError } from "./utils/response.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
