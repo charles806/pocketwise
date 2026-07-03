@@ -15,8 +15,16 @@ interface WalletItemProps {
   balanceColor: string;
 }
 
+interface SplitConfig {
+  spendPercent: number;
+  savingsPercent: number;
+  emergencyPercent: number;
+  flexPercent: number;
+}
+
 interface WalletCardsProps {
   wallets: any[] | null;
+  splitConfig: SplitConfig | null;
 }
 
 const WalletItem = ({
@@ -64,7 +72,13 @@ const WalletItem = ({
   );
 };
 
-const EmergencyWalletItem = ({ balance }: { balance: string }) => {
+const EmergencyWalletItem = ({
+  balance,
+  percentage,
+}: {
+  balance: string;
+  percentage: string;
+}) => {
   const { accessToken } = useAuth();
   const [isUnlocked, setIsUnlocked] = useState<boolean | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -108,7 +122,7 @@ const EmergencyWalletItem = ({ balance }: { balance: string }) => {
     <div className="relative" onClick={handleClick}>
       <WalletItem
         label="Emergency"
-        percentage="10%"
+        percentage={percentage}
         balance={balance}
         dotColor="#d97706"
         balanceColor="#d97706"
@@ -128,7 +142,7 @@ const EmergencyWalletItem = ({ balance }: { balance: string }) => {
   );
 };
 
-const WalletCards = ({ wallets }: WalletCardsProps) => {
+const WalletCards = ({ wallets, splitConfig }: WalletCardsProps) => {
   const getBalance = (type: string) => {
     if (!wallets) return "₦0.00";
 
@@ -151,22 +165,25 @@ const WalletCards = ({ wallets }: WalletCardsProps) => {
       <div className="flex flex-col gap-2 sm:gap-3 px-3 pb-5 sm:px-6 sm:pb-8">
         <WalletItem
           label="Spend"
-          percentage="50%"
+          percentage={`${splitConfig?.spendPercent ?? 50}%`}
           balance={getBalance("spend")}
           dotColor="#4f46e5"
           balanceColor="#4f46e5"
         />
         <WalletItem
           label="Savings"
-          percentage="30%"
+          percentage={`${splitConfig?.savingsPercent ?? 30}%`}
           balance={getBalance("savings")}
           dotColor="#059669"
           balanceColor="#059669"
         />
-        <EmergencyWalletItem balance={getBalance("emergency")} />
+        <EmergencyWalletItem
+          balance={getBalance("emergency")}
+          percentage={`${splitConfig?.emergencyPercent ?? 10}%`}
+        />
         <WalletItem
           label="Flex"
-          percentage="10%"
+          percentage={`${splitConfig?.flexPercent ?? 10}%`}
           balance={getBalance("flex")}
           dotColor="#db2777"
           balanceColor="#db2777"

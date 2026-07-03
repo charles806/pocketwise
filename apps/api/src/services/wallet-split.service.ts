@@ -28,6 +28,13 @@ export const walletSplitService = {
     return create;
   },
 
+  async getWalletSplitConfig(userId: string) {
+    const config = await prisma.walletSplitConfig.findUnique({
+      where: { userId },
+    });
+    return config;
+  },
+
   async updateWalletSplitConfig(userId: string, data: WalletSplitConfigInput) {
     const check = await prisma.walletSplitConfig.findUnique({
       where: {

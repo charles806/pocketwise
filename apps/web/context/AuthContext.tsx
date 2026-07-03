@@ -25,6 +25,10 @@ const clearSessionCookie = () => {
 };
 
 interface User {
+  phone?: string;
+  kycTier?: number;
+  createdAt?: string;
+  profilePicture?: string;
   id: string;
   email: string;
   firstName?: string;

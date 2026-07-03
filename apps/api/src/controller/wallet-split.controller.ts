@@ -43,6 +43,29 @@ export const setWalletSplitConfigController = async (
   }
 };
 
+export const getWalletSplitConfigController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, "Unauthorized", 401);
+
+    const result = await walletSplitService.getWalletSplitConfig(userId);
+
+    return sendSuccess(res, "Success", result, 200);
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Error fetching wallet split config";
+
+    const status = (error as any)?.statusCode || 500;
+
+    sendError(res, message, status);
+  }
+};
+
 export const updateWalletSplitConfigController = async (
   req: Request,
   res: Response,

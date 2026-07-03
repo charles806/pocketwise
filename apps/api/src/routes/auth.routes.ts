@@ -12,6 +12,9 @@ import {
   forgotPassword,
   verifyOtp,
   resetPassword,
+  updateProfile,
+  changePassword,
+  uploadAvatar,
 } from "../controller/auth.controller.js";
 import { validate } from "../middleware/validate.middleware.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -22,6 +25,8 @@ import {
   forgotPasswordSchema,
   verifyOtpSchema,
   resetPasswordSchema,
+  profileSchema,
+  changePasswordSchema,
 } from "../schemas/auth.schema.js";
 import { setupPinSchema, changePinSchema } from "../schemas/pin.schema.js";
 import { updateFcmTokenController } from "../controller/updateFcmToken.controller.js";
@@ -78,6 +83,21 @@ router.post(
   rateLimit({ windowMs: 60_000, max: 3, keyBy: "ip" }),
   validate(resetPasswordSchema),
   resetPassword,
+);
+
+router.patch("/profile", authMiddleware, validate(profileSchema), updateProfile);
+router.post(
+  "/change-password",
+  authMiddleware,
+  rateLimit({ windowMs: 60_000, max: 5, keyBy: "user" }),
+  validate(changePasswordSchema),
+  changePassword,
+);
+router.post(
+  "/upload-avatar",
+  authMiddleware,
+  rateLimit({ windowMs: 60_000, max: 5, keyBy: "user" }),
+  uploadAvatar,
 );
 
 export default router;

@@ -1,4 +1,5 @@
 import { notificationService } from "../features/notifications/notification.service.js";
+import { Prisma } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import {
   calculateDaysRemaining,
@@ -34,6 +35,11 @@ export const savingsGoalService = {
         targetAmount: data.targetAmount,
         deadline: data.deadline,
         isCompleted: false,
+        autoContribute: data.autoContribute,
+        weeklyAmount:
+          data.autoContribute && data.weeklyAmount
+            ? new Prisma.Decimal(data.weeklyAmount)
+            : null,
       },
     });
 

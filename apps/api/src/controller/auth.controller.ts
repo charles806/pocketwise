@@ -228,6 +228,60 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+
+const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, "Unauthorized", 401);
+
+    const result = await authService.updateProfile(userId, req.body);
+    sendSuccess(res, "Profile updated successfully", result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error updating profile";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const changePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, "Unauthorized", 401);
+
+    const result = await authService.changePassword(userId, req.body);
+    sendSuccess(res, "Password updated successfully", result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error changing password";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const uploadAvatar = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, "Unauthorized", 401);
+
+    const { image } = req.body;
+    if (!image || typeof image !== "string") {
+      return sendError(res, "Image is required and must be a string", 400);
+    }
+    if (!image.startsWith("data:image/")) {
+      return sendError(res, "Invalid image format. Must be a base64 encoded image", 400);
+    }
+    if (image.length > 2_800_000) {
+      return sendError(res, "Image too large. Maximum size is 2MB", 400);
+    }
+
+    const result = await authService.uploadAvatar(userId, image);
+    sendSuccess(res, "Avatar uploaded successfully", result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error uploading avatar";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
 export {
   signUp,
   login,
@@ -241,4 +295,7 @@ export {
   forgotPassword,
   verifyOtp,
   resetPassword,
+  updateProfile,
+  changePassword,
+  uploadAvatar,
 };

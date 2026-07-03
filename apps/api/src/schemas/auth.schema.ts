@@ -38,3 +38,35 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Reset token is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
+
+
+export const profileSchema = z
+  .object({
+    firstName: z.string().min(1, "First name cannot be empty").optional(),
+    lastName: z.string().min(1, "Last name cannot be empty").optional(),
+    phone: z.string().min(10, "Phone must be at least 10 digits").optional(),
+    userName: z.string().min(2, "Username must be at least 2 characters").optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.firstName && !data.lastName && !data.phone && !data.userName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one field must be provided",
+        path: [],
+      });
+    }
+  });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "New password must be at least 8 characters"),
+    confirmNewPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
+  });
+
+export type ProfileInput = z.infer<typeof profileSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

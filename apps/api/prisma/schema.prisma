@@ -46,6 +46,7 @@ model User {
   emergencyUnlockRequests EmergencyUnlockRequest[]
   primaryGoal        String?       @map("primary_goal")
   transferPin        String?       @map("transfer_pin")
+  profilePicture String? @map("profile_picture")
   walletSplitConfig WalletSplitConfig?
 
   @@map("users")

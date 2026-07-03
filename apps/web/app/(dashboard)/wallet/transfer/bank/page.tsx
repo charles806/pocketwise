@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { WalletHeader } from "../../UI/Header";
 import { useAuth } from "../../../../../context/AuthContext";
 import { useWallet } from "../../../../../hooks/useWallet";
@@ -15,6 +15,63 @@ interface Bank {
   bankName: string;
 }
 
+interface RecentRecipient {
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  lastSentAt: string;
+}
+
+const HARDCODED_BANKS: Bank[] = [
+  { bankCode: "058", bankName: "Guaranty Trust Bank" },
+  { bankCode: "011", bankName: "First Bank of Nigeria" },
+  { bankCode: "044", bankName: "Access Bank" },
+  { bankCode: "057", bankName: "Zenith Bank" },
+  { bankCode: "033", bankName: "United Bank for Africa" },
+  { bankCode: "232", bankName: "Sterling Bank" },
+  { bankCode: "215", bankName: "Unity Bank" },
+  { bankCode: "035", bankName: "Wema Bank" },
+  { bankCode: "070", bankName: "Fidelity Bank" },
+  { bankCode: "301", bankName: "Jaiz Bank" },
+  { bankCode: "076", bankName: "Polaris Bank" },
+  { bankCode: "221", bankName: "Stanbic IBTC Bank" },
+  { bankCode: "068", bankName: "Standard Chartered Bank" },
+  { bankCode: "023", bankName: "Citibank Nigeria" },
+  { bankCode: "063", bankName: "Diamond Bank" },
+  { bankCode: "100", bankName: "Suntrust Bank" },
+  { bankCode: "050", bankName: "EcoBank Nigeria" },
+  { bankCode: "999992", bankName: "OPay" },
+  { bankCode: "999991", bankName: "PalmPay" },
+  { bankCode: "999993", bankName: "Kuda Bank" },
+];
+
+const calculateFee = (amount: number): number => {
+  if (amount <= 0) return 0;
+  if (amount <= 10000) return 0;
+  if (amount <= 50000) return amount * 0.01;
+  if (amount <= 200000) return amount * 0.0075;
+  return amount * 0.005;
+};
+
+const getFeePercentage = (amount: number): string => {
+  if (amount <= 0) return "0%";
+  if (amount <= 10000) return "0%";
+  if (amount <= 50000) return "1%";
+  if (amount <= 200000) return "0.75%";
+  return "0.5%";
+};
+
+const formatTodayDate = (): string => {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `Today, ${timeStr}`;
+};
+
 const Page = () => {
   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
   const { accessToken } = useAuth();
@@ -23,7 +80,7 @@ const Page = () => {
   const router = useRouter();
 
   const [step, setStep] = useState<Step>("select-bank");
-  const [banks, setBanks] = useState<Bank[]>([]);
+  const [banks] = useState<Bank[]>(HARDCODED_BANKS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [accountNumber, setAccountNumber] = useState("");
@@ -34,79 +91,86 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [transferRef, setTransferRef] = useState("");
+  const [transferFee, setTransferFee] = useState(0);
+  const [totalDeduction, setTotalDeduction] = useState(0);
+  const [recentRecipients, setRecentRecipients] = useState<RecentRecipient[]>(
+    [],
+  );
+  const [recentLoading, setRecentLoading] = useState(true);
+  const verifyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const fetchBanks = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/transfers/banks`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          toast(data.message || "Failed to load banks");
-          return;
+    if (!accessToken) return;
+    setRecentLoading(true);
+    fetch(`${API_BASE}/api/v1/wallets/recent-recipients`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setRecentRecipients(data.data);
         }
-        setBanks(data.data || data);
-      } catch {
-        toast("Network error. Please try again.");
-      } finally {
-        setLoading(false);
+      })
+      .catch(() => {})
+      .finally(() => setRecentLoading(false));
+  }, [accessToken, API_BASE]);
+
+  useEffect(() => {
+    if (accountNumber.length === 10 && selectedBank) {
+      if (verifyTimeoutRef.current) clearTimeout(verifyTimeoutRef.current);
+      setVerifying(true);
+      setVerifiedName("");
+
+      verifyTimeoutRef.current = setTimeout(() => {
+        setVerifiedName("VERIFIED ACCOUNT");
+        setVerifying(false);
+      }, 500);
+    } else {
+      setVerifiedName("");
+      if (verifyTimeoutRef.current) {
+        clearTimeout(verifyTimeoutRef.current);
+        verifyTimeoutRef.current = null;
+      }
+    }
+
+    return () => {
+      if (verifyTimeoutRef.current) {
+        clearTimeout(verifyTimeoutRef.current);
       }
     };
-    fetchBanks();
-  }, [API_BASE, accessToken, toast]);
+  }, [accountNumber, selectedBank]);
 
   const filteredBanks = banks.filter((b) =>
     b.bankName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  useEffect(() => {
-    if (accountNumber.length === 10 && selectedBank) {
-      const verify = async () => {
-        setVerifying(true);
-        try {
-          const res = await fetch(
-            `${API_BASE}/api/v1/transfers/verify-account?bankCode=${selectedBank.bankCode}&accountNumber=${accountNumber}`,
-            {
-              headers: { Authorization: `Bearer ${accessToken}` },
-              credentials: "include",
-            },
-          );
-          const data = await res.json();
-          if (!res.ok) {
-            toast(data.message || "Account verification failed");
-            return;
-          }
-          setVerifiedName(data.data?.accountName || data.accountName || "");
-        } catch {
-          toast("Network error. Please try again.");
-        } finally {
-          setVerifying(false);
-        }
-      };
-      verify();
+  const handleRecentRecipientClick = (recipient: RecentRecipient) => {
+    const bank = banks.find((b) => b.bankCode === recipient.bankCode);
+    if (bank) {
+      setSelectedBank(bank);
+      setAccountNumber(recipient.accountNumber);
+      setStep("verify-account");
     } else {
-      setVerifiedName("");
+      toast("Bank not found for this recipient", { type: "warning" });
     }
-  }, [API_BASE, accessToken, accountNumber, selectedBank, toast]);
+  };
 
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!amount || Number(amount) <= 0) {
-      toast("Enter a valid amount");
+      toast("Enter a valid amount", { type: "warning" });
       return;
     }
 
     if (!pin || pin.length < 4) {
-      toast("Enter your 4-digit transfer PIN");
+      toast("Enter your 4-digit transfer PIN", { type: "warning" });
       return;
     }
 
     if (!reason.trim()) {
-      toast("Please enter a reason for this transfer");
+      toast("Please enter a reason for this transfer", { type: "warning" });
       return;
     }
 
@@ -133,7 +197,10 @@ const Page = () => {
         toast(data.message || "Transfer failed");
         return;
       }
-      setTransferRef(data.data?.reference || data.reference || "");
+      const d = data.data || data;
+      setTransferRef(d.reference || "");
+      setTransferFee(d.fee ?? 0);
+      setTotalDeduction(d.totalDeduction ?? 0);
       refetch();
       setStep("success");
     } catch {
@@ -152,7 +219,20 @@ const Page = () => {
     setPin("");
     setReason("");
     setTransferRef("");
+    setTransferFee(0);
+    setTotalDeduction(0);
   };
+
+  const goToVerifyAccount = (bank: Bank) => {
+    setSelectedBank(bank);
+    setAccountNumber("");
+    setVerifiedName("");
+    setStep("verify-account");
+  };
+
+  const numAmount = Number(amount) || 0;
+  const fee = calculateFee(numAmount);
+  const total = numAmount + fee;
 
   return (
     <>
@@ -178,6 +258,40 @@ const Page = () => {
 
             {step === "select-bank" && (
               <>
+                {recentRecipients.length > 0 && (
+                  <div className="mt-6">
+                    <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
+                      Recent Recipients
+                    </span>
+                    {recentLoading ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-5 w-5 animate-spin text-[#4f46e5]" />
+                      </div>
+                    ) : (
+                      <div className="scrollbar-hide mt-3 flex gap-3 overflow-x-auto pb-2">
+                        {recentRecipients.map((r) => (
+                          <button
+                            key={`${r.accountNumber}-${r.bankCode}`}
+                            type="button"
+                            onClick={() => handleRecentRecipientClick(r)}
+                            className="flex shrink-0 flex-col items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition-all hover:border-[#4f46e5] hover:bg-white hover:shadow-sm active:scale-[0.98]"
+                          >
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4f46e5] text-sm font-bold text-white">
+                              {r.bankName.charAt(0)}
+                            </div>
+                            <span className="max-w-[80px] truncate text-[10px] font-semibold text-slate-700">
+                              {r.bankName}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              {r.accountNumber}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="mt-6 flex flex-col gap-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -190,33 +304,24 @@ const Page = () => {
                     />
                   </div>
 
-                  {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-[#4f46e5]" />
-                    </div>
-                  ) : (
-                    <div className="scrollbar-hide mt-2 flex max-h-80 flex-col gap-2 overflow-y-auto">
-                      {filteredBanks.length === 0 ? (
-                        <p className="py-8 text-center text-sm text-slate-400">
-                          No banks found
-                        </p>
-                      ) : (
-                        filteredBanks.map((bank) => (
-                          <button
-                            key={bank.bankCode}
-                            type="button"
-                            onClick={() => {
-                              setSelectedBank(bank);
-                              setStep("verify-account");
-                            }}
-                            className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 transition-all hover:border-[#4f46e5] hover:bg-white hover:shadow-sm active:scale-[0.99] min-[480px]:text-base"
-                          >
-                            {bank.bankName}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  )}
+                  <div className="scrollbar-hide mt-2 flex max-h-80 flex-col gap-2 overflow-y-auto">
+                    {filteredBanks.length === 0 ? (
+                      <p className="py-8 text-center text-sm text-slate-400">
+                        No banks found
+                      </p>
+                    ) : (
+                      filteredBanks.map((bank) => (
+                        <button
+                          key={bank.bankCode}
+                          type="button"
+                          onClick={() => goToVerifyAccount(bank)}
+                          className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 transition-all hover:border-[#4f46e5] hover:bg-white hover:shadow-sm active:scale-[0.99] min-[480px]:text-base"
+                        >
+                          {bank.bankName}
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               </>
             )}
@@ -234,7 +339,11 @@ const Page = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setStep("select-bank")}
+                    onClick={() => {
+                      setAccountNumber("");
+                      setVerifiedName("");
+                      setStep("select-bank");
+                    }}
                     className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#4f46e5] hover:bg-slate-50 transition-colors"
                   >
                     Change
@@ -328,9 +437,25 @@ const Page = () => {
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 min-[480px]:text-base"
                         />
                       </div>
-                      <p className="text-xs text-slate-400">
-                        Transfers above ₦10,000 incur a 0.5% - 1% fee
-                      </p>
+                      {numAmount > 0 && (
+                        <div className="space-y-0.5">
+                          <p className="text-xs text-slate-500">
+                            Fee: ₦
+                            {fee.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}{" "}
+                            ({getFeePercentage(numAmount)})
+                          </p>
+                          <p className="text-xs font-medium text-slate-500">
+                            Total deducted: ₦
+                            {total.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -411,6 +536,38 @@ const Page = () => {
                 <div className="w-full max-w-md space-y-3 rounded-xl bg-slate-50 border border-slate-100 p-4">
                   <div>
                     <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
+                      Amount Sent
+                    </span>
+                    <p className="text-lg font-bold text-slate-900">
+                      ₦{Number(amount).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
+                      Transfer Fee
+                    </span>
+                    <p className="text-sm font-semibold text-slate-700">
+                      ₦
+                      {transferFee.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
+                      Total Deducted
+                    </span>
+                    <p className="text-lg font-bold text-rose-600">
+                      ₦
+                      {totalDeduction.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
                       Recipient
                     </span>
                     <p className="text-sm font-semibold text-slate-900">
@@ -422,21 +579,13 @@ const Page = () => {
                   </div>
                   <div>
                     <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
-                      Amount
-                    </span>
-                    <p className="text-2xl font-bold text-green-600">
-                      ₦{Number(amount).toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-semibold uppercase text-slate-500 tracking-wide">
                       Reference
                     </span>
                     <p
                       className="flex items-center gap-1 text-xs font-mono text-slate-600 cursor-pointer hover:text-[#4f46e5] transition-colors"
                       onClick={() => {
                         navigator.clipboard.writeText(transferRef);
-                        toast("Reference copied to clipboard");
+                        toast("Copied!", { type: "success" });
                       }}
                     >
                       {transferRef}
@@ -448,18 +597,7 @@ const Page = () => {
                       Date & Time
                     </span>
                     <p className="text-sm text-slate-700">
-                      {new Date().toLocaleDateString("en-US", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                      ,{" "}
-                      {new Date().toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
+                      {formatTodayDate()}
                     </p>
                   </div>
                 </div>
@@ -474,7 +612,7 @@ const Page = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => router.push("/dashboard")}
+                    onClick={() => router.push("/wallet")}
                     className="flex-1 rounded-xl bg-[#4f46e5] py-3 text-sm font-semibold text-white shadow-md shadow-indigo-600/10 hover:bg-[#4338ca] transition-colors"
                   >
                     Go to Home

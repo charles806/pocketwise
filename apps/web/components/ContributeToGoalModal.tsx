@@ -61,6 +61,7 @@ const ContributeToGoalModal = ({
       }
       toast(
         `${formatNaira(numericAmount).replace("NGN", "₦")} added to ${goal.title}`,
+        { type: "success" },
       );
       onSuccess();
     } catch {

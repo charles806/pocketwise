@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Target, Plus, CheckCircle, Loader2 } from "lucide-react";
+import { Target, Plus, CheckCircle, Loader2, Repeat } from "lucide-react";
 import { WalletHeader } from "../wallet/UI/Header";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { formatNaira } from "../../../libs/utils";
 import ContributeToGoalModal from "../../../components/ContributeToGoalModal";
 import ConfirmCompleteModal from "../../../components/ConfirmCompleteModal";
+import AutoContributeModal from "../../../components/AutoContributeModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -22,6 +23,8 @@ interface Goal {
   isCompleted: boolean;
   daysRemaining: number | null;
   progress: number;
+  autoContribute: boolean;
+  weeklyAmount: string | null;
 }
 
 function GoalBadge({ goal }: { goal: Goal }) {
@@ -63,11 +66,13 @@ function GoalCard({
   goal,
   onAddMoney,
   onComplete,
+  onAutoContribute,
   completing,
 }: {
   goal: Goal;
   onAddMoney: () => void;
   onComplete: () => void;
+  onAutoContribute: () => void;
   completing: boolean;
 }) {
   const current = Number(goal.currentAmount);
@@ -80,7 +85,22 @@ function GoalCard({
         <h3 className="truncate text-lg font-bold text-slate-900">
           {goal.title}
         </h3>
-        <GoalBadge goal={goal} />
+        <div className="flex items-center gap-2 shrink-0">
+          {!goal.isCompleted && (
+            <button
+              onClick={onAutoContribute}
+              title={goal.autoContribute ? "Auto-save: ON" : "Auto-save: OFF"}
+              className={`rounded-lg p-1.5 transition-colors active:scale-95 ${
+                goal.autoContribute
+                  ? "text-[#4f46e5] bg-indigo-50 hover:bg-indigo-100"
+                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Repeat size={16} />
+            </button>
+          )}
+          <GoalBadge goal={goal} />
+        </div>
       </div>
 
       <div className="mt-4">
@@ -153,6 +173,9 @@ const Page = () => {
   const [unallocatedSavings, setUnallocatedSavings] = useState(0);
   const [contributingGoal, setContributingGoal] = useState<Goal | null>(null);
   const [confirmGoal, setConfirmGoal] = useState<Goal | null>(null);
+  const [autoContributeGoal, setAutoContributeGoal] = useState<Goal | null>(
+    null,
+  );
   const [completingIds] = useState<Set<string>>(new Set());
 
   const fetchGoals = useCallback(() => {
@@ -227,7 +250,6 @@ const Page = () => {
   const handleComplete = (goal: Goal) => {
     setConfirmGoal(goal);
   };
-
 
   return (
     <>
@@ -305,6 +327,7 @@ const Page = () => {
                       setContributingGoal(goal);
                     }}
                     onComplete={() => handleComplete(goal)}
+                    onAutoContribute={() => setAutoContributeGoal(goal)}
                     completing={completingIds.has(goal.id)}
                   />
                 ))}
@@ -336,6 +359,22 @@ const Page = () => {
           onClose={() => setConfirmGoal(null)}
           onSuccess={() => {
             setConfirmGoal(null);
+            handleRefresh();
+          }}
+        />
+      )}
+
+      {autoContributeGoal && (
+        <AutoContributeModal
+          goal={{
+            id: autoContributeGoal.id,
+            title: autoContributeGoal.title,
+            autoContribute: autoContributeGoal.autoContribute,
+            weeklyAmount: autoContributeGoal.weeklyAmount,
+          }}
+          onClose={() => setAutoContributeGoal(null)}
+          onSuccess={() => {
+            setAutoContributeGoal(null);
             handleRefresh();
           }}
         />

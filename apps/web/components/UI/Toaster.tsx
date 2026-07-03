@@ -13,6 +13,7 @@ import {
 
 const AUTO_DISMISS_MS: Record<ToastType, number | null> = {
   info: 4000,
+  success: 4000,
   warning: 7000,
   error: null, // persistent — user must dismiss
 };

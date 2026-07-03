@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Loader2, Users, Download, Lock, Key, ChevronRight } from "lucide-react";
+import { Loader2, Download, Lock, Key, ChevronRight } from "lucide-react";
 
 interface WaitlistEntry {
   id: string;
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
               <Lock className="text-indigo-400" size={28} />
             </div>
             <h1 className="text-2xl font-bold text-white mb-2 font-jakarta">Admin Access</h1>
-            <p className="text-white/50 text-center text-sm">Enter the secret key to view waitlist data</p>
+            <p className="text-white/50 text-center text-sm">Enter the secret key to vie≈w waitlist data</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4 relative z-10">

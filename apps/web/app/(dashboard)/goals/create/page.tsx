@@ -17,6 +17,8 @@ const Page = () => {
   const [title, setTitle] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [autoContribute, setAutoContribute] = useState(false);
+  const [weeklyAmount, setWeeklyAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const minDate = new Date(Date.now() + 7 * 86400000)
@@ -26,8 +28,17 @@ const Page = () => {
     .toISOString()
     .split("T")[0];
 
+  const weeklyAmountNum = Number(weeklyAmount) || 0;
+  const targetAmountNum = Number(targetAmount) || 0;
+  const weeklyExceedsTarget =
+    autoContribute && weeklyAmountNum > targetAmountNum && targetAmountNum > 0;
+  const weeklyAmountValid = !autoContribute || weeklyAmountNum > 0;
+
   const canSubmit =
-    title.trim().length > 0 && Number(targetAmount) >= 1000 && deadline !== "";
+    title.trim().length > 0 &&
+    targetAmountNum >= 1000 &&
+    deadline !== "" &&
+    weeklyAmountValid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,8 +55,12 @@ const Page = () => {
         credentials: "include",
         body: JSON.stringify({
           title: title.trim(),
-          targetAmount: Number(targetAmount),
+          targetAmount: targetAmountNum,
           deadline: new Date(deadline).toISOString(),
+          autoContribute,
+          ...(autoContribute && weeklyAmountNum > 0
+            ? { weeklyAmount: weeklyAmountNum }
+            : {}),
         }),
       });
 
@@ -56,7 +71,7 @@ const Page = () => {
         return;
       }
 
-      toast("Goal created!");
+      toast("Goal created!", { type: "success" });
       router.push("/goals");
     } catch {
       toast("Network error. Please try again.", { type: "error" });
@@ -137,6 +152,59 @@ const Page = () => {
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-all text-slate-900 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10"
                 />
               </div>
+
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-slate-900">
+                    Auto-save weekly
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    Automatically move money into this goal every week from your
+                    unallocated savings
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={autoContribute}
+                  onClick={() => {
+                    setAutoContribute(!autoContribute);
+                    if (autoContribute) setWeeklyAmount("");
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${autoContribute ? "bg-[#4f46e5]" : "bg-slate-300"}`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${autoContribute ? "translate-x-6" : "translate-x-1"}`}
+                  />
+                </button>
+              </div>
+
+              {autoContribute && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-slate-700">
+                    Weekly Amount
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500 font-medium">
+                      ₦
+                    </span>
+                    <input
+                      type="number"
+                      value={weeklyAmount}
+                      onChange={(e) => setWeeklyAmount(e.target.value)}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pl-8 text-sm transition-all placeholder:text-slate-400 focus:border-[#4f46e5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10"
+                    />
+                  </div>
+                  {weeklyExceedsTarget && (
+                    <p className="text-xs text-amber-600">
+                      This is more than your target amount
+                    </p>
+                  )}
+                </div>
+              )}
 
               <button
                 type="submit"

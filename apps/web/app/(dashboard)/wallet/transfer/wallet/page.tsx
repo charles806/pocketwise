@@ -97,7 +97,9 @@ const Page = () => {
 
     if (sourceWallet && !destWallet) {
       if (wallet.id === sourceWallet.id) {
-        toast("Source and destination wallets must be different");
+        toast("Source and destination wallets must be different", {
+          type: "warning",
+        });
         return;
       }
       setDestWallet(wallet);
@@ -113,27 +115,27 @@ const Page = () => {
     e.preventDefault();
 
     if (!amount || Number(amount) <= 0) {
-      toast("Enter a valid amount");
+      toast("Enter a valid amount", { type: "warning" });
       return;
     }
 
     if (Number(amount) < 1000) {
-      toast("Minimum transfer amount is ₦1,000");
+      toast("Minimum transfer amount is ₦1,000", { type: "warning" });
       return;
     }
 
     if (sourceWallet && Number(amount) > sourceWallet.balance) {
-      toast("Insufficient balance");
+      toast("Insufficient balance", { type: "warning" });
       return;
     }
 
     if (!pin || pin.length < 4) {
-      toast("Enter your 4-digit transfer PIN");
+      toast("Enter your 4-digit transfer PIN", { type: "warning" });
       return;
     }
 
     if (!reason.trim()) {
-      toast("Please enter a reason for this transfer");
+      toast("Please enter a reason for this transfer", { type: "warning" });
       return;
     }
 
@@ -479,7 +481,9 @@ const Page = () => {
                       className="flex items-center gap-1 text-xs font-mono text-slate-600 cursor-pointer hover:text-[#4f46e5] transition-colors"
                       onClick={() => {
                         navigator.clipboard.writeText(transferRef);
-                        toast("Reference copied to clipboard");
+                        toast("Reference copied to clipboard", {
+                          type: "success",
+                        });
                       }}
                     >
                       {transferRef}

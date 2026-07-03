@@ -1,5 +1,6 @@
 import type { TransactionType, WalletType } from "@prisma/client";
 import prisma from "../lib/prisma.js";
+import bcrypt from "bcrypt"
 import { Prisma } from "@prisma/client";
 import {
   calculateWalletSplits,
@@ -10,6 +11,8 @@ import { p2pRecipientService } from "./p2p-recipient.service.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 import { EmergencyUnlockService } from "./emergency-unlock.service.js";
 import { walletHelper } from "../helper/wallet-helpers.js";
+import { feeCalculator } from "../helper/fee-calculator.js";
+import { bankRecipientService } from "./bank-recipient.service.js";
 
 interface TransferInterface {
   userId: string;
@@ -26,6 +29,38 @@ interface internalWalletTransferInterface {
   type: TransactionType;
   reason?: string | undefined;
   skipAllocationGuard?: boolean;
+}
+
+const BANK_CODES: Record<string, string> = {
+  "058": "Guaranty Trust Bank",
+  "011": "First Bank of Nigeria",
+  "044": "Access Bank",
+  "057": "Zenith Bank",
+  "033": "United Bank for Africa",
+  "232": "Sterling Bank",
+  "215": "Unity Bank",
+  "035": "Wema Bank",
+  "070": "Fidelity Bank",
+  "301": "Jaiz Bank",
+  "076": "Polaris Bank",
+  "221": "Stanbic IBTC Bank",
+  "068": "Standard Chartered Bank",
+  "023": "Citibank Nigeria",
+  "063": "Diamond Bank",
+  "100": "Suntrust Bank",
+  "050": "EcoBank Nigeria",
+  "999992": "OPay",
+  "999991": "PalmPay",
+  "999993": "Kuda Bank",
+};
+
+interface BankTransferInterface {
+  bankCode: string;
+  accountNumber: string;
+  amount: number;
+  accountName: string;
+  reason: string;
+  pin: string;
 }
 
 const walletService = {
@@ -240,13 +275,13 @@ const transferService = {
     });
     notificationService
       .notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
-      .catch(() => {});
+      .catch(() => { });
     notificationService
       .notifyWalletSplit(receiverUserId, amount, result.allocations)
-      .catch(() => {});
+      .catch(() => { });
 
-    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => {});
-    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => {});
+    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => { });
+    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => { });
 
     p2pRecipientService
       .upsertRecipient({
@@ -256,7 +291,7 @@ const transferService = {
         recipientLastName: receiverCheck.lastName,
         recipientUserName: receiverCheck.userName,
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return result;
   },
@@ -422,5 +457,110 @@ const internalWalletTransferService = {
     return result;
   },
 };
+
+export const bankTransferService = {
+  async sendToBank(userId: string, data: BankTransferInterface) {
+    const getUser = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { id: true, transferPin: true },
+    });
+
+    if (!getUser) {
+      throw Object.assign(new Error("User not found"), { statusCode: 404 });
+    }
+
+    if (!getUser.transferPin) {
+      throw Object.assign(
+        new Error("Transfer PIN not set up"),
+        { statusCode: 400 }
+      );
+    }
+
+    const isPinValid = await bcrypt.compare(data.pin, getUser.transferPin);
+    if (!isPinValid) {
+      throw Object.assign(new Error("Invalid PIN"), { statusCode: 401 });
+    }
+
+    const fee = feeCalculator(data.amount) ?? 0;
+    const totalDeduction = data.amount + fee;
+
+    const spendWallet = await prisma.wallet.findUnique({
+      where: {
+        userId_type: { userId, type: "spend" },
+      },
+    });
+
+    if (!spendWallet) {
+      throw Object.assign(
+        new Error("Spend wallet not found"),
+        { statusCode: 404 }
+      );
+    }
+
+    if (spendWallet.balance.toNumber() < totalDeduction) {
+      throw Object.assign(
+        new Error("Insufficient funds"),
+        { statusCode: 400 }
+      );
+    }
+
+    const bankName = BANK_CODES[data.bankCode] ?? "Unknown Bank";
+    const reference = crypto.randomUUID();
+
+    const result = await prisma.$transaction(async (tx) => {
+      const deductedWallet = await tx.wallet.update({
+        where: { id: spendWallet.id },
+        data: { balance: { decrement: totalDeduction } },
+      });
+
+      // TODO: Replace this comment with real Anchor NIP Transfer API call
+      // when CAC registration is complete and Anchor sandbox is funded.
+      // Example:
+      // await anchor.nipTransfer({ bankCode, accountNumber, amount, reference });
+      // If Anchor call fails, re-credit wallet and throw error.
+
+      await tx.transaction.create({
+        data: {
+          userId,
+          walletId: spendWallet.id,
+          type: "transfer",
+          amount: -totalDeduction,
+          status: "success",
+          reason: data.reason,
+          reference,
+        },
+      });
+
+      return {
+        reference,
+        amount: data.amount,
+        fee,
+        totalDeduction,
+        newBalance: deductedWallet.balance,
+      };
+    });
+
+    //  Upsert recipient for recent recipients list
+    await bankRecipientService.upsertRecipient(userId, {
+      bankCode: data.bankCode,
+      bankName,
+      accountNumber: data.accountNumber,
+      accountName: data.accountName,
+      userId: userId
+    });
+
+
+
+    cache.del(CACHE_KEYS.userWallets(userId));
+
+    return {
+      ...result,
+      bankName,
+      accountName: data.accountName,
+      accountNumber: data.accountNumber,
+    };
+  },
+};
+
 
 export { walletService, transferService, internalWalletTransferService };

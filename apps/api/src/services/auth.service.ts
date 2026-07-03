@@ -228,6 +228,7 @@ const authService = {
         onboardingComplete: true,
         primaryGoal: true,
         createdAt: true,
+        profilePicture: true,
         transferPin: true,
       },
     });
@@ -433,6 +434,105 @@ const authService = {
     await cache.del(CACHE_KEYS.resetToken(normalizedEmail));
 
     return { success: true, message: "Password reset successfully" };
+  },
+
+  async updateProfile(userId: string, data: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    userName?: string;
+  }) {
+    if (data.userName) {
+      const existing = await prisma.user.findFirst({
+        where: { userName: data.userName, id: { not: userId } },
+      });
+      if (existing) {
+        const error = new Error("Username is already taken") as any;
+        error.statusCode = 409;
+        throw error;
+      }
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(data.firstName !== undefined && { firstName: data.firstName }),
+        ...(data.lastName !== undefined && { lastName: data.lastName }),
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.userName !== undefined && { userName: data.userName }),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
+        email: true,
+        phone: true,
+        kycTier: true,
+        isSimulationMode: true,
+        onboardingComplete: true,
+        primaryGoal: true,
+        profilePicture: true,
+        createdAt: true,
+      },
+    });
+
+    await cache.del(CACHE_KEYS.userProfile(userId));
+    return { ...updated, requiresPinSetup: false };
+  },
+
+  async changePassword(
+    userId: string,
+    data: { currentPassword: string; newPassword: string },
+  ) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, passwordHash: true },
+    });
+
+    if (!user) {
+      const error = new Error("User not found") as any;
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const isValid = await bcrypt.compare(data.currentPassword, user.passwordHash);
+    if (!isValid) {
+      const error = new Error("Current password is incorrect") as any;
+      error.statusCode = 401;
+      throw error;
+    }
+
+    if (data.currentPassword === data.newPassword) {
+      const error = new Error("New password must be different from current password") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const passwordHash = await bcrypt.hash(data.newPassword, 12);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    await cache.del(CACHE_KEYS.userProfile(userId));
+    return { success: true, message: "Password changed successfully" };
+  },
+
+  async uploadAvatar(userId: string, image: string) {
+    const { cloudinary } = await import("../lib/cloudinary.js");
+
+    const result = await cloudinary.uploader.upload(image, {
+      folder: "pocketwise/avatars",
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { profilePicture: result.secure_url },
+    });
+
+    await cache.del(CACHE_KEYS.userProfile(userId));
+    return { profilePicture: result.secure_url };
   },
 };
 

@@ -128,17 +128,17 @@ const Page = () => {
     e.preventDefault();
 
     if (!amount || Number(amount) <= 0) {
-      toast("Enter a valid amount");
+      toast("Enter a valid amount", { type: "warning" });
       return;
     }
 
     if (!pin || pin.length < 4) {
-      toast("Enter your 4-digit transfer PIN");
+      toast("Enter your 4-digit transfer PIN", { type: "warning" });
       return;
     }
 
     if (!reason.trim()) {
-      toast("Please enter a reason for this transfer");
+      toast("Please enter a reason for this transfer", { type: "warning" });
       return;
     }
 
@@ -413,5 +413,3 @@ const Page = () => {
 };
 
 export default Page;
-
-

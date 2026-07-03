@@ -52,6 +52,7 @@ const ConfirmCompleteModal = ({
       }
       toast(
         `${formatNaira(currentAmount).replace("NGN", "₦")} moved to Spend wallet!`,
+        { type: "success" },
       );
       onSuccess();
     } catch {

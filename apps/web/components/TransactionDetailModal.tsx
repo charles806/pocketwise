@@ -135,7 +135,7 @@ const TransactionDetailModal = ({ transaction, onClose }: Props) => {
     try {
       await navigator.clipboard.writeText(transaction.id);
       setCopied(true);
-      toast("Copied!");
+      toast("Copied!", { type: "success" });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast("Failed to copy", { type: "error" });

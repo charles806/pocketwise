@@ -607,6 +607,199 @@ export const notificationService = {
     });
   },
 
+  async notifyWeeklySummary(
+    userId: string,
+    summary: {
+      thisWeekSpent: number;
+      thisWeekSaved: number;
+      savedDifference: number;
+      goalTitle: string | null;
+      goalProgressPercent: number | null;
+    },
+  ) {
+    const formattedSpent = summary.thisWeekSpent.toLocaleString("en-NG");
+    const formattedSaved = summary.thisWeekSaved.toLocaleString("en-NG");
+
+    let comparisonLine: string;
+    if (summary.savedDifference > 0) {
+      const diff = summary.savedDifference.toLocaleString("en-NG");
+      comparisonLine = `You saved ₦${diff} more than last week — keep it up! 🔥`;
+    } else if (summary.savedDifference < 0) {
+      const diff = Math.abs(summary.savedDifference).toLocaleString("en-NG");
+      comparisonLine = `You saved ₦${diff} less than last week.`;
+    } else {
+      comparisonLine = "Same savings as last week.";
+    }
+
+    const title = "📊 Your Weekly PocketWise Summary";
+    const message = `This week: ₦${formattedSpent} spent, ₦${formattedSaved} saved. ${comparisonLine}`;
+
+    const goalSection =
+      summary.goalTitle && summary.goalProgressPercent !== null
+        ? `
+          <div style="background:#fffbeb; border-left:4px solid #d97706; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#d97706; font-weight:600; font-size:14px;">🎯 ${summary.goalTitle} — ${summary.goalProgressPercent}% complete</p>
+          </div>`
+        : "";
+
+    const emailHtml = `
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
+
+        <div style="background:#eef2ff; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">Your Weekly Summary 📊</h1>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 20px;">Here's how your money moved this week.</p>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td style="width:50%; padding-right:6px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; background:#fef2f2; border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px; text-align:center;">
+                      <p style="margin:0 0 4px; color:#991b1b; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Spent</p>
+                      <p style="margin:0; color:#dc2626; font-size:22px; font-weight:700; letter-spacing:-0.5px;">₦${formattedSpent}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td style="width:50%; padding-left:6px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; background:#f0fdf4; border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px; text-align:center;">
+                      <p style="margin:0 0 4px; color:#166534; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Saved</p>
+                      <p style="margin:0; color:#16a34a; font-size:22px; font-weight:700; letter-spacing:-0.5px;">₦${formattedSaved}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <div style="background:#f8fafc; border-left:4px solid #4f46e5; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#475569; font-size:14px;">${comparisonLine}</p>
+          </div>
+
+          ${goalSection}
+
+          <p style="margin:0;">Keep going — every smart choice adds up. 💪</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
+
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "SYSTEM",
+      subject: title,
+      emailHtml,
+    });
+  },
+
+  async notifyAutoContribution(
+    userId: string,
+    goalTitle: string,
+    amount: number,
+  ) {
+    const formattedAmount = amount.toLocaleString("en-NG");
+    const title = "🎯 Auto-Save Contribution";
+    const message = `₦${formattedAmount} was automatically added to your goal "${goalTitle}" this week 🎯`;
+
+    const emailHtml = `
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
+
+        <div style="background:#eef2ff; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="display:block;">
+                  <rect width="64" height="64" rx="16" fill="#5B4FCF"/>
+                  <rect x="12" y="24" width="40" height="26" rx="7" fill="white"/>
+                  <rect x="12" y="18" width="18" height="8" rx="4" fill="#EDE9FF"/>
+                  <line x1="22" y1="24" x2="22" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="32" y1="24" x2="32" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <line x1="42" y1="24" x2="42" y2="50" stroke="#5B4FCF" stroke-width="2"/>
+                  <circle cx="46" cy="37" r="3" fill="#5B4FCF"/>
+                </svg>
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">Auto-Save Deposit 🎯</h1>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 12px;">Your weekly auto-contribution just went through for <strong style="color:#4f46e5;">${goalTitle}</strong>.</p>
+
+          <div style="background:#eef2ff; border-left:4px solid #4f46e5; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#4f46e5; font-weight:700; font-size:18px;">₦${formattedAmount} added</p>
+          </div>
+
+          <p style="margin:0 0 12px;">You're making consistent progress — every contribution adds up. Keep it up! 🚀</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>`;
+
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "GOAL",
+      subject: title,
+      emailHtml,
+    });
+  },
+
   async getNotifications(userId: string) {
     const cacheKey = CACHE_KEYS.notifications(userId);
     const cached = await cache.get<object>(cacheKey);

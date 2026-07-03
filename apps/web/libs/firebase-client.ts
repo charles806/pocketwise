@@ -33,6 +33,7 @@ export async function getFcmToken(): Promise<string | null> {
     const registration = await navigator.serviceWorker.register(
       "/firebase-messaging-sw",
     );
+    await navigator.serviceWorker.ready;
     const token = await getToken(messaging!, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: registration,
@@ -49,7 +50,7 @@ export function listenForForegroundMessages(
     notification?: { title?: string; body?: string };
   }) => void,
 ): () => void {
-  if (!messaging) return () => {};
+  if (!messaging) return () => { };
   const unsubscribe = onMessage(messaging, (payload) => {
     callback(payload);
   });
