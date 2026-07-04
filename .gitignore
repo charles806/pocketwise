@@ -15,6 +15,7 @@
 .env.local
 .env.production.local
 .env.test.local
+env/*.env
 .next
 .next/
 .pnp
