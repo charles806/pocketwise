@@ -9,7 +9,6 @@ import authRouter from "./routes/auth.routes.js";
 import waitlistRouter from "./routes/waitlist.routes.js";
 import walletRouter from "./routes/wallet.routes.js";
 import transactionRouter from "./routes/transaction.routes.js";
-import { webhookRoutes } from "./routes/webhook.routes.js";
 import savingsGoalRouter from "./routes/savings-goal.routes.js";
 import keepAliveRouter from "./routes/keep-alive.routes.js";
 import { keepAliveAuthMiddleware } from "./middleware/keep-alive-auth.middleware.js";
@@ -27,15 +26,42 @@ import { th } from "zod/v4/locales";
 import { notificationService } from "./features/notifications/notification.service.js";
 import { fcmMessaging } from "./lib/firebase.js";
 import bankTransferRouter from "./routes/bank-transfer.routes.js";
+import { rateLimitMiddleware } from "./middleware/rate-limit.middleware.js";
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const app = express();
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          "https://api.getanchor.co",
+          "https://api.sandbox.getanchor.co",
+          "https://*.upstash.io",
+          "https://fcm.googleapis.com",
+        ],
+        frameAncestors: ["'none'"],
+        imgSrc: ["'self'", "data:"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+  }),
+);
 app.use(cookieParser());
+//DO NOT TOUCH OR MOVE LINE 35 to 37 Don't touch !!!!!!!!!!
+import { webhookRoutes } from "./routes/webhook.routes.js";
+app.use("/api/v1/webhooks", webhookRoutes);
 app.use(express.json({ limit: "10mb" }));
+if (!FRONTEND_URL) {
+  throw new Error("FRONTEND_URL environment variable is required");
+}
+
 app.use(
   cors({
-    origin: FRONTEND_URL || true,
+    origin: FRONTEND_URL,
     credentials: true,
   }),
 );
@@ -61,7 +87,6 @@ app.use("/api/v1/waitlist", waitlistRouter);
 //Main App Routes
 app.use("/api/v1/wallets", walletRouter);
 app.use("/api/v1/transactions", transactionRouter);
-app.use("/api/v1/webhooks", webhookRoutes);
 app.use("/api/v1/savings-goals", savingsGoalRouter);
 app.use("/api/v1/wallet-split", walletSplitRouter);
 app.use("/api/v1/notifications", notificationsRouter);
@@ -81,6 +106,7 @@ app.use("/api/internal/keep-alive", keepAliveRouter);
 app.get(
   "/api/internal/auto-contribute",
   keepAliveAuthMiddleware,
+  rateLimitMiddleware,
   async (_req: Request, res: Response) => {
     try {
       const goals = await prisma.savingsGoal.findMany({
@@ -149,12 +175,14 @@ app.get(
 app.post(
   "/api/internal/complete-goals",
   keepAliveAuthMiddleware,
+  rateLimitMiddleware,
   completeGoalsController,
 );
 
 app.get(
   "/api/internal/weekly-summary",
   keepAliveAuthMiddleware,
+  rateLimitMiddleware,
   async (req: Request, res: Response) => {
     try {
       const users = await prisma.user.findMany({

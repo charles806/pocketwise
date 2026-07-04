@@ -24,7 +24,7 @@ export const EmergencyUnlockService = {
             throw Object.assign(new Error("Unlock already requested"), { statusCode: 409 });
         }
 
-        const unlocksAt = new Date();
+        const unlocksAt = new Date(Date.now() + 12 * 60 * 60 * 1000)
 
         const create = await prisma.emergencyUnlockRequest.create({
             data: {

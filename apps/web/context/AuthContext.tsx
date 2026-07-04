@@ -16,7 +16,8 @@ const INACTIVITY_LIMIT = 45 * 60 * 1000; // 45 minutes
 const setSessionCookie = () => {
   const date = new Date();
   date.setTime(date.getTime() + INACTIVITY_LIMIT);
-  document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax`;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `auth_session=true; path=/; expires=${date.toUTCString()}; SameSite=Lax${secure}`;
 };
 
 const clearSessionCookie = () => {
@@ -154,7 +155,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const initAuth = async () => {
       const url = `${API_BASE}/api/v1/auth/refresh`;
 
-      // console.log(`[AuthContext] initAuth: Fetching from ${url}`);
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -186,12 +186,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (meResponse.ok) {
             const meData = await meResponse.json();
             if (meData.data) {
-              console.log(
-                "[AuthContext] initAuth: Success! User:",
-                meData.data,
-                "Access Token:",
-                data.data.accessToken,
-              );
+              if (process.env.NODE_ENV !== "production") {
+                console.log(
+                  "[AuthContext] initAuth: Success! User:",
+                  meData.data,
+                  "Access Token:",
+                  data.data.accessToken,
+                );
+              }
+
               setUser(meData.data);
             }
           }
@@ -207,7 +210,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [router]);
 
   const setAuth = useCallback((token: string, userData: User) => {
-    console.log("[AuthContext] Setting user data:", userData);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[AuthContext] Setting user data:", userData);
+    }
+
     justAuthenticatedRef.current = true;
     setAccessToken(token);
     setUser(userData);

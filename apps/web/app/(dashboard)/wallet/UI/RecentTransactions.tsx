@@ -85,7 +85,8 @@ export const RecentTransactions = () => {
           credentials: "include",
         });
         if (!response.ok) {
-          console.log(" No session found (401/404)");
+          if (process.env.NODE_ENV !== "production")
+            console.log(" No session found (401/404)");
           return;
         }
 

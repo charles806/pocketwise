@@ -6,6 +6,7 @@ interface RateLimitConfig {
   windowMs: number;
   max: number;
   keyBy: "ip" | "user" | "ip-and-user";
+  keyFn?: (req: Request) => string | undefined;
   message?: string;
 }
 
@@ -14,6 +15,7 @@ interface FallbackEntry {
   resetAt: number;
 }
 
+const FALLBACK_MAX_SIZE = 10_000;
 const fallbackStore = new Map<string, FallbackEntry>();
 
 setInterval(() => {
@@ -57,6 +59,11 @@ function memoryCheck(
   const entry = fallbackStore.get(key);
 
   if (!entry || entry.resetAt <= now) {
+    if (fallbackStore.size >= FALLBACK_MAX_SIZE) {
+      const entriesToDelete = Math.min(1000, fallbackStore.size);
+      const keysToDelete = [...fallbackStore.keys()].slice(0, entriesToDelete);
+      for (const k of keysToDelete) fallbackStore.delete(k);
+    }
     fallbackStore.set(key, { count: 1, resetAt: now + config.windowMs });
     return { allowed: true, resetIn: 0 };
   }
@@ -82,6 +89,12 @@ export const rateLimit = (config: RateLimitConfig) => {
     if (config.keyBy === "user" || config.keyBy === "ip-and-user") {
       if (req.user?.id) {
         identifiers.push(`user:${req.user.id}`);
+      }
+    }
+    if (config.keyFn) {
+      const customKey = config.keyFn(req);
+      if (customKey) {
+        identifiers.push(customKey);
       }
     }
 
@@ -113,26 +126,42 @@ export const rateLimit = (config: RateLimitConfig) => {
   };
 };
 
-export const rateLimitMiddleware = (
+export const rateLimitMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): Promise<void> => {
   const key = req.ip ?? "unknown";
-  const now = Date.now();
-  const entry = fallbackStore.get(key);
+  const redisKey = `rl:global:${key}`;
 
-  if (!entry || entry.resetAt <= now) {
-    fallbackStore.set(key, { count: 1, resetAt: now + 60_000 });
-    next();
-    return;
-  }
+  try {
+    const count = await redis.incr(redisKey);
+    if (count === 1) {
+      await redis.expire(redisKey, 60);
+    }
 
-  entry.count += 1;
+    if (count > 10) {
+      const ttl = await redis.ttl(redisKey);
+      res.set("Retry-After", String(Math.max(ttl, 0)));
+      sendError(res, "Too many requests. Please try again later.", 429);
+      return;
+    }
+  } catch {
+    const now = Date.now();
+    const entry = fallbackStore.get(key);
 
-  if (entry.count > 10) {
-    sendError(res, "Too many requests. Please try again later.", 429);
-    return;
+    if (!entry || entry.resetAt <= now) {
+      fallbackStore.set(key, { count: 1, resetAt: now + 60_000 });
+      next();
+      return;
+    }
+
+    entry.count += 1;
+
+    if (entry.count > 10) {
+      sendError(res, "Too many requests. Please try again later.", 429);
+      return;
+    }
   }
 
   next();

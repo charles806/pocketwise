@@ -1,6 +1,6 @@
 import type { TransactionType, WalletType } from "@prisma/client";
 import prisma from "../lib/prisma.js";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import { Prisma } from "@prisma/client";
 import {
   calculateWalletSplits,
@@ -66,22 +66,19 @@ interface BankTransferInterface {
 const walletService = {
   async getWallet(userId: string) {
     const cacheKey = CACHE_KEYS.userWallets(userId);
-    const cached =
-      await cache.get<{ id: string; type: string; isLocked: boolean }[]>(
-        cacheKey,
-      );
+    const cached = await cache.get<{ id: string; type: string }[]>(cacheKey);
 
     let wallets;
     if (cached) {
       const balanceData = await prisma.wallet.findMany({
         where: { userId },
-        select: { id: true, type: true, balance: true, isLocked: true },
+        select: { id: true, type: true, balance: true },
       });
       wallets = balanceData;
     } else {
       wallets = await prisma.wallet.findMany({
         where: { userId },
-        select: { id: true, type: true, balance: true, isLocked: true },
+        select: { id: true, type: true, balance: true },
       });
 
       if (wallets.length === 0) {
@@ -93,7 +90,6 @@ const walletService = {
       const cacheData = wallets.map((w) => ({
         id: w.id,
         type: w.type,
-        isLocked: w.isLocked,
       }));
       await cache.set(cacheKey, cacheData, TTL.WALLETS_NO_BALANCE);
     }
@@ -167,121 +163,132 @@ const transferService = {
 
     const transferReference = crypto.randomUUID();
 
-    const result = await prisma.$transaction(async (tx) => {
-      const senderWallet = await tx.wallet.findUnique({
-        where: { userId_type: { userId, type: "spend" } },
-      });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRawUnsafe(
+          `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
+          userId,
+        );
 
-      if (!senderWallet) {
-        const error = new Error("Sender spend wallet not found") as any;
-        error.statusCode = 404;
-        throw error;
-      }
+        const senderWallet = await tx.wallet.findUnique({
+          where: { userId_type: { userId, type: "spend" } },
+        });
 
-      if (senderWallet.balance.toNumber() < amount) {
-        const error = new Error("Insufficient funds") as any;
-        error.statusCode = 400;
-        throw error;
-      }
-
-      // Debit sender
-      const updatedSenderWallet = await tx.wallet.update({
-        where: { id: senderWallet.id },
-        data: { balance: { decrement: amount } },
-      });
-
-      // Fetch receiver split config or fall back to default
-      const receiverSplitConfig = await tx.walletSplitConfig.findUnique({
-        where: { userId: receiverUserId },
-      });
-
-      const config = receiverSplitConfig ?? {
-        spendPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.spendPercent,
-        ),
-        savingsPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.savingsPercent,
-        ),
-        emergencyPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.emergencyPercent,
-        ),
-        flexPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.flexPercent,
-        ),
-      };
-
-      // Calculate allocations
-      const allocations = calculateWalletSplits(
-        new Prisma.Decimal(amount),
-        config,
-      );
-
-      // Fetch all receiver wallets and map by type
-      const receiverWallets = await tx.wallet.findMany({
-        where: { userId: receiverUserId },
-      });
-
-      const receiverWalletMap = new Map(
-        receiverWallets.map((w) => [w.type, w]),
-      );
-
-      // Credit each receiver wallet and create credit records
-      for (const allocation of allocations) {
-        const receiverWallet = receiverWalletMap.get(allocation.walletType);
-
-        if (!receiverWallet) {
-          throw new Error(`Receiver ${allocation.walletType} wallet not found`);
+        if (!senderWallet) {
+          const error = new Error("Sender spend wallet not found") as any;
+          error.statusCode = 404;
+          throw error;
         }
 
-        await tx.wallet.update({
-          where: { id: receiverWallet.id },
-          data: { balance: { increment: allocation.amount } },
+        if (senderWallet.balance.toNumber() < amount) {
+          const error = new Error("Insufficient funds") as any;
+          error.statusCode = 400;
+          throw error;
+        }
+
+        // Debit sender
+        const updatedSenderWallet = await tx.wallet.update({
+          where: { id: senderWallet.id },
+          data: { balance: { decrement: amount } },
         });
 
+        // Fetch receiver split config or fall back to default
+        const receiverSplitConfig = await tx.walletSplitConfig.findUnique({
+          where: { userId: receiverUserId },
+        });
+
+        const config = receiverSplitConfig ?? {
+          spendPercent: new Prisma.Decimal(
+            DEFAULT_WALLET_SPLIT_CONFIG.spendPercent,
+          ),
+          savingsPercent: new Prisma.Decimal(
+            DEFAULT_WALLET_SPLIT_CONFIG.savingsPercent,
+          ),
+          emergencyPercent: new Prisma.Decimal(
+            DEFAULT_WALLET_SPLIT_CONFIG.emergencyPercent,
+          ),
+          flexPercent: new Prisma.Decimal(
+            DEFAULT_WALLET_SPLIT_CONFIG.flexPercent,
+          ),
+        };
+
+        // Calculate allocations
+        const allocations = calculateWalletSplits(
+          new Prisma.Decimal(amount),
+          config,
+        );
+
+        // Fetch all receiver wallets and map by type
+        const receiverWallets = await tx.wallet.findMany({
+          where: { userId: receiverUserId },
+        });
+
+        const receiverWalletMap = new Map(
+          receiverWallets.map((w) => [w.type, w]),
+        );
+
+        // Credit each receiver wallet and create credit records
+        for (const allocation of allocations) {
+          const receiverWallet = receiverWalletMap.get(allocation.walletType);
+
+          if (!receiverWallet) {
+            throw new Error(
+              `Receiver ${allocation.walletType} wallet not found`,
+            );
+          }
+
+          await tx.wallet.update({
+            where: { id: receiverWallet.id },
+            data: { balance: { increment: allocation.amount } },
+          });
+
+          await tx.transaction.create({
+            data: {
+              userId: receiverUserId,
+              walletId: receiverWallet.id,
+              type: "split_credit",
+              amount: allocation.amount,
+              status: "success",
+              reference: `${transferReference}-${allocation.walletType}`,
+              senderWalletId: senderWallet.id,
+              receiverWalletId: receiverWallet.id,
+            },
+          });
+        }
+
+        // Create single debit record for sender
         await tx.transaction.create({
           data: {
-            userId: receiverUserId,
-            walletId: receiverWallet.id,
-            type: "split_credit",
-            amount: allocation.amount,
+            userId,
+            walletId: senderWallet.id,
+            type: "transfer",
+            amount: -amount,
+            reason: reason || null,
             status: "success",
-            reference: `${transferReference}-${allocation.walletType}`,
+            reference: transferReference,
             senderWalletId: senderWallet.id,
-            receiverWalletId: receiverWallet.id,
+            receiverWalletId: null,
           },
         });
-      }
 
-      // Create single debit record for sender
-      await tx.transaction.create({
-        data: {
-          userId,
-          walletId: senderWallet.id,
-          type: "transfer",
-          amount: -amount,
-          reason: reason || null,
-          status: "success",
+        return {
           reference: transferReference,
-          senderWalletId: senderWallet.id,
-          receiverWalletId: null,
-        },
-      });
+          senderBalance: updatedSenderWallet.balance,
+          allocations,
+        };
+      },
+      { timeout: 15000 },
+    );
 
-      return {
-        reference: transferReference,
-        senderBalance: updatedSenderWallet.balance,
-        allocations,
-      };
-    });
     notificationService
       .notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
-      .catch(() => { });
+      .catch(() => {});
     notificationService
       .notifyWalletSplit(receiverUserId, amount, result.allocations)
-      .catch(() => { });
+      .catch(() => {});
 
-    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => { });
-    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => { });
+    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => {});
+    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => {});
 
     p2pRecipientService
       .upsertRecipient({
@@ -291,7 +298,7 @@ const transferService = {
         recipientLastName: receiverCheck.lastName,
         recipientUserName: receiverCheck.userName,
       })
-      .catch(() => { });
+      .catch(() => {});
 
     return result;
   },
@@ -470,10 +477,9 @@ export const bankTransferService = {
     }
 
     if (!getUser.transferPin) {
-      throw Object.assign(
-        new Error("Transfer PIN not set up"),
-        { statusCode: 400 }
-      );
+      throw Object.assign(new Error("Transfer PIN not set up"), {
+        statusCode: 400,
+      });
     }
 
     const isPinValid = await bcrypt.compare(data.pin, getUser.transferPin);
@@ -484,30 +490,31 @@ export const bankTransferService = {
     const fee = feeCalculator(data.amount) ?? 0;
     const totalDeduction = data.amount + fee;
 
-    const spendWallet = await prisma.wallet.findUnique({
-      where: {
-        userId_type: { userId, type: "spend" },
-      },
-    });
-
-    if (!spendWallet) {
-      throw Object.assign(
-        new Error("Spend wallet not found"),
-        { statusCode: 404 }
-      );
-    }
-
-    if (spendWallet.balance.toNumber() < totalDeduction) {
-      throw Object.assign(
-        new Error("Insufficient funds"),
-        { statusCode: 400 }
-      );
-    }
-
     const bankName = BANK_CODES[data.bankCode] ?? "Unknown Bank";
     const reference = crypto.randomUUID();
 
     const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRawUnsafe(
+        `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
+        userId,
+      );
+
+      const spendWallet = await tx.wallet.findUnique({
+        where: { userId_type: { userId, type: "spend" } },
+      });
+
+      if (!spendWallet) {
+        throw Object.assign(new Error("Spend wallet not found"), {
+          statusCode: 404,
+        });
+      }
+
+      if (spendWallet.balance.toNumber() < totalDeduction) {
+        throw Object.assign(new Error("Insufficient funds"), {
+          statusCode: 400,
+        });
+      }
+
       const deductedWallet = await tx.wallet.update({
         where: { id: spendWallet.id },
         data: { balance: { decrement: totalDeduction } },
@@ -546,10 +553,8 @@ export const bankTransferService = {
       bankName,
       accountNumber: data.accountNumber,
       accountName: data.accountName,
-      userId: userId
+      userId: userId,
     });
-
-
 
     cache.del(CACHE_KEYS.userWallets(userId));
 
@@ -561,6 +566,5 @@ export const bankTransferService = {
     };
   },
 };
-
 
 export { walletService, transferService, internalWalletTransferService };

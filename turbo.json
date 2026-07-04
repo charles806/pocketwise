@@ -13,8 +13,7 @@
         "JWT_REFRESH_SECRET",
         "RESEND_API_KEY",
         "FRONTEND_URL",
-        "NEXT_PUBLIC_BACKEND_URL",
-        "ADMIN_SECRET"
+        "NEXT_PUBLIC_BACKEND_URL"
       ]
     },
     "lint": {

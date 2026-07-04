@@ -5,6 +5,7 @@ import { sendWelcomeEmail, sendOtpEmail } from "../lib/mail.js";
 import crypto from "crypto";
 import { generateMockAccountNumber } from "../utils/account.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
+import { redis } from "../lib/redis.js";
 
 interface SignupInput {
   firstName: string;
@@ -39,7 +40,10 @@ const authService = {
 
     const email = rawEmail.toLowerCase();
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
     if (existingUser) {
       const error = new Error("Email already in use") as any;
       error.statusCode = 409;
@@ -82,8 +86,8 @@ const authService = {
       await tx.wallet.createMany({
         data: [
           { userId: user.id, type: "spend" },
-          { userId: user.id, type: "savings", isLocked: true },
-          { userId: user.id, type: "emergency", isLocked: true },
+          { userId: user.id, type: "savings" },
+          { userId: user.id, type: "emergency" },
           { userId: user.id, type: "flex" },
         ],
       });
@@ -188,20 +192,39 @@ const authService = {
         { algorithms: ["HS256"] },
       ) as any;
 
-      const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true },
+      });
       if (!user) {
         const error = new Error("Invalid token") as any;
         error.statusCode = 401;
         throw error;
       }
 
+      const isBlacklisted = await redis.get(`blacklist:${refreshToken}`);
+      if (isBlacklisted) {
+        throw Object.assign(new Error("Token has been invalidated"), {
+          statusCode: 401,
+        });
+      }
+
+      // Rotate: blacklist old refresh token and issue a new one
+      await redis.setex(`blacklist:${refreshToken}`, 7 * 24 * 60 * 60, "1");
+
+      const newRefreshToken = jwt.sign(
+        { id: user.id, email: decoded.email },
+        process.env.JWT_REFRESH_SECRET!,
+        { expiresIn: "7d" },
+      );
+
       const accessToken = jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user.id, email: decoded.email },
         process.env.JWT_ACCESS_SECRET!,
         { expiresIn: "45m" },
       );
 
-      return { accessToken };
+      return { accessToken, refreshToken: newRefreshToken };
     } catch {
       const error = new Error("Invalid or expired refresh token") as any;
       error.statusCode = 401;
@@ -310,7 +333,10 @@ const authService = {
   },
 
   async setupPin(userId: string, pin: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { transferPin: true },
+    });
     if (!user) {
       const error = new Error("User not found") as any;
       error.statusCode = 404;
@@ -334,7 +360,10 @@ const authService = {
   },
 
   async changePin(userId: string, currentPin: string, newPin: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { transferPin: true },
+    });
     if (!user) {
       const error = new Error("User not found") as any;
       error.statusCode = 404;
@@ -436,12 +465,20 @@ const authService = {
     return { success: true, message: "Password reset successfully" };
   },
 
-  async updateProfile(userId: string, data: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    userName?: string;
-  }) {
+  async updateProfile(
+    userId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      userName?: string;
+    },
+  ) {
+    const oldUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { userName: true, phone: true, accountNumber: true },
+    });
+
     if (data.userName) {
       const existing = await prisma.user.findFirst({
         where: { userName: data.userName, id: { not: userId } },
@@ -478,6 +515,23 @@ const authService = {
     });
 
     await cache.del(CACHE_KEYS.userProfile(userId));
+
+    if (oldUser?.userName) {
+      await cache
+        .del(CACHE_KEYS.userLookup("username", oldUser.userName))
+        .catch(() => {});
+    }
+    if (oldUser?.phone) {
+      await cache
+        .del(CACHE_KEYS.userLookup("phone", oldUser.phone))
+        .catch(() => {});
+    }
+    if (oldUser?.accountNumber) {
+      await cache
+        .del(CACHE_KEYS.userLookup("account", oldUser.accountNumber))
+        .catch(() => {});
+    }
+
     return { ...updated, requiresPinSetup: false };
   },
 
@@ -496,7 +550,10 @@ const authService = {
       throw error;
     }
 
-    const isValid = await bcrypt.compare(data.currentPassword, user.passwordHash);
+    const isValid = await bcrypt.compare(
+      data.currentPassword,
+      user.passwordHash,
+    );
     if (!isValid) {
       const error = new Error("Current password is incorrect") as any;
       error.statusCode = 401;
@@ -504,7 +561,9 @@ const authService = {
     }
 
     if (data.currentPassword === data.newPassword) {
-      const error = new Error("New password must be different from current password") as any;
+      const error = new Error(
+        "New password must be different from current password",
+      ) as any;
       error.statusCode = 400;
       throw error;
     }

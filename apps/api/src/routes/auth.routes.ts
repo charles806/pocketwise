@@ -41,16 +41,30 @@ router.post(
   validate(signupSchema),
   signUp,
 );
-router.post("/login", strictIpLimit, validate(loginSchema), login);
+router.post(
+  "/login",
+  rateLimit({
+    windowMs: 60_000,
+    max: 5,
+    keyBy: "ip",
+    keyFn: (req) => {
+      const email = (req.body as { email?: string })?.email;
+      return email ? `login:${email.toLowerCase().trim()}` : undefined;
+    },
+  }),
+  validate(loginSchema),
+  login,
+);
 router.post(
   "/refresh",
   rateLimit({ windowMs: 60_000, max: 10, keyBy: "ip" }),
   refresh,
 );
-router.post("/logout", logout);
-router.get("/me", authMiddleware, me);
-router.get("/lookup", authMiddleware, lookupUser);
-router.patch("/goal", authMiddleware, updateGoal);
+const looseIpLimit = rateLimit({ windowMs: 60_000, max: 30, keyBy: "ip" });
+router.post("/logout", looseIpLimit, logout);
+router.get("/me", looseIpLimit, authMiddleware, me);
+router.get("/lookup", looseIpLimit, authMiddleware, lookupUser);
+router.patch("/goal", looseIpLimit, authMiddleware, updateGoal);
 router.post(
   "/setup-pin",
   authMiddleware,
@@ -85,7 +99,12 @@ router.post(
   resetPassword,
 );
 
-router.patch("/profile", authMiddleware, validate(profileSchema), updateProfile);
+router.patch(
+  "/profile",
+  authMiddleware,
+  validate(profileSchema),
+  updateProfile,
+);
 router.post(
   "/change-password",
   authMiddleware,

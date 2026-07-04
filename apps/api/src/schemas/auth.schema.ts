@@ -8,7 +8,13 @@ export const signupSchema = z
     email: z.string().email("Invalid email address"),
     phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
     dateOfBirth: z.string().date("Invalid date format"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+      ),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -36,16 +42,24 @@ export const verifyOtpSchema = z.object({
 export const resetPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
   token: z.string().min(1, "Reset token is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+    ),
 });
-
 
 export const profileSchema = z
   .object({
     firstName: z.string().min(1, "First name cannot be empty").optional(),
     lastName: z.string().min(1, "Last name cannot be empty").optional(),
     phone: z.string().min(10, "Phone must be at least 10 digits").optional(),
-    userName: z.string().min(2, "Username must be at least 2 characters").optional(),
+    userName: z
+      .string()
+      .min(2, "Username must be at least 2 characters")
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.firstName && !data.lastName && !data.phone && !data.userName) {
@@ -60,7 +74,9 @@ export const profileSchema = z
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "New password must be at least 8 characters"),
+    newPassword: z
+      .string()
+      .min(8, "New password must be at least 8 characters"),
     confirmNewPassword: z.string().min(1, "Please confirm your new password"),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {

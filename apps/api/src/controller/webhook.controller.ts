@@ -9,16 +9,15 @@ const verifyAnchorSignature = (
   secret: string,
 ): boolean => {
   const hash = crypto
-    .createHmac("sha256", secret)
+    .createHmac("sha1", secret)
     .update(rawBody)
-    .digest("hex");
+    .digest("base64");
 
-  const hashBuf = Buffer.from(hash);
-  const sigBuf = Buffer.from(signature);
+  const hashBuffer = Buffer.from(hash);
+  const sigBuffer = Buffer.from(signature);
 
-  return (
-    hashBuf.length === sigBuf.length && crypto.timingSafeEqual(hashBuf, sigBuf)
-  );
+  if (hashBuffer.length !== sigBuffer.length) return false;
+  return crypto.timingSafeEqual(hashBuffer, sigBuffer);
 };
 
 export const webhook = async (req: Request, res: Response) => {
@@ -28,7 +27,7 @@ export const webhook = async (req: Request, res: Response) => {
     const secret = process.env.ANCHOR_WEBHOOK_SECRET!;
 
     if (!signature || !verifyAnchorSignature(rawBody, signature, secret)) {
-      return sendError(res, "Invalid signature", 400);
+      return sendError(res, "Invalid signature", 401);
     }
 
     const payload = JSON.parse(rawBody);
@@ -42,6 +41,6 @@ export const webhook = async (req: Request, res: Response) => {
     sendSuccess(res, "Webhook processed successfully", result, 200);
   } catch (error) {
     console.error(error);
-    sendSuccess(res, "Webhook received", {}, 200);
+    sendError(res, "Internal server error", 500);
   }
 };

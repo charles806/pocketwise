@@ -70,14 +70,25 @@ const LoginForm = () => {
       const dataRes = (await res.json()) as LoginFormResponse;
 
       if (res.ok) {
-        console.log("Login User Data:", dataRes.user);
-        console.log("")
+        if (process.env.NODE_ENV !== "production") {
+          console.log("Login User Data:", dataRes.user);
+        }
+
+        console.log("");
         setAuth(dataRes.accessToken, dataRes.user);
-        window.location.href = redirectTo || "/wallet";
+        const safeRedirect =
+          redirectTo &&
+          redirectTo.startsWith("/") &&
+          !redirectTo.startsWith("//") &&
+          !redirectTo.includes("://")
+            ? redirectTo
+            : "/wallet";
+        window.location.href = safeRedirect;
         return;
       } else {
-        // Log full server error for developers, show safe message to users
-        console.error("[Login] Server error:", dataRes.message);
+        if (process.env.NODE_ENV !== "production") {
+          console.error("[Login] Server error:", dataRes.message);
+        }
 
         if (res.status === 401) {
           toast("Invalid email or password. Please try again.", {

@@ -240,31 +240,56 @@ export const savingsGoalService = {
       throw error;
     }
 
-    if (amount > (await walletHelper.getUnallocatedSavings(userId))) {
-      const error = new Error("Insufficient unallocated savings. ") as any;
-      error.statusCode = 400;
-      throw error;
-    }
+    const { update, previousProgress, newProgress } = await prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`
+        SELECT id FROM wallets WHERE user_id = ${userId}::uuid AND type = 'savings' FOR UPDATE
+      `;
 
-    const previousProgress = calculateProgress(
-      findGoal.currentAmount.toNumber(),
-      findGoal.targetAmount.toNumber(),
-    );
+        const wallet = await tx.wallet.findUnique({
+          where: { userId_type: { userId, type: "savings" } },
+        });
 
-    const update = await prisma.savingsGoal.update({
-      where: {
-        id: goalId,
+        if (!wallet) {
+          const error = new Error("Savings wallet not found") as any;
+          error.statusCode = 404;
+          throw error;
+        }
+
+        const goals = await tx.savingsGoal.findMany({
+          where: { userId, status: "ACTIVE", deletedAt: null },
+          select: { currentAmount: true },
+        });
+
+        const totalAllocated = goals.reduce(
+          (sum, g) => sum + g.currentAmount.toNumber(),
+          0,
+        );
+        const unallocated = wallet.balance.toNumber() - totalAllocated;
+
+        if (amount > unallocated) {
+          const error = new Error("Insufficient unallocated savings.") as any;
+          error.statusCode = 400;
+          throw error;
+        }
+
+        const previousProgress = calculateProgress(
+          findGoal.currentAmount.toNumber(),
+          findGoal.targetAmount.toNumber(),
+        );
+
+        const update = await tx.savingsGoal.update({
+          where: { id: goalId },
+          data: { currentAmount: { increment: amount } },
+        });
+
+        const newProgress = calculateProgress(
+          update.currentAmount.toNumber(),
+          update.targetAmount.toNumber(),
+        );
+
+        return { update, previousProgress, newProgress };
       },
-      data: {
-        currentAmount: {
-          increment: amount,
-        },
-      },
-    });
-
-    const newProgress = calculateProgress(
-      update.currentAmount.toNumber(),
-      update.targetAmount.toNumber(),
     );
 
     const milestones = [25, 50, 75] as const;

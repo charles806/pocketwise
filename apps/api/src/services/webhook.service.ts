@@ -38,12 +38,9 @@ export const webhookService = {
       throw error;
     }
 
-    // 2. Safe Idempotency Check
-    // Use startsWith to match any of the split transactions created previously
+    // 2. Idempotency Check (outside transaction — optimization to avoid work)
     const existingTransaction = await prisma.transaction.findFirst({
-      where: {
-        anchorRef: { startsWith: `${anchorReference}` },
-      },
+      where: { anchorRef: anchorReference },
     });
 
     if (existingTransaction) {

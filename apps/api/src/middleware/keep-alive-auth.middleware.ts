@@ -14,9 +14,7 @@ export const keepAliveAuthMiddleware = (
     return;
   }
 
-  const secret =
-    (req.headers["x-keep-alive-secret"] as string | undefined) ??
-    (req.query.secret as string | undefined);
+  const secret = req.headers["x-keep-alive-secret"] as string | undefined;
 
   if (!secret) {
     sendError(res, "Unauthorized: Missing keep-alive secret", 401);

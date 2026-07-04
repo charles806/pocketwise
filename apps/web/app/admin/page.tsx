@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Loader2, Download, Lock, Key, ChevronRight } from "lucide-react";
@@ -15,7 +15,7 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [secretKey, setSecretKey] = useState("");
   const [secretError, setSecretError] = useState("");
-  
+
   const [data, setData] = useState<WaitlistEntry[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export default function AdminDashboard() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!secretKey) return;
-    
+
     // We try to authenticate by attempting to fetch the count
     fetchData(secretKey);
   };
@@ -36,11 +36,14 @@ export default function AdminDashboard() {
     setError("");
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/waitlist/all`, {
-        headers: {
-          "Authorization": `Bearer ${key}`
-        }
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/waitlist/all`,
+        {
+          headers: {
+            Authorization: `Bearer ${key}`,
+          },
+        },
+      );
 
       const result = await response.json();
 
@@ -48,8 +51,6 @@ export default function AdminDashboard() {
         setIsAuthenticated(true);
         setData(result.data);
         setTotalCount(result.data.length);
-        // Persist session if needed
-        sessionStorage.setItem("admin_secret", key);
       } else {
         setIsAuthenticated(false);
         setSecretError("Invalid secret key or unauthorized.");
@@ -61,30 +62,27 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => {
-    const savedSecret = sessionStorage.getItem("admin_secret");
-    if (savedSecret) {
-      setSecretKey(savedSecret);
-      fetchData(savedSecret);
-    }
-  }, []);
-
   const exportToCSV = () => {
     const csvContent = [
       ["ID", "Email", "Date Joined"],
-      ...data.map(entry => [
-        entry.id, 
-        entry.email, 
-        new Date(entry.createdAt).toLocaleString()
-      ])
-    ].map(e => e.join(",")).join("\n");
+      ...data.map((entry) => [
+        entry.id,
+        entry.email,
+        new Date(entry.createdAt).toLocaleString(),
+      ]),
+    ]
+      .map((e) => e.join(","))
+      .join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `pocketwise_waitlist_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
+    link.setAttribute(
+      "download",
+      `pocketwise_waitlist_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -93,7 +91,7 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[#0F0D23]">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md p-8 rounded-3xl relative overflow-hidden"
@@ -101,23 +99,30 @@ export default function AdminDashboard() {
             background: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-            backdropFilter: "blur(20px)"
+            backdropFilter: "blur(20px)",
           }}
         >
           {/* Decorative glow inside card */}
           <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-          
+
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-4 border border-indigo-500/20">
               <Lock className="text-indigo-400" size={28} />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2 font-jakarta">Admin Access</h1>
-            <p className="text-white/50 text-center text-sm">Enter the secret key to vie≈w waitlist data</p>
+            <h1 className="text-2xl font-bold text-white mb-2 font-jakarta">
+              Admin Access
+            </h1>
+            <p className="text-white/50 text-center text-sm">
+              Enter the secret key to vie≈w waitlist data
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4 relative z-10">
             <div className="relative">
-              <Key size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+              <Key
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
+              />
               <input
                 type="password"
                 value={secretKey}
@@ -126,7 +131,7 @@ export default function AdminDashboard() {
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all font-medium"
               />
             </div>
-            
+
             {secretError && (
               <p className="text-red-400 text-sm mt-2">{secretError}</p>
             )}
@@ -165,7 +170,9 @@ export default function AdminDashboard() {
               className="rounded-xl border border-white/10"
             />
             <div>
-              <h1 className="text-white font-bold text-lg">Waitlist Dashboard</h1>
+              <h1 className="text-white font-bold text-lg">
+                Waitlist Dashboard
+              </h1>
               <p className="text-white/50 text-xs">PocketWise Admin Central</p>
             </div>
           </div>
@@ -192,8 +199,12 @@ export default function AdminDashboard() {
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <p className="text-white/50 font-medium text-sm mb-2">Total Signups</p>
-            <p className="text-4xl font-bold text-white tracking-tight">{totalCount.toLocaleString()}</p>
+            <p className="text-white/50 font-medium text-sm mb-2">
+              Total Signups
+            </p>
+            <p className="text-4xl font-bold text-white tracking-tight">
+              {totalCount.toLocaleString()}
+            </p>
           </motion.div>
           {/* Add more metrics cards later if needed */}
         </div>
@@ -210,9 +221,15 @@ export default function AdminDashboard() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/10 bg-white/[0.02]">
-                  <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-wider w-12">#</th>
-                  <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-wider">Email Address</th>
-                  <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-wider">Date Joined</th>
+                  <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-wider w-12">
+                    #
+                  </th>
+                  <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-wider">
+                    Email Address
+                  </th>
+                  <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-wider">
+                    Date Joined
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -233,8 +250,8 @@ export default function AdminDashboard() {
                   </tr>
                 ) : (
                   data.map((entry, index) => (
-                    <tr 
-                      key={entry.id} 
+                    <tr
+                      key={entry.id}
                       className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
                     >
                       <td className="py-4 px-6 text-sm text-white/30 font-medium">
@@ -244,12 +261,12 @@ export default function AdminDashboard() {
                         {entry.email}
                       </td>
                       <td className="py-4 px-6 text-sm text-white/60">
-                        {new Date(entry.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
+                        {new Date(entry.createdAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </td>
                     </tr>

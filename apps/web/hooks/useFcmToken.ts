@@ -15,9 +15,6 @@ export function useFcmToken() {
 
   useEffect(() => {
     if (isLoading || !user || !accessToken) return;
-    console.log("useFcmToken mounted")
-    console.log("Notification support check:", typeof Notification !== "undefined");
-    console.log("Current permission:", Notification?.permission);
 
     if (!hasRun.current) {
       hasRun.current = true;

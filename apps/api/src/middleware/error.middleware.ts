@@ -18,7 +18,9 @@ export const errorMiddleware = (
 ) => {
   console.error(err)
   const status = err.statusCode || 500;
-  const message = err.message || "Something went wrong";
+  const message = err.statusCode ? err.message
+    : "Internal server error";
 
+  console.error(`[Error] ${req.method} ${req.path}:`, err);
   sendError(res, message, status);
 };

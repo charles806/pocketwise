@@ -234,15 +234,17 @@ export const contributeToGoalController = async (
       return sendError(res, "Goal ID is required", 400);
     }
 
-    const { amount } = req.body;
+    const parsed = z
+      .object({
+        amount: z.number().positive("Amount must be greater than zero"),
+      })
+      .safeParse(req.body);
 
-    if (
-      amount === undefined ||
-      typeof amount !== "number" ||
-      Number.isNaN(amount)
-    ) {
+    if (!parsed.success) {
       return sendError(res, "Please provide a valid amount", 400);
     }
+
+    const { amount } = parsed.data;
 
     const result = await savingsGoalService.contributeToGoal(
       userId,
