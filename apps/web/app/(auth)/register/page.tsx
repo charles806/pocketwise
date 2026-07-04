@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +11,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Eye, EyeOff, ChevronLeft } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft, Check, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -31,7 +32,6 @@ interface SignupResponse {
   };
 }
 
-//Validation One
 const step1Schema = z
   .object({
     email: z.string().email("Invalid email address"),
@@ -42,8 +42,6 @@ const step1Schema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
-
-//Final Validation
 
 const fullSignupSchema = z
   .object({
@@ -61,6 +59,51 @@ const fullSignupSchema = z
     path: ["confirmPassword"],
   });
 
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "14px",
+    backgroundColor: "#f8f7fb",
+    transition: "all 0.25s ease",
+    "& fieldset": {
+      borderColor: "#e2e8f0",
+      transition: "all 0.25s ease",
+    },
+    "&:hover fieldset": {
+      borderColor: "#c4b5fd",
+    },
+    "&.Mui-focused": {
+      backgroundColor: "#fff",
+      boxShadow: "0 0 0 6px rgba(124, 58, 237, 0.06), 0 0 40px rgba(124, 58, 237, 0.18)",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#7C3AED",
+      borderWidth: "1.5px",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "#64748b",
+    fontWeight: 500,
+    fontSize: "0.9rem",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "#7C3AED",
+  },
+  "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+    fontSize: "1rem",
+    fontWeight: 500,
+    letterSpacing: "0.01em",
+    color: "#7C3AED",
+  },
+  "& .MuiFormHelperText-root": {
+    marginLeft: "4px",
+    fontWeight: 500,
+    fontSize: "0.75rem",
+  },
+};
+
+const primaryButtonSx =
+  "w-full rounded-xl !bg-gradient-to-r !from-violet-600 !to-purple-600 hover:!from-violet-500 hover:!to-purple-500 disabled:!from-slate-200 disabled:!to-slate-200 disabled:!text-slate-400 !text-white transition-all duration-300 !py-4 normal-case font-sans font-bold text-sm shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/45 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2";
+
 export default function SignUp() {
   const router = useRouter();
   const { setAuth } = useAuth();
@@ -76,42 +119,63 @@ export default function SignUp() {
   const [userName, setUserName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  //Password Strength Calculation
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const firstNameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (step === 1) {
+      setTimeout(() => emailInputRef.current?.focus(), 150);
+    } else {
+      setTimeout(() => firstNameInputRef.current?.focus(), 150);
+    }
+  }, [step]);
+
   const calculateStrength = (pass: string) => {
     let score = 0;
     if (!pass) return score;
     if (pass.length >= 8) score += 1;
-    if (/[a-zA-Z]/.test(pass)) score += 1;
+    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) score += 1;
     if (/[0-9]/.test(pass)) score += 1;
     if (/[^a-zA-Z\d]/.test(pass)) score += 1;
     return score;
   };
 
-  //Password Strength
   const strength = calculateStrength(password);
 
-  //Password Strength Color
   const getStrengthColor = (index: number) => {
     if (strength === 0) return "bg-slate-200";
     if (strength < index + 1) return "bg-slate-200";
     if (strength === 1) return "bg-red-500";
-    if (strength === 2) return "bg-yellow-500";
-    if (strength === 3) return "bg-blue-500";
+    if (strength === 2) return "bg-amber-500";
+    if (strength === 3) return "bg-violet-500";
     return "bg-emerald-500";
   };
 
-  //Validate Step 1
+  const strengthLabel = ["Enter password", "Weak", "Fair", "Good", "Strong"];
+
+  const isStep1Complete =
+    email.trim() !== "" &&
+    password.trim() !== "" &&
+    confirmPassword.trim() !== "";
+
+  const isStep2Complete =
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    userName.trim() !== "" &&
+    phoneNumber.trim() !== "" &&
+    dateOfBirth.trim() !== "" &&
+    termsAccepted;
+
   const validateStep1 = () => {
     const result = step1Schema.safeParse({ email, password, confirmPassword });
-
     if (result.success) {
       setErrors({});
       return true;
     }
-
     const outputErrors: Record<string, string> = {};
     result.error.issues.forEach((issue) => {
       outputErrors[issue.path[0] as string] = issue.message;
@@ -120,7 +184,6 @@ export default function SignUp() {
     return false;
   };
 
-  //Handle Step 1 Submit
   const handleStep1Submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateStep1()) {
@@ -129,10 +192,8 @@ export default function SignUp() {
     }
   };
 
-  //Handle Step 2 Submit
   const handleStep2Submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const normalizedEmail = email.toLowerCase().trim();
     const fullData = {
       email: normalizedEmail,
@@ -161,9 +222,7 @@ export default function SignUp() {
     try {
       const response = await fetch(`${API_BASE}/api/v1/auth/signup`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           email: normalizedEmail,
@@ -183,22 +242,11 @@ export default function SignUp() {
         const errorMessage = data.message || "Failed to create account";
         console.error("[Register] Server error:", errorMessage);
 
-        if(response.status === 400){
-          toast(errorMessage, {
-            type: "warning",
-            title: "Invalid Details",
-          });
-        }
-
         if (response.status === 409) {
-          // Email already exists — show inline error near the field
           setErrors({ email: "An account with this email already exists." });
           setStep(1);
         } else if (response.status === 400) {
-          toast(errorMessage, {
-            type: "warning",
-            title: "Invalid Details",
-          });
+          toast(errorMessage, { type: "warning", title: "Invalid Details" });
         } else {
           toast("Something went wrong. Please try again.", {
             type: "error",
@@ -222,47 +270,52 @@ export default function SignUp() {
     }
   };
 
-  //Handle Back
   const handleBack = () => {
     setStep(1);
     setErrors({});
   };
 
   return (
-    <main className="h-screen w-full absolute top-0 left-0 bg-slate-50 p-4 lg:p-8">
-      <div className="w-full max-w-360 h-[95vh] flex bg-white overflow-hidden rounded-4xl border border-slate-200">
+    <main className="min-h-screen w-full bg-slate-50 p-3 sm:p-4 lg:p-6 flex items-center justify-center">
+      <div className="w-full max-w-360 min-h-[92vh] lg:h-[92vh] flex bg-white overflow-hidden rounded-3xl lg:rounded-4xl border border-slate-200 shadow-xl shadow-slate-200/50">
         {/* Left Side */}
-        <section className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-50 p-12 relative overflow-hidden border-r border-slate-200">
+        <section className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-50/80 p-10 xl:p-14 relative overflow-hidden border-r border-slate-200">
+          <div className="absolute top-0 right-0 w-125 h-125 bg-violet-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-100 h-100 bg-fuchsia-100/30 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+
           <div className="relative z-10">
             <Link href="/" className="flex items-center gap-3 w-fit group">
-              <Image
-                src={logo}
-                alt="PocketWise Logo"
-                width={40}
-                height={40}
-                className="rounded-xl border border-slate-200 shadow-sm group-hover:scale-105 transition-transform"
-              />
-              <span className="text-xl font-bold font-sans text-slate-900 tracking-tighter">
+              <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
+                <Image
+                  src={logo}
+                  alt="PocketWise Logo"
+                  width={28}
+                  height={28}
+                  className="rounded-md"
+                />
+              </div>
+              <span className="text-xl font-bold font-sans text-slate-900 tracking-tight">
                 PocketWise
               </span>
             </Link>
           </div>
 
-          <div className="relative z-10 max-w-2xl mt-4">
-            <h1 className="text-5xl lg:text-6xl font-extrabold font-sans text-slate-900 tracking-tighter leading-[1.05] mb-8">
-              One deposit. Four wallets.
+          <div className="relative z-10 max-w-xl mt-6">
+            <h1 className="text-4xl xl:text-5xl font-extrabold font-sans text-slate-900 tracking-tight leading-[1.1] mb-6">
+              One deposit.
               <br />
-              Zero effort.
+              Four wallets.
+              <br />
+              <span className="text-violet-600">Zero effort.</span>
             </h1>
-            <p className="text-xl lg:text-2xl text-slate-600 font-medium tracking-tight mb-12 leading-relaxed max-w-[90%]">
+            <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-md">
               Join PocketWise to automatically sort, save, and grow your money
-              the exact second it lands in your account. No math or spreadsheets
-              required.
+              the exact second it lands in your account.
             </p>
           </div>
 
-          <div className="relative z-10 flex-1 flex items-end justify-center">
-            <div className="relative w-full max-w-md aspect-square">
+          <div className="relative z-10 flex-1 flex items-end justify-center pt-8">
+            <div className="relative w-full max-w-sm xl:max-w-md aspect-square">
               <Image
                 src={signUp}
                 alt="PocketWise App Interface"
@@ -275,271 +328,360 @@ export default function SignUp() {
         </section>
 
         {/* Right Side */}
-        <section className="w-full lg:w-1/2 flex flex-col pt-12 pb-12 overflow-y-auto bg-white">
-          <div className="w-full max-w-md mx-auto my-auto px-6">
-            <div className="flex flex-col gap-2 text-center mb-8">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <span
-                  className={`text-xs font-medium px-3 py-1 rounded-full ${step === 1 ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
-                >
-                  Step 1 of 2
-                </span>
-                {step === 2 && (
-                  <button
-                    onClick={handleBack}
-                    className="text-slate-500 hover:text-slate-700 transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                )}
+        <section className="w-full lg:w-1/2 flex flex-col bg-white relative">
+          {step === 2 && (
+            <button
+              onClick={handleBack}
+              className="absolute top-6 left-6 z-20 w-9 h-9 flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:text-violet-600 hover:border-violet-200 hover:bg-violet-50 transition-all duration-200 shadow-sm"
+              aria-label="Go back"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
+
+          <div className="flex-1 flex flex-col justify-start pt-16 sm:pt-20 lg:pt-24 pb-12 px-6 sm:px-10 lg:px-16 overflow-y-auto">
+            <div className="w-full max-w-md mx-auto">
+              {/* Step Progress */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Step {step} of 2
+                  </span>
+                  <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">
+                    {step === 1 ? "Account" : "Profile"}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-violet-600 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: step === 1 ? "50%" : "100%" }}
+                  />
+                </div>
               </div>
-              <h1 className="text-3xl font-bold font-sans text-slate-900 tracking-tight">
-                {step === 1 ? "Create your account" : "Tell us about yourself"}
-              </h1>
-              <p className="text-slate-500 font-medium text-sm">
-                {step === 1
-                  ? "Start managing your money smarter in seconds."
-                  : "We need a few more details to set up your profile."}
-              </p>
-            </div>
 
-            {step === 1 ? (
-              <form
-                onSubmit={handleStep1Submit}
-                className="flex flex-col gap-5 w-full"
-              >
-                <TextField
-                  label="Email address"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  error={!!errors.email}
-                  helperText={errors.email}
-                  type="email"
-                  disabled={loading}
-                />
+              <div className="mb-8">
+                <h1 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 tracking-tight mb-2">
+                  {step === 1 ? "Create your account" : "Tell us about yourself"}
+                </h1>
+                <p className="text-slate-500 font-medium text-sm sm:text-base">
+                  {step === 1
+                    ? "Start managing your money smarter in seconds."
+                    : "We need a few more details to set up your profile."}
+                </p>
+              </div>
 
-                <div className="w-full flex flex-col gap-1.5">
-                  <TextField
-                    label="Password"
-                    variant="outlined"
-                    className="w-full rounded-xl!"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    error={!!errors.password}
-                    helperText={errors.password}
-                    disabled={loading}
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              aria-label="toggle password visibility"
-                              onClick={() => setShowPassword(!showPassword)}
-                              edge="end"
-                              size="small"
-                            >
-                              {showPassword ? (
-                                <EyeOff className="w-5 h-5 text-slate-400" />
-                              ) : (
-                                <Eye className="w-5 h-5 text-slate-400" />
-                              )}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-
-                  {password && (
-                    <div className="flex items-center gap-1.5 mt-1 px-1">
-                      {[0, 1, 2, 3].map((index) => (
-                        <div
-                          key={index}
-                          className={`h-1.5 w-full rounded-full transition-colors duration-300 ${getStrengthColor(index)}`}
-                        />
-                      ))}
-                      <span className="text-[10px] text-slate-500 font-medium ml-2 w-16 text-right">
-                        {strength === 0 && "Weak"}
-                        {strength === 1 && "Weak"}
-                        {strength === 2 && "Fair"}
-                        {strength === 3 && "Good"}
-                        {strength === 4 && "Strong"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <TextField
-                  label="Confirm password"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  error={!!errors.confirmPassword}
-                  helperText={errors.confirmPassword}
-                  disabled={loading}
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                            size="small"
-                          >
-                            {showPassword ? (
-                              <EyeOff className="w-5 h-5 text-slate-400" />
-                            ) : (
-                              <Eye className="w-5 h-5 text-slate-400" />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  disableElevation
-                  className="w-full rounded-xl shadow-sm bg-[#0f172a]! !hover:bg-slate-800 disabled:bg-slate-200! disabled:text-slate-400! text-white! transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
+              {/* Sliding Panels */}
+              <div className="overflow-hidden py-5 -my-5">
+                <div
+                  className="flex transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  style={{ transform: `translateX(-${(step - 1) * 100}%)` }}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    "Next"
-                  )}
-                </Button>
-              </form>
-            ) : (
-              <form
-                onSubmit={handleStep2Submit}
-                className="flex flex-col gap-5 w-full"
-              >
-
-                <TextField
-                  label="First name"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  error={!!errors.firstName}
-                  helperText={errors.firstName}
-                  disabled={loading}
-                />
-
-                <TextField
-                  label="Last name"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  error={!!errors.lastName}
-                  helperText={errors.lastName}
-                  disabled={loading}
-                />
-
-                <TextField
-                  label="Username"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  error={!!errors.userName}
-                  helperText={errors.userName}
-                  disabled={loading}
-                />
-
-                <TextField
-                  label="Phone number"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  error={!!errors.phoneNumber}
-                  helperText={errors.phoneNumber}
-                  disabled={loading}
-                />
-
-                <TextField
-                  label="Date of birth"
-                  variant="outlined"
-                  className="w-full rounded-xl!"
-                  type="date"
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  error={!!errors.dateOfBirth}
-                  helperText={errors.dateOfBirth}
-                  disabled={loading}
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
-
-                <div className="flex items-start gap-2 text-left mt-1">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    required
-                    disabled={loading}
-                    className="mt-1 size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none"
+                  {/* Step 1 */}
+                  <div
+                    className="w-full shrink-0 px-1"
+                    aria-hidden={step !== 1}
+                    style={{ pointerEvents: step === 1 ? "auto" : "none" }}
                   >
-                    I confirm that I am at least 16 years old and I agree to the{" "}
-                    <Link
-                      href="/terms"
-                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
+                    <form
+                      onSubmit={handleStep1Submit}
+                      className="flex flex-col gap-5 w-full"
                     >
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      href="/privacy"
-                      className="text-slate-900 underline underline-offset-2 hover:text-slate-700 transition-colors"
+                      <TextField
+                        label="Email address"
+                        variant="outlined"
+                        fullWidth
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        error={!!errors.email}
+                        helperText={errors.email}
+                        type="email"
+                        disabled={loading}
+                        sx={fieldSx}
+                        inputRef={emailInputRef}
+                      />
+
+                      <div className="w-full flex flex-col gap-3">
+                        <TextField
+                          label="Password"
+                          variant="outlined"
+                          fullWidth
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          error={!!errors.password}
+                          helperText={errors.password}
+                          disabled={loading}
+                          sx={fieldSx}
+                          slotProps={{
+                            input: {
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() =>
+                                      setShowPassword(!showPassword)
+                                    }
+                                    edge="end"
+                                    size="small"
+                                    className="text-slate-400 hover:text-violet-600 transition-colors"
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className="w-5 h-5" />
+                                    ) : (
+                                      <Eye className="w-5 h-5" />
+                                    )}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            },
+                          }}
+                        />
+
+                        {password && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              {[0, 1, 2, 3].map((index) => (
+                                <div
+                                  key={index}
+                                  className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${getStrengthColor(
+                                    index
+                                  )}`}
+                                />
+                              ))}
+                              <span className="text-[11px] font-semibold text-slate-500 ml-1 w-14 text-right">
+                                {strengthLabel[strength]}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 font-medium">
+                              Use 8+ characters with uppercase, numbers & symbols
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <TextField
+                        label="Confirm password"
+                        variant="outlined"
+                        fullWidth
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword}
+                        disabled={loading}
+                        sx={fieldSx}
+                        slotProps={{
+                          input: {
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  aria-label="toggle password visibility"
+                                  onClick={() =>
+                                    setShowPassword(!showPassword)
+                                  }
+                                  edge="end"
+                                  size="small"
+                                  className="text-slate-400 hover:text-violet-600 transition-colors"
+                                >
+                                  {showPassword ? (
+                                    <EyeOff className="w-5 h-5" />
+                                  ) : (
+                                    <Eye className="w-5 h-5" />
+                                  )}
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          },
+                        }}
+                      />
+
+                      <div className="pt-2">
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          disabled={loading || !isStep1Complete}
+                          disableElevation
+                          className={primaryButtonSx}
+                        >
+                          {loading ? (
+                            <CircularProgress size={22} color="inherit" />
+                          ) : (
+                            <>
+                              Continue
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <p className="text-center text-sm font-medium text-slate-500 mt-4">
+                        Already have an account?{" "}
+                        <Link
+                          href="/login"
+                          className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-4 transition-colors"
+                        >
+                          Log in
+                        </Link>
+                      </p>
+                    </form>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div
+                    className="w-full shrink-0 px-1"
+                    aria-hidden={step !== 2}
+                    style={{ pointerEvents: step === 2 ? "auto" : "none" }}
+                  >
+                    <form
+                      onSubmit={handleStep2Submit}
+                      className="flex flex-col gap-5 w-full"
                     >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <TextField
+                          label="First name"
+                          variant="outlined"
+                          fullWidth
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          error={!!errors.firstName}
+                          helperText={errors.firstName}
+                          disabled={loading}
+                          sx={fieldSx}
+                          inputRef={firstNameInputRef}
+                        />
+                        <TextField
+                          label="Last name"
+                          variant="outlined"
+                          fullWidth
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          error={!!errors.lastName}
+                          helperText={errors.lastName}
+                          disabled={loading}
+                          sx={fieldSx}
+                        />
+                      </div>
+
+                      <TextField
+                        label="Username"
+                        variant="outlined"
+                        fullWidth
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        error={!!errors.userName}
+                        helperText={errors.userName}
+                        disabled={loading}
+                        sx={fieldSx}
+                      />
+
+                      <TextField
+                        label="Phone number"
+                        variant="outlined"
+                        fullWidth
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        error={!!errors.phoneNumber}
+                        helperText={errors.phoneNumber}
+                        disabled={loading}
+                        sx={fieldSx}
+                        placeholder="+1 (555) 000-0000"
+                      />
+
+                      <TextField
+                        label="Date of birth"
+                        variant="outlined"
+                        fullWidth
+                        type="date"
+                        value={dateOfBirth}
+                        onChange={(e) => setDateOfBirth(e.target.value)}
+                        error={!!errors.dateOfBirth}
+                        helperText={errors.dateOfBirth}
+                        disabled={loading}
+                        sx={fieldSx}
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                        }}
+                      />
+
+                      <label
+                        className={`flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                          termsAccepted
+                            ? "border-violet-200 bg-violet-50/50"
+                            : "border-slate-200 bg-slate-50/50 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="relative flex items-center mt-0.5">
+                          <input
+                            type="checkbox"
+                            id="terms"
+                            required
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            disabled={loading}
+                            className="peer sr-only"
+                          />
+                          <div
+                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
+                              termsAccepted
+                                ? "bg-violet-600 border-violet-600"
+                                : "border-slate-300 bg-white peer-hover:border-violet-400"
+                            }`}
+                          >
+                            {termsAccepted && (
+                              <Check className="w-3 h-3 text-white" />
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed select-none">
+                          I confirm that I am at least 16 years old and I agree
+                          to the{" "}
+                          <Link
+                            href="/terms"
+                            className="text-violet-600 hover:text-violet-700 underline underline-offset-2 transition-colors"
+                          >
+                            Terms of Service
+                          </Link>{" "}
+                          and{" "}
+                          <Link
+                            href="/privacy"
+                            className="text-violet-600 hover:text-violet-700 underline underline-offset-2 transition-colors"
+                          >
+                            Privacy Policy
+                          </Link>
+                          .
+                        </span>
+                      </label>
+
+                      <div className="pt-2">
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          disabled={loading || !isStep2Complete}
+                          disableElevation
+                          className={primaryButtonSx}
+                        >
+                          {loading ? (
+                            <CircularProgress size={22} color="inherit" />
+                          ) : (
+                            "Create Account"
+                          )}
+                        </Button>
+                      </div>
+
+                      <p className="text-center text-sm font-medium text-slate-500 mt-4">
+                        Already have an account?{" "}
+                        <Link
+                          href="/login"
+                          className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-4 transition-colors"
+                        >
+                          Log in
+                        </Link>
+                      </p>
+                    </form>
+                  </div>
                 </div>
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  disableElevation
-                  className="w-full rounded-xl shadow-sm bg-[#0f172a]! !hover:bg-slate-800 disabled:bg-slate-200! disabled:text-slate-400! text-white! transition-colors py-3 normal-case font-sans font-bold text-base mt-2"
-                >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    "Continue"
-                  )}
-                </Button>
-              </form>
-            )}
-
-            <p className="mt-8 text-center text-sm font-medium text-slate-500">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-slate-900 hover:underline underline-offset-4 transition-colors"
-              >
-                Log in
-              </Link>
-            </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>
