@@ -40,16 +40,28 @@ const authService = {
 
     const email = rawEmail.toLowerCase();
 
-    const existingUser = await prisma.user.findUnique({
+    const existingEmail = await prisma.user.findUnique({
       where: { email },
       select: { id: true },
     });
-    if (existingUser) {
+    if (existingEmail) {
       const error = new Error("Email already in use") as any;
       error.statusCode = 409;
       throw error;
     }
 
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        userName
+      },
+      select: { id: true }
+    })
+
+    if (existingUser) {
+      const error = new Error("Username already exists") as any;
+      error.statusCode = 409;
+      throw error;
+    }
     const dob = new Date(dateOfBirth);
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
@@ -519,17 +531,17 @@ const authService = {
     if (oldUser?.userName) {
       await cache
         .del(CACHE_KEYS.userLookup("username", oldUser.userName))
-        .catch(() => {});
+        .catch(() => { });
     }
     if (oldUser?.phone) {
       await cache
         .del(CACHE_KEYS.userLookup("phone", oldUser.phone))
-        .catch(() => {});
+        .catch(() => { });
     }
     if (oldUser?.accountNumber) {
       await cache
         .del(CACHE_KEYS.userLookup("account", oldUser.accountNumber))
-        .catch(() => {});
+        .catch(() => { });
     }
 
     return { ...updated, requiresPinSetup: false };

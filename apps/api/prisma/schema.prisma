@@ -17,37 +17,37 @@ model Waitlist {
 }
 
 model User {
-  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email              String        @unique
-  phone              String?       @unique
-  passwordHash       String        @map("password_hash")
-  dateOfBirth        DateTime      @map("date_of_birth")
-  kycTier            Int           @default(1) @map("kyc_tier")
-  isSimulationMode   Boolean       @default(false) @map("is_simulation_mode")
-  onboardingComplete Boolean       @default(false) @map("onboarding_complete")
-  createdAt          DateTime      @default(now()) @map("created_at")
-  updatedAt          DateTime      @default(now()) @updatedAt @map("updated_at")
-  firstName          String
-  lastName           String
-  userName           String
-  accountNumber      String?       @unique
-  anchorCustomerId  String? @map("anchor_customer_id")
-  anchorAccountId   String? @map("anchor_account_id")
-  fcmToken String? @map("fcm_token")
-  aiInsights         AIInsight[]
-  kycRecords         KycRecord[]
-  referrals          Referral[]    @relation("ReferrerReferrals")
-  savingsGoals       SavingsGoal[]
-  transactions       Transaction[]
-  wallets            Wallet[]
-  notifications Notification[]
-  bankRecipients BankRecipient[]
-  p2pRecipients P2PRecipient[]
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                   String                   @unique
+  phone                   String?                  @unique
+  passwordHash            String                   @map("password_hash")
+  dateOfBirth             DateTime                 @map("date_of_birth")
+  kycTier                 Int                      @default(1) @map("kyc_tier")
+  isSimulationMode        Boolean                  @default(false) @map("is_simulation_mode")
+  onboardingComplete      Boolean                  @default(false) @map("onboarding_complete")
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  updatedAt               DateTime                 @default(now()) @updatedAt @map("updated_at")
+  primaryGoal             String?                  @map("primary_goal")
+  firstName               String
+  lastName                String                   
+  userName                String                   @unique
+  accountNumber           String?                  @unique
+  transferPin             String?                  @map("transfer_pin")
+  anchorAccountId         String?                  @map("anchor_account_id")
+  anchorCustomerId        String?                  @map("anchor_customer_id")
+  fcmToken                String?                  @map("fcm_token")
+  profilePicture          String?                  @map("profile_picture")
+  aiInsights              AIInsight[]
+  bankRecipients          BankRecipient[]
   emergencyUnlockRequests EmergencyUnlockRequest[]
-  primaryGoal        String?       @map("primary_goal")
-  transferPin        String?       @map("transfer_pin")
-  profilePicture String? @map("profile_picture")
-  walletSplitConfig WalletSplitConfig?
+  kycRecords              KycRecord[]
+  notifications           Notification[]
+  p2pRecipients           P2PRecipient[]
+  referrals               Referral[]               @relation("ReferrerReferrals")
+  savingsGoals            SavingsGoal[]
+  transactions            Transaction[]
+  walletSplitConfig       WalletSplitConfig?
+  wallets                 Wallet[]
 
   @@map("users")
 }
@@ -66,36 +66,36 @@ model KycRecord {
 }
 
 model Wallet {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String        @map("user_id") @db.Uuid
-  type         WalletType
-  balance      Decimal       @default(0.00) @db.Decimal(12, 2)
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
-  transactions Transaction[]
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                  String                   @map("user_id") @db.Uuid
+  type                    WalletType
+  balance                 Decimal                  @default(0.00) @db.Decimal(12, 2)
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  updatedAt               DateTime                 @default(now()) @updatedAt @map("updated_at")
   emergencyUnlockRequests EmergencyUnlockRequest[]
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions            Transaction[]
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, type])
   @@map("wallets")
 }
 
 model Transaction {
-  id           String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String            @map("user_id") @db.Uuid
-  walletId     String            @map("wallet_id") @db.Uuid
-  type         TransactionType
-  amount       Decimal           @db.Decimal(12, 2)
-  reason       String?
-  anchorRef String? @unique @map("anchor_ref")   
-  splitGroupId String?           @map("split_group_id") @db.Uuid
-  status       TransactionStatus @default(pending)
-  reference  String @unique
-  senderWalletId   String?           @map("sender_wallet_id") @db.Uuid
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String            @map("user_id") @db.Uuid
+  walletId         String            @map("wallet_id") @db.Uuid
+  type             TransactionType
+  amount           Decimal           @db.Decimal(12, 2)
+  reason           String?
+  anchorRef        String?           @unique @map("anchor_ref")
+  splitGroupId     String?           @map("split_group_id") @db.Uuid
+  status           TransactionStatus @default(pending)
+  createdAt        DateTime          @default(now()) @map("created_at")
   receiverWalletId String?           @map("receiver_wallet_id") @db.Uuid
-  createdAt    DateTime          @default(now()) @map("created_at")
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet       Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  reference        String            @unique
+  senderWalletId   String?           @map("sender_wallet_id") @db.Uuid
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet           Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
@@ -110,11 +110,11 @@ model SavingsGoal {
   autoContribute Boolean   @default(false) @map("auto_contribute")
   weeklyAmount   Decimal?  @map("weekly_amount") @db.Decimal(12, 2)
   isCompleted    Boolean   @default(false) @map("is_completed")
-  status         String    @default("ACTIVE")  // Values: ACTIVE, COMPLETED, CANCELLED
-  completedAt    DateTime? @map("completed_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
+  completedAt    DateTime? @map("completed_at")
   deletedAt      DateTime? @map("deleted_at")
+  status         String    @default("ACTIVE")
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("savings_goals")
@@ -184,8 +184,7 @@ model BankRecipient {
   accountNumber String   @map("account_number")
   accountName   String   @map("account_name")
   lastSentAt    DateTime @default(now()) @map("last_sent_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, accountNumber])
   @@index([userId])
@@ -193,15 +192,14 @@ model BankRecipient {
 }
 
 model P2PRecipient {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String   @map("user_id") @db.Uuid
-  recipientUserId   String   @map("recipient_user_id") @db.Uuid
-  recipientFirstName String  @map("recipient_first_name")
-  recipientLastName  String  @map("recipient_last_name")
-  recipientUserName  String  @map("recipient_username")
-  lastSentAt        DateTime @default(now()) @map("last_sent_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  recipientUserId    String   @map("recipient_user_id") @db.Uuid
+  recipientFirstName String   @map("recipient_first_name")
+  recipientLastName  String   @map("recipient_last_name")
+  recipientUserName  String   @map("recipient_username")
+  lastSentAt         DateTime @default(now()) @map("last_sent_at")
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipientUserId])
   @@index([userId])
@@ -209,16 +207,15 @@ model P2PRecipient {
 }
 
 model EmergencyUnlockRequest {
-  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String               @map("user_id") @db.Uuid
-  walletId    String               @map("wallet_id") @db.Uuid
+  id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String                @map("user_id") @db.Uuid
+  walletId    String                @map("wallet_id") @db.Uuid
   reason      String
-  requestedAt DateTime             @default(now()) @map("requested_at")
-  unlocksAt   DateTime             @map("unlocks_at")
+  requestedAt DateTime              @default(now()) @map("requested_at")
+  unlocksAt   DateTime              @map("unlocks_at")
   status      EmergencyUnlockStatus @default(pending)
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet      Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([walletId])
