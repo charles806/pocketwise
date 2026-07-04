@@ -30,4 +30,4 @@ npm-debug.log*
 out/
 yarn-debug.log*
 yarn-error.log*
-docs
+# docs
