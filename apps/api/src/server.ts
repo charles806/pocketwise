@@ -22,13 +22,13 @@ import emergencyUnlockRouter from "./routes/emergency-unlock.routes.js";
 import prisma from "./lib/prisma.js";
 import { walletHelper } from "./helper/wallet-helpers.js";
 import { savingsGoalService } from "./services/saving-goal.service.js";
-import { th } from "zod/v4/locales";
 import { notificationService } from "./features/notifications/notification.service.js";
 import { fcmMessaging } from "./lib/firebase.js";
 import bankTransferRouter from "./routes/bank-transfer.routes.js";
 import { rateLimitMiddleware } from "./middleware/rate-limit.middleware.js";
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
+const MOBILE_URL = process.env.MOBILE_URL;
 const app = express();
 app.use(
   helmet({
@@ -59,9 +59,12 @@ if (!FRONTEND_URL) {
   throw new Error("FRONTEND_URL environment variable is required");
 }
 
+const allowedOrigins = [FRONTEND_URL];
+if (MOBILE_URL) allowedOrigins.push(MOBILE_URL);
+
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
