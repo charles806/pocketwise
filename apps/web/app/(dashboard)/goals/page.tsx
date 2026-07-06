@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Target, Plus, CheckCircle, Loader2, Repeat } from "lucide-react";
+import { Target, Plus, CheckCircle, Loader2, Repeat, Pause, X } from "lucide-react";
 import { WalletHeader } from "../wallet/UI/Header";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -10,6 +10,7 @@ import { formatNaira } from "../../../libs/utils";
 import ContributeToGoalModal from "../../../components/ContributeToGoalModal";
 import ConfirmCompleteModal from "../../../components/ConfirmCompleteModal";
 import AutoContributeModal from "../../../components/AutoContributeModal";
+import PauseGoalModal from "../../../components/PauseGoalModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -67,37 +68,71 @@ function GoalCard({
   onAddMoney,
   onComplete,
   onAutoContribute,
+  onPause,
+  onCancel,
   completing,
 }: {
   goal: Goal;
   onAddMoney: () => void;
   onComplete: () => void;
   onAutoContribute: () => void;
+  onPause: () => void;
+  onCancel: () => void;
   completing: boolean;
 }) {
   const current = Number(goal.currentAmount);
   const target = Number(goal.targetAmount);
   const progress = goal.progress;
 
+  const isPaused = goal.status === "paused";
+
   return (
-    <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-[0_4px_24px_rgba(15,23,42,0.06)]">
+    <div className="relative rounded-2xl border border-slate-200/70 bg-white p-5 shadow-[0_4px_24px_rgba(15,23,42,0.06)]">
+      {isPaused && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[1px]">
+          <div className="flex flex-col items-center gap-1.5 rounded-xl bg-slate-900/80 px-4 py-3">
+            <Pause size={20} className="text-white" />
+            <span className="text-xs font-semibold text-white">Paused</span>
+          </div>
+        </div>
+      )}
       <div className="flex items-start justify-between gap-3">
         <h3 className="truncate text-lg font-bold text-slate-900">
           {goal.title}
         </h3>
         <div className="flex items-center gap-2 shrink-0">
           {!goal.isCompleted && (
-            <button
-              onClick={onAutoContribute}
-              title={goal.autoContribute ? "Auto-save: ON" : "Auto-save: OFF"}
-              className={`rounded-lg p-1.5 transition-colors active:scale-95 ${
-                goal.autoContribute
-                  ? "text-[#4f46e5] bg-indigo-50 hover:bg-indigo-100"
-                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              <Repeat size={16} />
-            </button>
+            <>
+              <button
+                onClick={onAutoContribute}
+                title={goal.autoContribute ? "Auto-save: ON" : "Auto-save: OFF"}
+                className={`cursor-pointer rounded-lg p-1.5 transition-colors active:scale-95 ${
+                  goal.autoContribute
+                    ? "text-[#4f46e5] bg-indigo-50 hover:bg-indigo-100"
+                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Repeat size={16} />
+              </button>
+              <button
+                onClick={onPause}
+                title={goal.status === "paused" ? "Resume goal" : "Pause goal"}
+                className={`cursor-pointer rounded-lg p-1.5 transition-colors active:scale-95 ${
+                  goal.status === "paused"
+                    ? "text-amber-600 bg-amber-50 hover:bg-amber-100"
+                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Pause size={16} />
+              </button>
+              <button
+                onClick={onCancel}
+                title="Cancel goal"
+                className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:text-rose-600 hover:bg-rose-50 active:scale-95"
+              >
+                <X size={16} />
+              </button>
+            </>
           )}
           <GoalBadge goal={goal} />
         </div>
@@ -125,7 +160,7 @@ function GoalCard({
         <div className="mt-4 flex items-start gap-2">
           <button
             onClick={onAddMoney}
-            className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 active:scale-95"
+            className="cursor-pointer flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 active:scale-95"
           >
             Add Money
           </button>
@@ -176,7 +211,12 @@ const Page = () => {
   const [autoContributeGoal, setAutoContributeGoal] = useState<Goal | null>(
     null,
   );
+  const [pauseGoal, setPauseGoal] = useState<Goal | null>(null);
+  const [cancelGoal, setCancelGoal] = useState<Goal | null>(null);
   const [completingIds] = useState<Set<string>>(new Set());
+
+  const activeGoals = goals.filter((g) => g.status !== "paused");
+  const pausedGoals = goals.filter((g) => g.status === "paused");
 
   const fetchGoals = useCallback(() => {
     if (!accessToken) return;
@@ -317,21 +357,50 @@ const Page = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {goals.map((goal) => (
-                  <GoalCard
-                    key={goal.id}
-                    goal={goal}
-                    onAddMoney={() => {
-                      fetchUnallocated();
-                      setContributingGoal(goal);
-                    }}
-                    onComplete={() => handleComplete(goal)}
-                    onAutoContribute={() => setAutoContributeGoal(goal)}
-                    completing={completingIds.has(goal.id)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {activeGoals.map((goal) => (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      onAddMoney={() => {
+                        fetchUnallocated();
+                        setContributingGoal(goal);
+                      }}
+                      onComplete={() => handleComplete(goal)}
+                      onAutoContribute={() => setAutoContributeGoal(goal)}
+                      onPause={() => setPauseGoal(goal)}
+                      onCancel={() => setCancelGoal(goal)}
+                      completing={completingIds.has(goal.id)}
+                    />
+                  ))}
+                </div>
+
+                {pausedGoals.length > 0 && (
+                  <div className="mt-8">
+                    <h2 className="mb-3 text-sm font-bold text-slate-500">
+                      Paused
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {pausedGoals.map((goal) => (
+                        <GoalCard
+                          key={goal.id}
+                          goal={goal}
+                          onAddMoney={() => {
+                            fetchUnallocated();
+                            setContributingGoal(goal);
+                          }}
+                          onComplete={() => handleComplete(goal)}
+                          onAutoContribute={() => setAutoContributeGoal(goal)}
+                          onPause={() => setPauseGoal(goal)}
+                          onCancel={() => setCancelGoal(goal)}
+                          completing={completingIds.has(goal.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -379,6 +448,18 @@ const Page = () => {
           }}
         />
       )}
+
+      {pauseGoal && (
+        <PauseGoalModal
+          goal={{ id: pauseGoal.id, title: pauseGoal.title }}
+          onClose={() => setPauseGoal(null)}
+          onSuccess={() => {
+            setPauseGoal(null);
+            handleRefresh();
+          }}
+        />
+      )}
+
     </>
   );
 };

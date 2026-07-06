@@ -116,7 +116,7 @@ export const RecentTransactions = () => {
           <div className="flex flex-col items-center justify-center py-10 sm:py-14 px-4 sm:px-6 text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
             {/* Animated icon container */}
             <div className="relative mb-4 sm:mb-5">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl bg-linear-to-br from-slate-50 to-slate-100 border border-slate-200">
                 <ReceiptText className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" />
               </div>
               {/* Pulse ring */}
@@ -133,15 +133,10 @@ export const RecentTransactions = () => {
             </p>
 
             {/* CTA */}
-            <button className="inline-flex items-center gap-2 bg-[#4f46e5] hover:bg-[#3730a3] active:scale-95 transition-all duration-200 text-white text-sm font-semibold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-sm hover:shadow-md cursor-pointer">
+            <button className="inline-flex items-center gap-2 bg-[#4f46e5] hover:bg-primary-dark active:scale-95 transition-all duration-200 text-white text-sm font-semibold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-sm hover:shadow-md cursor-pointer">
               Add Money
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            {/* Helper text */}
-            <p className="text-xs text-slate-300 mt-3 sm:mt-4">
-              Money splits automatically the moment it arrives
-            </p>
           </div>
         ) : (
           transactions.slice(0, 5).map((tx, idx) => {
