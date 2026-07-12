@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { WalletHeader } from "../wallet/UI/Header";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -11,6 +12,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  ArrowRight,
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -29,9 +31,15 @@ const WALLET_LABELS: Record<string, string> = {
   flex: "Flex",
 };
 
-const DEFAULT_SPLIT = { spendPercent: 50, savingsPercent: 30, emergencyPercent: 10, flexPercent: 10 };
+const DEFAULT_SPLIT = {
+  spendPercent: 50,
+  savingsPercent: 30,
+  emergencyPercent: 10,
+  flexPercent: 10,
+};
 
 function Page() {
+  const router = useRouter();
   const { user, accessToken, refreshUser } = useAuth();
   const { toast } = useToast();
 
@@ -44,15 +52,36 @@ function Page() {
     phone: "",
     userName: "",
   });
-  const [profile, setProfile] = useState({ firstName: "", lastName: "", phone: "", userName: "" });
+  const [profile, setProfile] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    userName: "",
+  });
 
-  const [pw, setPw] = useState({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
-  const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
+  const [pw, setPw] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+  const [showPw, setShowPw] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
 
-  const [pin, setPin] = useState({ currentPin: "", newPin: "", confirmNewPin: "" });
-
-  const [split, setSplit] = useState({ spendPercent: 50, savingsPercent: 30, emergencyPercent: 10, flexPercent: 10 });
-  const [initialSplit, setInitialSplit] = useState({ spendPercent: 50, savingsPercent: 30, emergencyPercent: 10, flexPercent: 10 });
+  const [split, setSplit] = useState({
+    spendPercent: 50,
+    savingsPercent: 30,
+    emergencyPercent: 10,
+    flexPercent: 10,
+  });
+  const [initialSplit, setInitialSplit] = useState({
+    spendPercent: 50,
+    savingsPercent: 30,
+    emergencyPercent: 10,
+    flexPercent: 10,
+  });
   const [splitLoading, setSplitLoading] = useState(true);
   const [hasExistingSplit, setHasExistingSplit] = useState(false);
 
@@ -110,7 +139,9 @@ function Page() {
     profile.userName !== initialProfile.userName;
 
   const profileInitials =
-    ((user?.firstName?.[0] || "") + (user?.lastName?.[0] || "")).toUpperCase() || "?";
+    (
+      (user?.firstName?.[0] || "") + (user?.lastName?.[0] || "")
+    ).toUpperCase() || "?";
 
   const handleAvatarUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,33 +227,6 @@ function Page() {
     }
   };
 
-  const handlePinSubmit = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/change-pin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          currentPin: pin.currentPin,
-          newPin: pin.newPin,
-          confirmNewPin: pin.confirmNewPin,
-        }),
-      });
-      const body = await res.json();
-      if (res.ok && body.success) {
-        toast("PIN updated successfully", { type: "success" });
-        setPin({ currentPin: "", newPin: "", confirmNewPin: "" });
-      } else {
-        toast(body.message || "Failed to change PIN", { type: "error" });
-      }
-    } catch {
-      toast("Failed to change PIN", { type: "error" });
-    }
-  };
-
   const handleSplitSubmit = async () => {
     try {
       const method = hasExistingSplit ? "PATCH" : "POST";
@@ -247,7 +251,11 @@ function Page() {
     }
   };
 
-  const splitTotal = split.spendPercent + split.savingsPercent + split.emergencyPercent + split.flexPercent;
+  const splitTotal =
+    split.spendPercent +
+    split.savingsPercent +
+    split.emergencyPercent +
+    split.flexPercent;
   const splitDirty =
     split.spendPercent !== initialSplit.spendPercent ||
     split.savingsPercent !== initialSplit.savingsPercent ||
@@ -264,7 +272,10 @@ function Page() {
   const updateSplit = (key: string, val: number) => {
     const range = SPLIT_RANGES[key];
     if (!range) return;
-    setSplit((prev) => ({ ...prev, [key]: Math.min(range.max, Math.max(range.min, val)) }));
+    setSplit((prev) => ({
+      ...prev,
+      [key]: Math.min(range.max, Math.max(range.min, val)),
+    }));
   };
 
   const copyAccountNumber = () => {
@@ -275,8 +286,8 @@ function Page() {
     }
   };
 
-  const pwAllFilled = pw.currentPassword && pw.newPassword && pw.confirmNewPassword;
-  const pinAllFilled = pin.currentPin.length === 4 && pin.newPin.length === 4 && pin.confirmNewPin.length === 4;
+  const pwAllFilled =
+    pw.currentPassword && pw.newPassword && pw.confirmNewPassword;
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -345,10 +356,10 @@ function Page() {
                     : "bg-amber-100 text-amber-700"
                 }`}
               >
-                Tier {((user as any)?.kycTier ?? 1)}
+                Tier {(user as any)?.kycTier ?? 1}
               </span>
               <p className="text-xs text-slate-400 mt-1">
-                Tier {((user as any)?.kycTier ?? 1)} &mdash; Basic access
+                Tier {(user as any)?.kycTier ?? 1} &mdash; Basic access
               </p>
             </div>
           </div>
@@ -356,39 +367,57 @@ function Page() {
 
         {/* ─── Section 2: Edit Profile ─── */}
         <section className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_4px_24px_rgba(15,23,42,0.06)] p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Edit Profile</h3>
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">
+            Edit Profile
+          </h3>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  First Name
+                </label>
                 <input
                   value={profile.firstName}
-                  onChange={(e) => setProfile((p) => ({ ...p, firstName: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((p) => ({ ...p, firstName: e.target.value }))
+                  }
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10 outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Last Name
+                </label>
                 <input
                   value={profile.lastName}
-                  onChange={(e) => setProfile((p) => ({ ...p, lastName: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((p) => ({ ...p, lastName: e.target.value }))
+                  }
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10 outline-none transition-all"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Phone
+              </label>
               <input
                 value={profile.phone}
-                onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, phone: e.target.value }))
+                }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10 outline-none transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Username
+              </label>
               <input
                 value={profile.userName}
-                onChange={(e) => setProfile((p) => ({ ...p, userName: e.target.value }))}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, userName: e.target.value }))
+                }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10 outline-none transition-all"
               />
             </div>
@@ -404,7 +433,9 @@ function Page() {
 
         {/* ─── Section 3: Change Password ─── */}
         <section className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_4px_24px_rgba(15,23,42,0.06)] p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Change Password</h3>
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">
+            Change Password
+          </h3>
           <div className="space-y-4">
             {(["current", "new", "confirm"] as const).map((field) => {
               const label =
@@ -413,23 +444,43 @@ function Page() {
                   : field === "new"
                     ? "New Password"
                     : "Confirm New Password";
-              const key = field === "confirm" ? "confirmNewPassword" : field === "current" ? "currentPassword" : "newPassword";
-              const showKey = field === "current" ? "current" : field === "new" ? "new" : "confirm";
+              const key =
+                field === "confirm"
+                  ? "confirmNewPassword"
+                  : field === "current"
+                    ? "currentPassword"
+                    : "newPassword";
+              const showKey =
+                field === "current"
+                  ? "current"
+                  : field === "new"
+                    ? "new"
+                    : "confirm";
               return (
                 <div key={field} className="relative">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {label}
+                  </label>
                   <input
                     type={showPw[showKey] ? "text" : "password"}
                     value={pw[key]}
-                    onChange={(e) => setPw((p) => ({ ...p, [key]: e.target.value }))}
+                    onChange={(e) =>
+                      setPw((p) => ({ ...p, [key]: e.target.value }))
+                    }
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 pr-10 text-sm focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10 outline-none transition-all"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPw((p) => ({ ...p, [showKey]: !p[showKey] }))}
+                    onClick={() =>
+                      setShowPw((p) => ({ ...p, [showKey]: !p[showKey] }))
+                    }
                     className="absolute right-3 top-[38px] text-slate-400 hover:text-slate-600"
                   >
-                    {showPw[showKey] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPw[showKey] ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               );
@@ -446,46 +497,39 @@ function Page() {
 
         {/* ─── Section 4: Change Transfer PIN ─── */}
         <section className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_4px_24px_rgba(15,23,42,0.06)] p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Change Transfer PIN</h3>
-          <div className="space-y-4">
-            {(["current", "new", "confirm"] as const).map((field) => {
-              const label =
-                field === "current"
-                  ? "Current PIN"
-                  : field === "new"
-                    ? "New PIN"
-                    : "Confirm New PIN";
-              const key = field === "confirm" ? "confirmNewPin" : field === "current" ? "currentPin" : "newPin";
-              return (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={4}
-                    value={pin[key]}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-                      setPin((p) => ({ ...p, [key]: val }));
-                    }}
-                    className="w-full max-w-[160px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-center tracking-[0.5em] focus:border-[#4f46e5] focus:ring-2 focus:ring-[#4f46e5]/10 outline-none transition-all"
-                  />
-                </div>
-              );
-            })}
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">
+            Transfer PIN
+          </h3>
+          <p className="text-sm text-slate-500 mb-4">
+            Change your transfer PIN or reset it if you&apos;ve forgotten it.
+          </p>
+          <div className="space-y-3">
             <button
-              onClick={handlePinSubmit}
-              disabled={!pinAllFilled}
-              className="rounded-xl bg-[#4f46e5] text-white font-semibold px-6 py-2.5 text-sm hover:bg-[#4338ca] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => router.push("/profile/change-pin")}
+              className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm hover:border-[#4f46e5] hover:bg-[#eef2ff] transition-all group"
             >
-              Update PIN
+              <span className="font-medium text-slate-700 group-hover:text-[#4f46e5]">
+                Change PIN
+              </span>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#4f46e5] transition-colors" />
+            </button>
+            <button
+              onClick={() => router.push("/profile/forgot-pin")}
+              className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm hover:border-[#4f46e5] hover:bg-[#eef2ff] transition-all group"
+            >
+              <span className="font-medium text-slate-700 group-hover:text-[#4f46e5]">
+                Forgot PIN?
+              </span>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#4f46e5] transition-colors" />
             </button>
           </div>
         </section>
 
         {/* ─── Section 5: Wallet Split ─── */}
         <section className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_4px_24px_rgba(15,23,42,0.06)] p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Wallet Split Configuration</h3>
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">
+            Wallet Split Configuration
+          </h3>
 
           {splitLoading ? (
             <div className="flex justify-center py-8">
@@ -493,7 +537,14 @@ function Page() {
             </div>
           ) : (
             <div className="space-y-5">
-              {(["spendPercent", "savingsPercent", "emergencyPercent", "flexPercent"] as const).map((key) => {
+              {(
+                [
+                  "spendPercent",
+                  "savingsPercent",
+                  "emergencyPercent",
+                  "flexPercent",
+                ] as const
+              ).map((key) => {
                 const label = WALLET_LABELS[key.replace("Percent", "")];
                 const color = WALLET_COLORS[key.replace("Percent", "")];
                 return (
@@ -504,7 +555,9 @@ function Page() {
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-sm font-medium text-slate-700">{label}</span>
+                        <span className="text-sm font-medium text-slate-700">
+                          {label}
+                        </span>
                       </div>
                       <span className="text-sm font-semibold" style={{ color }}>
                         {split[key]}%
@@ -526,7 +579,9 @@ function Page() {
               })}
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <span className="text-sm font-medium text-slate-700">Total</span>
+                <span className="text-sm font-medium text-slate-700">
+                  Total
+                </span>
                 <span
                   className={`text-sm font-bold ${
                     splitTotal === 100 ? "text-emerald-600" : "text-red-500"
@@ -537,7 +592,9 @@ function Page() {
               </div>
 
               {splitTotal !== 100 && (
-                <p className="text-xs text-red-500">Percentages must add up to 100%</p>
+                <p className="text-xs text-red-500">
+                  Percentages must add up to 100%
+                </p>
               )}
 
               <button

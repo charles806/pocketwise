@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { generateMockAccountNumber } from "../utils/account.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 import { redis } from "../lib/redis.js";
+import { sendSMS } from "../lib/sms.js";
 
 interface SignupInput {
   firstName: string;
@@ -52,10 +53,10 @@ const authService = {
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        userName
+        userName,
       },
-      select: { id: true }
-    })
+      select: { id: true },
+    });
 
     if (existingUser) {
       const error = new Error("Username already exists") as any;
@@ -405,10 +406,13 @@ const authService = {
     return { success: true, message: "PIN changed successfully" };
   },
 
-  async forgotPassword(email: string) {
+  async forgotPassword(identifier: string) {
+    const isEmail = identifier.includes("@");
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      select: { id: true, email: true, firstName: true },
+      where: isEmail
+        ? { email: identifier.toLowerCase() }
+        : { phone: identifier },
+      select: { id: true, email: true, firstName: true, phone: true },
     });
 
     if (!user) {
@@ -420,21 +424,30 @@ const authService = {
 
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    await cache.set(CACHE_KEYS.otpReset(user.email), otp, TTL.OTP);
+    await cache.set(CACHE_KEYS.otpReset(identifier), otp, TTL.OTP);
 
-    sendOtpEmail(user.email, otp, user.firstName).catch(console.error);
+    if (isEmail) {
+      sendOtpEmail(user.email, otp, user.firstName).catch(console.error);
+    } else {
+      sendSMS(
+        user.phone!,
+        `Your PocketWise password reset OTP is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`,
+      ).catch(console.error);
+    }
+
+    // sendOtpEmail(user.email, otp, user.firstName).catch(console.error);
 
     return {
       success: true,
       message: "If an account with that email exists, an OTP has been sent.",
+      channel: isEmail ? "email" : "sms",
     };
   },
 
-  async verifyOtp(email: string, otp: string) {
-    const normalizedEmail = email.toLowerCase();
-    const storedOtp = await cache.get<string>(
-      CACHE_KEYS.otpReset(normalizedEmail),
-    );
+  async verifyOtp(identifier: string, otp: string) {
+    const isEmail = identifier.includes("@");
+    const key = isEmail ? identifier.toLowerCase() : identifier;
+    const storedOtp = await cache.get<string>(CACHE_KEYS.otpReset(key));
 
     if (!storedOtp || storedOtp !== otp) {
       const error = new Error("Invalid or expired OTP") as any;
@@ -442,23 +455,29 @@ const authService = {
       throw error;
     }
 
-    await cache.del(CACHE_KEYS.otpReset(normalizedEmail));
+    await cache.del(CACHE_KEYS.otpReset(key));
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    await cache.set(
-      CACHE_KEYS.resetToken(normalizedEmail),
-      resetToken,
-      TTL.RESET_TOKEN,
-    );
+    await cache.set(CACHE_KEYS.resetToken(key), resetToken, TTL.RESET_TOKEN);
 
     return { success: true, token: resetToken };
   },
 
-  async resetPassword(email: string, token: string, newPassword: string) {
-    const normalizedEmail = email.toLowerCase();
-    const storedToken = await cache.get<string>(
-      CACHE_KEYS.resetToken(normalizedEmail),
-    );
+  async resetPassword(
+    identifier: string,
+    token: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) {
+    if (newPassword !== confirmPassword) {
+      const error = new Error("Passwords do not match") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const isEmail = identifier.includes("@");
+    const key = isEmail ? identifier.toLowerCase() : identifier;
+    const storedToken = await cache.get<string>(CACHE_KEYS.resetToken(key));
 
     if (!storedToken || storedToken !== token) {
       const error = new Error("Invalid or expired reset token") as any;
@@ -468,11 +487,11 @@ const authService = {
 
     const passwordHash = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({
-      where: { email: normalizedEmail },
+      where: isEmail ? { email: key } : { phone: identifier },
       data: { passwordHash },
     });
 
-    await cache.del(CACHE_KEYS.resetToken(normalizedEmail));
+    await cache.del(CACHE_KEYS.resetToken(key));
 
     return { success: true, message: "Password reset successfully" };
   },
@@ -531,17 +550,17 @@ const authService = {
     if (oldUser?.userName) {
       await cache
         .del(CACHE_KEYS.userLookup("username", oldUser.userName))
-        .catch(() => { });
+        .catch(() => {});
     }
     if (oldUser?.phone) {
       await cache
         .del(CACHE_KEYS.userLookup("phone", oldUser.phone))
-        .catch(() => { });
+        .catch(() => {});
     }
     if (oldUser?.accountNumber) {
       await cache
         .del(CACHE_KEYS.userLookup("account", oldUser.accountNumber))
-        .catch(() => { });
+        .catch(() => {});
     }
 
     return { ...updated, requiresPinSetup: false };
@@ -604,6 +623,91 @@ const authService = {
 
     await cache.del(CACHE_KEYS.userProfile(userId));
     return { profilePicture: result.secure_url };
+  },
+
+  async forgotPin(phone: string) {
+    const user = await prisma.user.findUnique({
+      where: { phone },
+      select: { id: true, phone: true, firstName: true },
+    });
+
+    if (!user) {
+      return {
+        success: true,
+        message:
+          "If an account with that phone number exists, an OTP has been sent.",
+      };
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    await cache.set(CACHE_KEYS.pinOtpReset(phone), otp, TTL.OTP);
+
+    sendSMS(
+      user.phone!,
+      `Your PocketWise PIN reset OTP is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`,
+    ).catch(console.error);
+
+    return {
+      success: true,
+      message:
+        "If an account with that phone number exists, an OTP has been sent.",
+      channel: "sms",
+    };
+  },
+
+  async verifyPinOtp(phone: string, otp: string) {
+    const storedOtp = await cache.get<string>(CACHE_KEYS.pinOtpReset(phone));
+
+    if (!storedOtp || storedOtp !== otp) {
+      const error = new Error("Invalid or expired OTP") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await cache.del(CACHE_KEYS.pinOtpReset(phone));
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    await cache.set(
+      CACHE_KEYS.pinResetToken(phone),
+      resetToken,
+      TTL.RESET_TOKEN,
+    );
+
+    return { success: true, token: resetToken };
+  },
+
+  async resetPin(
+    phone: string,
+    token: string,
+    newPin: string,
+    confirmPin: string,
+  ) {
+    if (newPin !== confirmPin) {
+      const error = new Error("PINs do not match") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const storedToken = await cache.get<string>(
+      CACHE_KEYS.pinResetToken(phone),
+    );
+
+    if (!storedToken || storedToken !== token) {
+      const error = new Error("Invalid or expired reset token") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const hashedPin = await bcrypt.hash(newPin, 10);
+    await prisma.user.update({
+      where: { phone },
+      data: { transferPin: hashedPin },
+    });
+
+    await cache.del(CACHE_KEYS.pinResetToken(phone));
+
+    return { success: true, message: "PIN reset successfully" };
   },
 };
 

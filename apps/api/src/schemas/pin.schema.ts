@@ -25,7 +25,7 @@ const WEAK_PINS = new Set([
   "9876",
 ]);
 
-const isWeakPin = (pin: string) => WEAK_PINS.has(pin);
+export const isWeakPin = (pin: string) => WEAK_PINS.has(pin);
 
 const pinSchema = z
   .string()

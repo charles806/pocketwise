@@ -224,9 +224,12 @@ const changePin = async (req: Request, res: Response) => {
 
 const forgotPassword = async (req: Request, res: Response) => {
   try {
-    const { email } = req.body;
-    const result = await authService.forgotPassword(email);
-    sendSuccess(res, result.message, { success: result.success });
+    const { identifier } = req.body;
+    const result = await authService.forgotPassword(identifier);
+    sendSuccess(res, result.message, {
+      success: result.success,
+      channel: result.channel,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Error processing request";
@@ -237,8 +240,8 @@ const forgotPassword = async (req: Request, res: Response) => {
 
 const verifyOtp = async (req: Request, res: Response) => {
   try {
-    const { email, otp } = req.body;
-    const result = await authService.verifyOtp(email, otp);
+    const { identifier, otp } = req.body;
+    const result = await authService.verifyOtp(identifier, otp);
     sendSuccess(res, "OTP verified successfully", result);
   } catch (error) {
     const message =
@@ -250,12 +253,59 @@ const verifyOtp = async (req: Request, res: Response) => {
 
 const resetPassword = async (req: Request, res: Response) => {
   try {
-    const { email, token, password } = req.body;
-    const result = await authService.resetPassword(email, token, password);
+    const { identifier, token, newPassword, confirmPassword } = req.body;
+    const result = await authService.resetPassword(
+      identifier,
+      token,
+      newPassword,
+      confirmPassword,
+    );
     sendSuccess(res, result.message, { success: result.success });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Error resetting password";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const forgotPin = async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.body;
+    const result = await authService.forgotPin(phone);
+    sendSuccess(res, result.message, {
+      success: result.success,
+      channel: result.channel,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error processing request";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const verifyPinOtp = async (req: Request, res: Response) => {
+  try {
+    const { phone, otp } = req.body;
+    const result = await authService.verifyPinOtp(phone, otp);
+    sendSuccess(res, "OTP verified successfully", result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error verifying OTP";
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
+const resetPin = async (req: Request, res: Response) => {
+  try {
+    const { phone, token, newPin, confirmPin } = req.body;
+    const result = await authService.resetPin(phone, token, newPin, confirmPin);
+    sendSuccess(res, result.message, { success: result.success });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Error resetting PIN";
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -366,6 +416,9 @@ export {
   forgotPassword,
   verifyOtp,
   resetPassword,
+  forgotPin,
+  verifyPinOtp,
+  resetPin,
   updateProfile,
   changePassword,
   uploadAvatar,

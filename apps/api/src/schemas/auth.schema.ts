@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isWeakPin } from "./pin.schema.js";
 
 export const signupSchema = z
   .object({
@@ -28,28 +29,64 @@ export const loginSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  identifier: z.string().min(1, "Email or phone number is required"),
 });
 
 export const verifyOtpSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  identifier: z.string().min(1, "Identifier is required"),
   otp: z
     .string()
     .length(6, "OTP must be 6 digits")
     .regex(/^\d{6}$/, "OTP must be numeric"),
 });
 
-export const resetPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  token: z.string().min(1, "Reset token is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number",
-    ),
+export const resetPasswordSchema = z
+  .object({
+    identifier: z.string().min(1, "Identifier is required"),
+    token: z.string().min(1, "Reset token is required"),
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export const forgotPinSchema = z.object({
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
 });
+
+export const verifyPinOtpSchema = z.object({
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  otp: z
+    .string()
+    .length(6, "OTP must be 6 digits")
+    .regex(/^\d{6}$/, "OTP must be numeric"),
+});
+
+export const resetPinSchema = z
+  .object({
+    phone: z.string().min(10, "Phone number must be at least 10 digits"),
+    token: z.string().min(1, "Reset token is required"),
+    newPin: z
+      .string()
+      .length(4, "PIN must be exactly 4 digits")
+      .regex(/^\d{4}$/, "PIN must contain only numbers")
+      .refine((pin) => !isWeakPin(pin), {
+        message: "PIN too simple, choose something stronger",
+      }),
+    confirmPin: z.string(),
+  })
+  .refine((data) => data.newPin === data.confirmPin, {
+    message: "PINs do not match",
+    path: ["confirmPin"],
+  });
 
 export const profileSchema = z
   .object({

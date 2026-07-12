@@ -12,6 +12,9 @@ import {
   forgotPassword,
   verifyOtp,
   resetPassword,
+  forgotPin,
+  verifyPinOtp,
+  resetPin,
   updateProfile,
   changePassword,
   uploadAvatar,
@@ -25,6 +28,9 @@ import {
   forgotPasswordSchema,
   verifyOtpSchema,
   resetPasswordSchema,
+  forgotPinSchema,
+  verifyPinOtpSchema,
+  resetPinSchema,
   profileSchema,
   changePasswordSchema,
 } from "../schemas/auth.schema.js";
@@ -97,6 +103,25 @@ router.post(
   rateLimit({ windowMs: 60_000, max: 3, keyBy: "ip" }),
   validate(resetPasswordSchema),
   resetPassword,
+);
+
+router.post(
+  "/forgot-pin",
+  rateLimit({ windowMs: 60_000, max: 3, keyBy: "ip" }),
+  validate(forgotPinSchema),
+  forgotPin,
+);
+router.post(
+  "/verify-pin-otp",
+  rateLimit({ windowMs: 60_000, max: 5, keyBy: "ip" }),
+  validate(verifyPinOtpSchema),
+  verifyPinOtp,
+);
+router.post(
+  "/reset-pin",
+  rateLimit({ windowMs: 60_000, max: 3, keyBy: "ip" }),
+  validate(resetPinSchema),
+  resetPin,
 );
 
 router.patch(
