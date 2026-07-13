@@ -13,7 +13,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
-import logo from "../../../icon.png";
+import logo from "../../../../public/logo.png";
 import { useAuth } from "../../../../context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;

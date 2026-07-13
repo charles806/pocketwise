@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../context/ToastContext";
-import logo from "../../../public/logo.png";
-import loginImage from "../../../public/loginImge.png";
+import logo from "../../../public/logo.png"
+import loginImage from "../../../public/loginImge.png"
 import {
   ChevronLeft,
   Mail,

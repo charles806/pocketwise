@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import logo from "../../../icon.png";
+import logo from "../../../../public/logo.png";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Shield, Zap, Gift, ArrowRight, Loader2 } from "lucide-react";
