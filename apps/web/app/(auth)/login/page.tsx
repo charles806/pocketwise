@@ -2,8 +2,8 @@
 import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import logo from "../../../public/logo.png";
-import loginImage from "../../../public/loginImge.png";
+import logo from "../../logo.png";
+import loginImage from "../../loginImge.png";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -43,7 +43,8 @@ const fieldSx = {
     },
     "&.Mui-focused": {
       backgroundColor: "#fff",
-      boxShadow: "0 0 0 4px rgba(124, 58, 237, 0.08), 0 0 24px rgba(124, 58, 237, 0.12)",
+      boxShadow:
+        "0 0 0 4px rgba(124, 58, 237, 0.08), 0 0 24px rgba(124, 58, 237, 0.12)",
     },
     "&.Mui-focused fieldset": {
       borderColor: "#4f65dc",
@@ -119,7 +120,7 @@ const LoginForm = () => {
 
       if (res.ok) {
         console.log("Login User Data:", dataRes.user);
-        console.log("")
+        console.log("");
         setAuth(dataRes.accessToken, dataRes.user);
         window.location.href = redirectTo || "/wallet";
         return;

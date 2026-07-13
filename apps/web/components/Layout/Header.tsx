@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "../../public/logo.png"
+import logo from "../../app/logo.png";
 import {
   Menu,
   X,
@@ -39,21 +39,17 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-[95%] md:w-[80%] max-w-300 rounded-3xl border border-white/40 bg-white/70 backdrop-blur-md ${scrolled
+        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-[95%] md:w-[80%] max-w-300 rounded-3xl border border-white/40 bg-white/70 backdrop-blur-md ${
+          scrolled
             ? "shadow-[0_8px_30px_rgb(0,0,0,0.12)] bg-white/80"
             : "shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/60"
-          }`}
+        }`}
       >
         <div className="w-full px-5 sm:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-1 group">
-              <Image
-                src={logo}
-                alt="PocketWise Logo"
-                width={75}
-                height={75}
-              />
+              <Image src={logo} alt="PocketWise Logo" width={75} height={75} />
               <span className="font-jakarta font-bold text-lg text-gray-900 tracking-tight">
                 PocketWise
               </span>
@@ -97,8 +93,9 @@ export default function Header() {
 
       {/* Mobile overlay */}
       <div
-        className={`mobile-menu-overlay fixed inset-0 z-40 bg-white/98 backdrop-blur-xl flex flex-col pt-20 px-6 pb-8 md:hidden ${menuOpen ? "open" : "opacity-0 invisible"
-          }`}
+        className={`mobile-menu-overlay fixed inset-0 z-40 bg-white/98 backdrop-blur-xl flex flex-col pt-20 px-6 pb-8 md:hidden ${
+          menuOpen ? "open" : "opacity-0 invisible"
+        }`}
       >
         <nav className="flex flex-col gap-1">
           {navLinks?.map((l) => (

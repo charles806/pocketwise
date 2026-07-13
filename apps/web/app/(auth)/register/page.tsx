@@ -4,8 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import signUp from "../../../public/walletuicard.png";
-import logo from "../../../public/logo.png";
+import signUp from "../../walletuicard.png";
+import logo from "../../logo.png";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -73,7 +73,8 @@ const fieldSx = {
     },
     "&.Mui-focused": {
       backgroundColor: "#fff",
-      boxShadow: "0 0 0 6px rgba(124, 58, 237, 0.06), 0 0 40px rgba(124, 58, 237, 0.18)",
+      boxShadow:
+        "0 0 0 6px rgba(124, 58, 237, 0.06), 0 0 40px rgba(124, 58, 237, 0.18)",
     },
     "&.Mui-focused fieldset": {
       borderColor: "#7C3AED",
@@ -361,7 +362,9 @@ export default function SignUp() {
 
               <div className="mb-8">
                 <h1 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 tracking-tight mb-2">
-                  {step === 1 ? "Create your account" : "Tell us about yourself"}
+                  {step === 1
+                    ? "Create your account"
+                    : "Tell us about yourself"}
                 </h1>
                 <p className="text-slate-500 font-medium text-sm sm:text-base">
                   {step === 1
@@ -444,7 +447,7 @@ export default function SignUp() {
                                 <div
                                   key={index}
                                   className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${getStrengthColor(
-                                    index
+                                    index,
                                   )}`}
                                 />
                               ))}
@@ -453,7 +456,8 @@ export default function SignUp() {
                               </span>
                             </div>
                             <p className="text-[11px] text-slate-400 font-medium">
-                              Use 8+ characters with uppercase, numbers & symbols
+                              Use 8+ characters with uppercase, numbers &
+                              symbols
                             </p>
                           </div>
                         )}
@@ -476,9 +480,7 @@ export default function SignUp() {
                               <InputAdornment position="end">
                                 <IconButton
                                   aria-label="toggle password visibility"
-                                  onClick={() =>
-                                    setShowPassword(!showPassword)
-                                  }
+                                  onClick={() => setShowPassword(!showPassword)}
                                   edge="end"
                                   size="small"
                                   className="text-slate-400 hover:text-violet-600 transition-colors"
