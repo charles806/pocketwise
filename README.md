@@ -10,20 +10,36 @@ Built with real money via **Anchor BaaS** from day one.
 
 ## Architecture
 
-```
-┌──────────────┐      HTTPS      ┌─────────────────┐      Prisma      ┌─────────────────┐
-│  pocketwise  │ ──────────────> │  pocketwise     │ ──────────────> │  Neon            │
-│  -frontend   │                 │  -backend       │                  │  (PostgreSQL)    │
-│  (Next.js 16) │ <────────────── │  (Express 5)    │ <────────────── │                  │
-│  Vercel      │    JSON API     │  Vercel         │                  │                  │
-└──────────────┘                 └─────────────────┘                  └─────────────────┘
-                                       │
-                          ┌────────────┼────────────────┬───────────────────┐
-                          ▼            ▼                ▼                   ▼
-                    ┌──────────┐ ┌──────────┐ ┌──────────────┐ ┌─────────────────┐
-                    │ Anchor   │ │ Resend   │ │ BulkSMS      │ │ Firebase Cloud  │
-                    │ BaaS     │ │ (Email)  │ │ Nigeria (SMS)│ │ Messaging (Push)│
-                    └──────────┘ └──────────┘ └──────────────┘ └─────────────────┘
+```mermaid
+graph TD
+    subgraph "Vercel"
+        FE["PocketWise Frontend<br/>Next.js 16 · React 19"]
+        API["PocketWise Backend<br/>Express 5 · TypeScript · Prisma"]
+    end
+
+    subgraph "Infrastructure"
+        DB[("Neon PostgreSQL")]
+        RD[("Upstash Redis<br/>Rate Limiting · Cache")]
+    end
+
+    subgraph "Integrations"
+        ANCHOR["Anchor BaaS<br/>Banking · KYC · Transfers"]
+        RESEND["Resend<br/>Transactional Email"]
+        SMS["BulkSMS Nigeria<br/>SMS · OTP"]
+        FCM["Firebase Cloud<br/>Push Notifications"]
+        CLOUD["Cloudinary<br/>Profile Images"]
+        SENTRY["Sentry<br/>Error Monitoring"]
+    end
+
+    FE <-- "HTTPS / JSON API" --> API
+    API <-- "Prisma ORM" --> DB
+    API -.-> RD
+    API --> ANCHOR
+    API --> RESEND
+    API --> SMS
+    API --> FCM
+    API --> CLOUD
+    API -.-> SENTRY
 ```
 
 ---
