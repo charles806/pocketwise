@@ -569,10 +569,18 @@ function Page() {
                       max={SPLIT_RANGES[key]!.max}
                       value={split[key]}
                       onChange={(e) => updateSplit(key, Number(e.target.value))}
-                      className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#4f46e5]"
-                      style={{
-                        accentColor: color,
-                      }}
+                      className="slider w-full h-1.5! rounded-full cursor-pointer accent-(--slider-color)"
+                      style={
+                        {
+                          "--slider-color": color,
+                          "--fill-percent": `${
+                            ((split[key] - SPLIT_RANGES[key]!.min) /
+                              (SPLIT_RANGES[key]!.max -
+                                SPLIT_RANGES[key]!.min)) *
+                            100
+                          }%`,
+                        } as React.CSSProperties
+                      }
                     />
                   </div>
                 );
