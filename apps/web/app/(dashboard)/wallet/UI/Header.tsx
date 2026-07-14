@@ -2,11 +2,12 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import { ResponsiveNav } from "./ResponsiveNav";
-import { Bell } from "lucide-react";
+import { Bell, Settings } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
 import { Greeting } from "../../../../libs/utils";
 import { useFcmToken } from "../../../../hooks/useFcmToken";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -39,7 +40,7 @@ export const WalletHeader = () => {
   const greeting = Greeting();
 
   return (
-    <header className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-20 border-b border-gray-200 bg-white sticky top-0 z-10">
+    <header className="flex items-center justify-between px-4 sm:px-6 h-16 sm:h-20 border-b border-gray-200 bg-white sticky top-0 z-10">
       {/* Left */}
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="partOne relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-gray-100 cursor-pointer shrink-0">
@@ -88,12 +89,17 @@ export const WalletHeader = () => {
           )}
         </div>
         {/* Avatar */}
-        <div
-          className="w-9 h-9 rounded-full bg-[#4f46e5] text-white flex items-center justify-center text-sm font-semibold cursor-pointer"
-          onClick={() => router.push("/profile")}
-        >
-          {user?.firstName?.charAt(0)}
-        </div>
+        <Button
+            className="bg-white hover:bg-gray-100  active:scale-95 transition-all duration-200 shadow-sm border border-gray-200"
+            onClick={() => router.push("/profile")}
+            style={{
+              height: "40px",
+              minWidth: "40px",
+              borderRadius: "9999px",
+            }}
+          >
+          <Settings className="w-5 h-5 text-gray-600" />
+        </Button>
       </div>
     </header>
   );

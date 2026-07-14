@@ -41,7 +41,7 @@ const Wallet = () => {
       <PinSetupModal />
       <GoalModal />
       <main
-        className="min-h-screen mt-5! flex flex-col gap-5 sm:gap-8"
+        className="min-h-screen mt-5! flex flex-col gap-5 sm:gap-8 pb-10 sm:pb-16"
         style={{ backgroundColor: "#f8fafc" }}
       >
         {/* Balance Card */}
