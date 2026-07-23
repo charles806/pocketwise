@@ -25,11 +25,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Pocketwise: Smart Wallet & Money Manager",
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png", sizes: "32x32" }],
+    icon: [{ url: "/logo.png", type: "image/png" }],
     shortcut: ["/logo.png"],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png" }],
   },
   description:
     "Automatically split deposits into Spend, Savings, and Flex wallets. Build financial discipline without willpower—designed for Nigerian youth and students.",
