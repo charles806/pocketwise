@@ -1,7 +1,9 @@
-import { Redirect } from "expo-router";
+import React from 'react'
 
-export default function Index() {
-  // TODO: once a real authenticated home screen exists, check useAuth()
-  // here and redirect there instead when a session is already valid.
-  return <Redirect href="/login" />;
+const index = () => {
+  return (
+    <div>index</div>
+  )
 }
+
+export default index
