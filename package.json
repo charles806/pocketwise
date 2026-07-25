@@ -25,5 +25,13 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.18.14",
+    "@tanstack/react-query": "^5.101.4",
+    "expo-linear-gradient": "~56.0.4",
+    "lucide-react-native": "^1.26.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4"
+  }
 }
