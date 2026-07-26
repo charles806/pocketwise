@@ -1,4 +1,7 @@
+> `anchorRef` renamed to `baasRef` on 2026-07-25
+
 # PocketWise Security Audit Report
+
 **Date:** 2026-07-03
 **Scope:** apps/api (Express/Prisma), apps/web (Next.js), apps/mobile (Expo)
 **Stack:** Node.js/TypeScript/Express/Prisma/PostgreSQL, Turborepo monorepo, Redis (Upstash), Anchor BaaS (sandbox)
@@ -224,6 +227,7 @@
 ## LOW (good practice, not urgent)
 
 ### L-1: No refresh token rotation
+
 - **Location:** `apps/api/src/services/auth.service.ts:183-209`
 - **Detail:** Stolen refresh tokens remain valid for 7 days with no rotation or server-side
   tracking.
@@ -231,12 +235,14 @@
   every `/refresh` call) or add a `tokenVersion` to the User model.
 
 ### L-2: IP-only rate limiting on auth (weak against distributed attacks)
+
 - **Location:** `apps/api/src/routes/auth.routes.ts`
 - **Detail:** Login/signup keyed by IP only. A distributed attack from multiple IPs bypasses
   the limit. No per-email or per-account tracking.
 - **Recommendation:** Add per-email rate limiting in addition to per-IP.
 
 ### L-3: isLocked schema field is dead code — never enforced
+
 - **Location:** `apps/api/prisma/schema.prisma:73`, `apps/api/src/services/wallet.service.ts:78-96`
 - **Detail:** `isLocked` exists on the Wallet model but no transfer service function ever
   checks it. The emergency wallet is protected through other means (spend-only debit),
@@ -245,6 +251,7 @@
   field.
 
 ### L-4: lookupUser cache not invalidated on profile update
+
 - **Location:** `apps/api/src/services/auth.service.ts:480`
 - **Detail:** After updating profile, `userProfile` cache is invalidated but
   `userLookup` is not. Other users may see stale name/username for up to 10 minutes.
@@ -252,6 +259,7 @@
 - **Recommendation:** Also invalidate the lookup cache on profile update.
 
 ### L-5: Inconsistent Zod validation pattern
+
 - **Location:** `bank-transfer.routes.ts:7`, `internal-transfer.routes.ts:9-15`,
   `savings-goal.routes.ts:18-23`
 - **Detail:** Several routes skip the `validate()` middleware and do Zod parsing inside
@@ -259,6 +267,7 @@
 - **Recommendation:** Move to consistent middleware-first validation for all routes.
 
 ### L-6: Helmet CSP not customized for fintech app
+
 - **Location:** `apps/api/src/server.ts:33`
 - **Detail:** Helmet applied with zero configuration — CSP header is permissive
   (no directives set).
@@ -266,23 +275,27 @@
   `connect-src`, `frame-ancestors`.
 
 ### L-7: @types/bcrypt in dependencies instead of devDependencies
+
 - **Location:** `apps/api/package.json:31`
 - **Detail:** Build-time only type package incorrectly listed in `dependencies`.
 - **Recommendation:** Move to `devDependencies`.
 
 ### L-8: No rate limit on low-risk auth endpoints
+
 - **Location:** `apps/api/src/routes/auth.routes.ts:50-53`
 - **Detail:** `logout`, `me`, `lookup`, `goal` have no rate limiting. Minor abuse vector
   for log spam.
 - **Recommendation:** Add basic rate limiting for consistency.
 
 ### L-9: Multiple console.log statements in production TSX files
+
 - **Location:** `GoalModal.tsx:70,91,94`, `useFcmToken.ts:18-20`,
   `RecentTransactions.tsx:88`
 - **Detail:** Not sensitive, but should be cleaned up for production.
 - **Recommendation:** Remove or guard behind `NODE_ENV !== 'production'`.
 
 ### L-10: isLocked never toggled after emergency unlock completes
+
 - **Location:** `apps/api/src/services/emergency-unlock.service.ts`
 - **Detail:** Despite having an `isLocked` field on the Wallet model, the emergency unlock
   flow never sets `isLocked: false`.
@@ -294,6 +307,7 @@
 ## PASSED (confirmed secure)
 
 ### Authentication & Session
+
 - **JWT secrets in env only:** All JWT operations (`auth.middleware.ts:5`,
   `auth.service.ts:98,104,156,162,187,200`) read from `process.env` only.
   No hardcoded secrets in source. `.env` is gitignored.
@@ -311,6 +325,7 @@
   confusion attacks.
 
 ### Authorization & IDOR
+
 - **No IDOR vulnerabilities found across all 30+ endpoints.** Every controller derives
   `userId` exclusively from `req.user.id` (JWT auth middleware). No endpoint accepts
   `userId` from body, params, or query string for ownership purposes. Specific verified
@@ -327,6 +342,7 @@
   - Bank recipients → `bank-recipient.service.ts:53-55` — filtered by JWT userId
 
 ### Transfer Security
+
 - **Transfer PIN verified server-side on P2P and internal transfers:**
   `wallet.routes.ts:18`, `internal-transfer.routes.ts:13` — `verifyTransferPin`
   middleware applied.
@@ -341,12 +357,14 @@
   `SELECT ... FOR UPDATE` used inside `$transaction`.
 
 ### Webhook Security
+
 - **Idempotency / replay protection:** `webhook.service.ts:43-51` — checks
   `prisma.transaction.findFirst` against `anchorRef` before processing.
 - **Catch block returns 200:** `webhook.controller.ts:45` — internal processing errors
   return 200 to Anchor.
 
 ### Input Validation
+
 - **Negative amounts prevented everywhere:** All Zod schemas use `.positive()` or
   `.min(N)` with N > 0. Service layers also double-check.
 - **accountNumber validated as exactly 10 digits:** `transfer.validator.ts:13` —
@@ -357,15 +375,17 @@
 - **No endpoint accepts userId from req.body:** Verified across all controllers.
 
 ### Rate Limiting
+
 - **Signup rate limited:** 3 req/60s per IP.
 - **Forgot-password / OTP / reset-password / change-password all rate limited.**
 - **P2P transfers rate limited:** 10 req/60s per IP+user.
 - **Internal transfers rate limited:** 10 req/60s per IP+user.
 - **KEEP_ALIVE_SECRET is strong:** 64-char lowercase hex string = 256-bit entropy.
-- **All /api/internal/* endpoints require keepAliveAuthMiddleware:**
+- _*All /api/internal/* endpoints require keepAliveAuthMiddleware:_*
   `server.ts:83,151,157`, `keep-alive-auth.middleware.ts:4-31`.
 
 ### Data Exposure
+
 - **FCM token** only returned to its owner during update — no unnecessary exposure.
 - **Anchor keys** stored only in `.env`, not hardcoded in source.
 - **Firebase service account** loaded from env var (`FIREBASE_SERVICE_ACCOUNT_JSON`) —
@@ -377,6 +397,7 @@
   confirms none tracked.
 
 ### Caching
+
 - **Wallet balance never served from cache during transfers:**
   `wallet.service.ts:67-113` — `getWallet()` caches only structural metadata
   (id, type, isLocked); balance always re-fetched fresh from DB. Transfer functions
@@ -391,16 +412,18 @@
   (`wallet.service.ts:455,554`). Goals cache invalidated on contribute/complete.
 
 ### Frontend
+
 - **Access token stored in React state (in-memory only):** `AuthContext.tsx:62` —
   `useState<string | null>(null)`. No localStorage/sessionStorage for tokens.
   Correct architecture.
-- **Firebase keys use NEXT_PUBLIC_ prefix:** Appropriate for Firebase client SDK
+- **Firebase keys use NEXT_PUBLIC\_ prefix:** Appropriate for Firebase client SDK
   credentials (inherently public).
 - **No localStorage usage for sensitive data:** Zero instances across all TSX/TS files.
 - **No hardcoded http:// URLs in frontend production code:** All `http://` references
   are localhost (development only).
 
 ### Dependencies & Configuration
+
 - **No obviously outdated/packages with known CVEs:** All deps at current 2026 versions.
   `jsonwebtoken` ^9.0.3 (post-fix for CVE-2022-23529). Express 5 stable. Prisma 6.19.3.
 - **Helmet applied globally:** `server.ts:33` — provides X-Content-Type-Options,
@@ -414,11 +437,11 @@
 ## SUMMARY
 
 | Severity | Count |
-|----------|-------|
-| CRITICAL | 5 |
-| HIGH | 7 |
-| MEDIUM | 9 |
-| LOW | 10 |
+| -------- | ----- |
+| CRITICAL | 5     |
+| HIGH     | 7     |
+| MEDIUM   | 9     |
+| LOW      | 10    |
 
 **Overall launch readiness: NOT READY** — 5 critical vulnerabilities involving real-money
 risk (double-spend race conditions, broken webhook signature verification, bank-transfer
@@ -427,4 +450,4 @@ real funds.
 
 ---
 
-*Audit performed 2026-07-03. Read-only — no files were modified.*
+_Audit performed 2026-07-03. Read-only — no files were modified._

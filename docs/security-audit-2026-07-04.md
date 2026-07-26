@@ -1,9 +1,11 @@
+> `anchorRef` renamed to `baasRef` on 2026-07-25
+
 # PocketWise Security Audit Report
 
 **Date:** 2026-07-04  
 **Scope:** Full-stack audit (apps/api, apps/web, apps/mobile)  
 **Methodology:** Manual code review, static analysis  
-**Status:** READ-ONLY audit — no files modified  
+**Status:** READ-ONLY audit — no files modified
 
 ---
 
@@ -15,7 +17,10 @@
 - **What an attacker could do:** The HMAC is computed as hex (`digest("hex")`), then the hex string is converted to base64, then compared against the `x-anchor-signature` header. Any Anchor webhook signature (which is likely raw hex or raw base64) will fail this comparison. Every legitimate deposit webhook is silently discarded with HTTP 200. Users never get credited, and the system is blind to incoming deposits.
 - **Recommended fix:** Remove the double encoding. Compute the HMAC and compare directly:
   ```ts
-  const hash = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  const hash = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex");
   return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
   ```
   Verify the exact format Anchor sends (hex vs base64) against their docs.
@@ -277,13 +282,13 @@
 
 ## SUMMARY
 
-| Severity | Count |
-|----------|-------|
-| **Critical** | 3 |
-| **High** | 5 |
-| **Medium** | 10 |
-| **Low** | 7 |
-| **Passed** | 40+ checks confirmed |
+| Severity     | Count                |
+| ------------ | -------------------- |
+| **Critical** | 3                    |
+| **High**     | 5                    |
+| **Medium**   | 10                   |
+| **Low**      | 7                    |
+| **Passed**   | 40+ checks confirmed |
 
 **Overall launch readiness: NOT READY**
 

@@ -25,8 +25,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Pocketwise: Smart Wallet & Money Manager",
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png" }],
-    shortcut: ["/logo.png"],
+    icon: [
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: ["/favicon-96x96.png"],
     apple: [{ url: "/apple-touch-icon.png", type: "image/png" }],
   },
   description:

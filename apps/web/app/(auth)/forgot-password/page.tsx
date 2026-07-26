@@ -195,7 +195,7 @@ const ForgotPassword = () => {
                 src={loginImage}
                 alt="PocketWise App Interface"
                 fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                // sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-contain drop-shadow-2xl"
                 priority
               />

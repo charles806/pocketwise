@@ -40,7 +40,7 @@ export const webhookService = {
 
     // 2. Idempotency Check (outside transaction — optimization to avoid work)
     const existingTransaction = await prisma.transaction.findFirst({
-      where: { anchorRef: anchorReference },
+      where: { baasRef: anchorReference },
     });
 
     if (existingTransaction) {
@@ -103,7 +103,7 @@ export const webhookService = {
               type: "deposit",
               amount: allocation.amount,
               status: "success",
-              anchorRef: `${data.reference}-${allocation.walletType}`,
+              baasRef: `${data.reference}-${allocation.walletType}`,
               reference: crypto.randomUUID(),
             },
           });

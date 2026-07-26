@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 
 const BULKSMS_API_TOKEN = process.env.BULKSMS_API_TOKEN;
 const BULKSMS_SENDER_ID = process.env.BULKSMS_SENDER_ID;
-const BULKSMS_BASE_URL = "https://www.bulksmsnigeria.com/api/v2";
+const BULKSMS_BASE_URL = process.env.BULKSMS_BASE_URL;
 
 export function formatNigerianPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, "");
