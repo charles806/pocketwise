@@ -35,16 +35,16 @@ const formatNaira = (amount: number) =>
     maximumFractionDigits: 2,
   })}`;
 
-const DEFAULT_BALANCE = 0;
+const defaultBalance = 0;
 
-const DEFAULT_WALLETS = [
+const defaultWallets = [
   { type: "spend", balance: 0, percent: 50 },
   { type: "savings", balance: 0, percent: 30 },
   { type: "emergency", balance: 0, percent: 10 },
   { type: "flex", balance: 0, percent: 10 },
 ];
 
-const DEFAULT_TRANSACTIONS: {
+const defaultTransactions: {
   id: string;
   title: string;
   time: string;
@@ -128,13 +128,7 @@ const WalletItem = ({
   badge?: React.ReactNode;
 }) => {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.walletItem,
-        pressed && { opacity: 0.85 },
-      ]}
-    >
+    <TouchableOpacity activeOpacity={0.8} style={styles.walletItem}>
       <View style={styles.walletItemLeft}>
         <View style={styles.walletItemLeftRow}>
           <View style={[styles.dot, { backgroundColor: dotColor }]} />
@@ -143,12 +137,14 @@ const WalletItem = ({
             <Text style={styles.walletSub}>{percentage} of deposits</Text>
           </View>
         </View>
+      </View>
+      <View style={styles.walletBalanceWrap}>
+        <Text style={[styles.walletBalance, { color: balanceColor }]}>
+          {balance}
+        </Text>
         {badge}
       </View>
-      <Text style={[styles.walletBalance, { color: balanceColor }]}>
-        {balance}
-      </Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 
@@ -158,18 +154,18 @@ const WalletCards = ({
   onOpenEmergencyModal: () => void;
 }) => {
   const getBalance = (type: string) => {
-    const wallet = DEFAULT_WALLETS.find((w) => w.type === type);
+    const wallet = defaultWallets.find((w) => w.type === type);
     return formatNaira(wallet ? wallet.balance : 0);
   };
   const getPercent = (type: string) => {
-    const wallet = DEFAULT_WALLETS.find((w) => w.type === type);
+    const wallet = defaultWallets.find((w) => w.type === type);
     return `${wallet ? wallet.percent : 0}%`;
   };
 
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>My Wallets</Text>
-      <View style={{ gap: 10 }}>
+      <View style={{ gap: 14 }}>
         <WalletItem
           label="Spend"
           percentage={getPercent("spend")}
@@ -248,7 +244,7 @@ const TransactionItem = ({
 };
 
 const RecentTransactions = () => {
-  const transactions = DEFAULT_TRANSACTIONS;
+  const transactions = defaultTransactions;
 
   return (
     <View style={styles.card}>
@@ -266,8 +262,8 @@ const RecentTransactions = () => {
           </View>
           <Text style={styles.emptyTitle}>No transactions yet</Text>
           <Text style={styles.emptySubtitle}>
-            Add money to your wallet to get started. Your activity will
-            appear here automatically.
+            Add money to your wallet to get started. Your activity will appear
+            here automatically.
           </Text>
           <TouchableOpacity style={styles.emptyCta} activeOpacity={0.85}>
             <Text style={styles.emptyCtaText}>Add Money</Text>
@@ -372,8 +368,8 @@ const EmergencyUnlockModal = ({
               </View>
               <Text style={styles.modalTitle}>Unlock Emergency Wallet</Text>
               <Text style={styles.modalBody}>
-                This money is meant for real emergencies. You'll need to tell
-                us why before you can access it.
+                This money is meant for real emergencies. You'll need to tell us
+                why before you can access it.
               </Text>
               <TouchableOpacity
                 onPress={() => setStep(2)}
@@ -387,9 +383,7 @@ const EmergencyUnlockModal = ({
 
           {step === 2 && (
             <View>
-              <Text style={styles.modalTitleLeft}>
-                What's the emergency?
-              </Text>
+              <Text style={styles.modalTitleLeft}>What's the emergency?</Text>
               <TextInput
                 value={reason}
                 onChangeText={setReason}
@@ -434,8 +428,8 @@ const EmergencyUnlockModal = ({
               </View>
               <View style={styles.modalWarningBox}>
                 <Text style={styles.modalWarningText}>
-                  Unlocking gives you one withdrawal from this wallet. It
-                  will lock again automatically after you use it.
+                  Unlocking gives you one withdrawal from this wallet. It will
+                  lock again automatically after you use it.
                 </Text>
               </View>
               <View style={styles.modalRow}>
@@ -472,18 +466,14 @@ const EmergencyUnlockModal = ({
               >
                 <Unlock size={28} color="#059669" />
               </View>
-              <Text style={styles.modalTitle}>
-                Emergency Wallet Unlocked
-              </Text>
+              <Text style={styles.modalTitle}>Emergency Wallet Unlocked</Text>
               <Text style={styles.modalBody}>
                 You can now transfer from this wallet.
               </Text>
               <View style={{ width: "100%", marginBottom: 20 }}>
                 <Text style={styles.modalReasonLabel}>Your reason</Text>
                 <View style={styles.modalReasonBox}>
-                  <Text style={styles.modalReasonText}>
-                    {submittedReason}
-                  </Text>
+                  <Text style={styles.modalReasonText}>{submittedReason}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -560,7 +550,7 @@ const Wallet = () => {
         contentContainerStyle={styles.screenContent}
       >
         <BalanceCard
-          totalBalance={DEFAULT_BALANCE}
+          totalBalance={defaultBalance}
           onSend={() => router.push("/transfer" as any)}
         />
 
@@ -649,9 +639,10 @@ const styles = StyleSheet.create({
   },
   balanceAmount: {
     color: "#fff",
-    fontSize: 32,
+    fontSize: 50,
     fontWeight: "800",
     marginTop: 4,
+    letterSpacing: 0.25,
   },
   actionRow: { flexDirection: "row", gap: 12 },
   actionButton: {
@@ -681,20 +672,33 @@ const styles = StyleSheet.create({
   },
 
   walletItem: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  walletItemLeft: {
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  walletItemLeftRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "#f8fafc",
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
+    gap: 20,
   },
-  walletItemLeft: { flex: 1, position: "relative" },
-  walletItemLeftRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   dot: { width: 12, height: 12, borderRadius: 6 },
-  walletLabel: { fontSize: 15, fontWeight: "700", color: "#0f172a" },
-  walletSub: { fontSize: 12, color: "#94a3b8", marginTop: 2 },
+  walletLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  walletSub: {
+    fontSize: 12,
+    color: "#94a3b8",
+    marginTop: 3,
+  },
+  walletBalanceWrap: {
+    justifyContent: "center",
+  },
   walletBalance: {
     fontSize: 15,
     fontWeight: "700",
@@ -705,7 +709,7 @@ const styles = StyleSheet.create({
   lockBadge: {
     position: "absolute",
     top: -6,
-    left: -6,
+    right: -15,
     width: 18,
     height: 18,
     borderRadius: 9,
