@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
+const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
 const fetchWallet = async (accessToken: string) => {
   const response = await fetch(`${API_BASE}/api/v1/wallets`, {
