@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 type Direction = "sent" | "received" | "deposit";

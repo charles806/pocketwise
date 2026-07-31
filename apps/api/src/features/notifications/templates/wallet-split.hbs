@@ -1,0 +1,62 @@
+
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
+
+        <div style="background:#eef2ff; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+            <img src="./logo.png" alt="Logo" width="32" height="32">
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 4px; letter-spacing:-0.3px;">Money Landed 💰</h1>
+          <p style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#4f46e5; margin:0; letter-spacing:-0.3px;">₦{{formattedTotal}}</p>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 20px;">Your deposit has arrived and been distributed according to your split config.</p>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden;">
+            <thead>
+              <tr>
+                <th style="background:#eef2ff; padding:10px 14px; text-align:left; color:#475569; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Wallet</th>
+                <th style="background:#eef2ff; padding:10px 14px; text-align:right; color:#475569; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              {{#each allocations}}
+              <tr>
+                <td style="border-bottom:1px solid #f1f5f9; padding:12px 14px; color:#0f172a; font-weight:500; font-size:14px;">
+                  <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:{{color}}; margin-right:10px; vertical-align:middle;"></span>
+                  <span style="vertical-align:middle;">{{walletLabel}} Wallet</span>
+                </td>
+                <td style="border-bottom:1px solid #f1f5f9; padding:12px 14px; text-align:right; font-weight:700; color:{{color}}; font-size:15px;">
+                  ₦{{amount}}
+                </td>
+              </tr>
+{{/each}}
+            </tbody>
+          </table>
+
+          <p style="margin:20px 0 0;">Your money is exactly where it should be. Keep it moving. 🚀</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>

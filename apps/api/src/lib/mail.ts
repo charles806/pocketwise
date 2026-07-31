@@ -15,7 +15,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
       to: email,
       subject: "Welcome to PocketWise",
       html: `
-<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+<body style="margin:0; padding:24px 16px; background:['#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
   <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
     <tr>
       <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">

@@ -105,8 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Try to restore the session on app launch
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshSession();
-  }, []);
+  }, [refreshSession]);
 
   // Inactivity handling — phones don't have a "mouse stopped moving" signal,
   // so instead we timestamp when the app backgrounds, then check elapsed

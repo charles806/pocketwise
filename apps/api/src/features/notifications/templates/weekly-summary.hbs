@@ -1,0 +1,71 @@
+
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
+    <tr>
+      <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
+
+        <div style="background:#eef2ff; padding:28px 32px 20px; text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              <td style="vertical-align:middle;">
+           <img src="./logo.png" alt="Logo" width="32" height="32">
+              </td>
+              <td style="padding-left:10px; vertical-align:middle;">
+                <span style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:20px; font-weight:700; color:#0f172a; letter-spacing:-0.5px;">Pocket<span style="color:#5B4FCF;">Wise</span></span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="font-family:'Plus Jakarta Sans',Arial,sans-serif; font-size:22px; font-weight:700; color:#0f172a; margin:16px 0 0; letter-spacing:-0.3px;">Your Weekly Summary 📊</h1>
+        </div>
+
+        <div style="padding:24px 32px 32px; color:#475569; font-size:15px; line-height:1.6;">
+
+          <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hey there,</p>
+          <p style="margin:0 0 20px;">Here's how your money moved this week.</p>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+            <tr>
+              <td style="width:50%; padding-right:6px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; background:#fef2f2; border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px; text-align:center;">
+                      <p style="margin:0 0 4px; color:#991b1b; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Spent</p>
+                      <p style="margin:0; color:#dc2626; font-size:22px; font-weight:700; letter-spacing:-0.5px;">₦{{formattedSpent}}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td style="width:50%; padding-left:6px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; background:#f0fdf4; border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px; text-align:center;">
+                      <p style="margin:0 0 4px; color:#166534; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase;">Saved</p>
+                      <p style="margin:0; color:#16a34a; font-size:22px; font-weight:700; letter-spacing:-0.5px;">₦{{formattedSaved}}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <div style="background:#f8fafc; border-left:4px solid #4f46e5; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#475569; font-size:14px;">{{#if isMoreThanLastWeek}}You saved ₦{{savedDiff}} more than last week — keep it up! 🔥{{/if}}{{#if isLessThanLastWeek}}You saved ₦{{savedDiff}} less than last week.{{/if}}{{#if isSameAsLastWeek}}Same savings as last week.{{/if}}</p>
+          </div>{{#if goalTitle}}{{#if goalProgressPercent}}
+
+          <div style="background:#fffbeb; border-left:4px solid #d97706; padding:14px 16px; margin:20px 0; border-radius:6px;">
+            <p style="margin:0; color:#d97706; font-weight:600; font-size:14px;">🎯 {{goalTitle}} — {{goalProgressPercent}}% complete</p>
+          </div>{{/if}}{{/if}}
+
+          <p style="margin:0;">Keep going — every smart choice adds up. 💪</p>
+
+          <p style="margin:24px 0 0; font-size:14px; color:#475569;">— The PocketWise Team</p>
+        </div>
+
+        <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
+          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</body>
