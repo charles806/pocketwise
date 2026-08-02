@@ -2,7 +2,13 @@ import React from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Wallet, ArrowLeftRight, Target, Bell, User } from "lucide-react-native";
+import {
+  Wallet,
+  ArrowLeftRight,
+  Target,
+  Bell,
+  User,
+} from "lucide-react-native";
 
 const ACTIVE_COLOR = "#7c3aed";
 const INACTIVE_COLOR = "#94a3b8";
@@ -49,7 +55,11 @@ export default function TabsLayout() {
           title: "Transactions",
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
-              <ArrowLeftRight color={color} size={22} strokeWidth={focused ? 2.4 : 2} />
+              <ArrowLeftRight
+                color={color}
+                size={22}
+                strokeWidth={focused ? 2.4 : 2}
+              />
             </View>
           ),
         }}
@@ -85,6 +95,25 @@ export default function TabsLayout() {
               <User color={color} size={22} strokeWidth={focused ? 2.4 : 2} />
             </View>
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="goals/create"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/change-pin"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/forgot-pin"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

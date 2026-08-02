@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { View, ScrollView } from "react-native";
 import { useWallet } from "@/hooks/useWallet";
 import { useAuth } from "@/context/AuthContext";
-import { WalletHeader } from "./UI/Header";
-import { PinSetupModal } from "./UI/PinSetupModal";
-import { GoalModal } from "./UI/GoalModal";
-import { BalanceCard } from "./UI/BalanceCard";
-import { WalletCards } from "./UI/WalletCard";
-import { RecentTransactions } from "./UI/RecentTransactions";
-import { SpendingOverview } from "./UI/SpendingOverview";
-import { EmergencyUnlockModal } from "./UI/EmergencyUnlockModal";
+import { WalletHeader } from "@/components/wallet/Header";
+import { PinSetupModal } from "@/components/wallet/PinSetupModal";
+import { GoalModal } from "@/components/wallet/GoalModal";
+import { BalanceCard } from "@/components/wallet/BalanceCard";
+import { WalletCards } from "@/components/wallet/WalletCard";
+import { RecentTransactions } from "@/components/wallet/RecentTransactions";
+import { SpendingOverview } from "@/components/wallet/SpendingOverview";
+import { EmergencyUnlockModal } from "@/components/wallet/EmergencyUnlockModal";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 

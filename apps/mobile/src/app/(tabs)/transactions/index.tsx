@@ -1,37 +1,69 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
+  StyleSheet,
+  ScrollView,
   TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
+  Pressable,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ArrowUpRight,
   ArrowDownLeft,
-  Wallet,
+  Wallet as WalletIcon,
   ChevronDown,
   Receipt,
+  Bell,
+  Settings,
 } from "lucide-react-native";
-import { useTransactions, Transaction } from "@/hooks/useTransactions";
 import { TransactionDetailModal } from "@/components/TransactionDetailModal";
+import { useTransactions } from "@/hooks/useTransactions";
 
+type Direction = "sent" | "received" | "deposit";
 type FilterTab = "all" | "sent" | "received" | "deposit";
 
-const FILTERS: { key: FilterTab; label: string }[] = [
+interface Transaction {
+  id: string;
+  type: string;
+  direction: Direction;
+  amount: number;
+  reason: string | null;
+  status: string;
+  createdAt: string;
+  counterpartyName: string | null;
+}
+
+interface MonthGroup {
+  key: string;
+  label: string;
+  transactions: Transaction[];
+  totalIn: number;
+  totalOut: number;
+}
+
+const filters: { key: FilterTab; label: string }[] = [
   { key: "all", label: "All" },
   { key: "sent", label: "Sent" },
   { key: "received", label: "Received" },
   { key: "deposit", label: "Deposits" },
 ];
 
-function formatNaira(amount: number) {
-  return `₦${(amount ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning,";
+  if (hour < 18) return "Good afternoon,";
+  return "Good evening,";
+};
 
-function formatDate(dateStr: string) {
+const formatNaira = (amount: number) =>
+  `₦${Math.abs(amount).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-NG", {
     day: "numeric",
@@ -40,19 +72,19 @@ function formatDate(dateStr: string) {
     minute: "2-digit",
     hour12: true,
   });
-}
+};
 
-function formatMonthKey(dateStr: string) {
+const formatMonthKey = (dateStr: string) => {
   const d = new Date(dateStr);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
+};
 
-function formatMonthLabel(dateStr: string) {
+const formatMonthLabel = (dateStr: string) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-NG", { month: "long", year: "numeric" });
-}
+};
 
-function directionConfig(direction: string) {
+const directionConfig = (direction: Direction) => {
   switch (direction) {
     case "sent":
       return {
@@ -72,96 +104,198 @@ function directionConfig(direction: string) {
       };
     case "deposit":
       return {
-        icon: Wallet,
-        bg: "#eef2ff",
+        icon: WalletIcon,
+        bg: "#e0e7ff",
         color: "#4f46e5",
         prefix: "+",
         amountColor: "#059669",
       };
-    default:
-      return {
-        icon: ArrowDownLeft,
-        bg: "#f1f5f9",
-        color: "#64748b",
-        prefix: "",
-        amountColor: "#64748b",
-      };
   }
-}
+};
 
-function getFallbackLabel(direction: string, type: string) {
+const getFallbackLabel = (direction: Direction, type: string) => {
   if (direction === "sent") return "Transfer Out";
   if (direction === "received") return "Transfer In";
   if (direction === "deposit") return "Deposit";
   return type;
-}
+};
 
-interface MonthGroup {
-  key: string;
-  label: string;
-  transactions: Transaction[];
-  totalIn: number;
-  totalOut: number;
-}
+const TransactionsHeader = () => {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const greeting = getGreeting();
+  const unreadCount = 0;
+
+  return (
+    <View style={[styles.header, { paddingTop: insets.top * 1.75 }]}>
+      <View style={styles.headerLeft}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>?</Text>
+        </View>
+        <View>
+          <Text style={styles.greetingText}>{greeting}</Text>
+          <Text style={styles.greetingName}>there 👋</Text>
+        </View>
+      </View>
+
+      <View style={styles.headerRight}>
+        <View>
+          <TouchableOpacity
+            onPress={() => router.push("/notifications" as any)}
+            style={styles.headerIconBtn}
+            activeOpacity={0.8}
+          >
+            <Bell size={19} color="#475569" />
+          </TouchableOpacity>
+          {unreadCount > 0 && (
+            <View style={styles.headerBadge}>
+              <Text style={styles.headerBadgeText}>
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </Text>
+            </View>
+          )}
+        </View>
+        <TouchableOpacity
+          onPress={() => router.push("/profile" as any)}
+          style={styles.headerIconBtn}
+          activeOpacity={0.8}
+        >
+          <Settings size={19} color="#475569" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const FilterTabs = ({
+  active,
+  onChange,
+}: {
+  active: FilterTab;
+  onChange: (f: FilterTab) => void;
+}) => {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.filterRow}
+    >
+      {filters.map((f) => {
+        const isActive = active === f.key;
+        return (
+          <TouchableOpacity
+            key={f.key}
+            onPress={() => onChange(f.key)}
+            activeOpacity={0.85}
+            style={[styles.filterChip, isActive && styles.filterChipActive]}
+          >
+            <Text
+              style={[
+                styles.filterChipText,
+                isActive && styles.filterChipTextActive,
+              ]}
+            >
+              {f.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  );
+};
+
+const TransactionRow = ({
+  tx,
+  onPress,
+}: {
+  tx: Transaction;
+  onPress: () => void;
+}) => {
+  const cfg = directionConfig(tx.direction);
+  const Icon = cfg.icon;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.txnRow, pressed && { opacity: 0.7 }]}
+    >
+      <View style={[styles.txnIconWrap, { backgroundColor: cfg.bg }]}>
+        <Icon size={19} color={cfg.color} />
+      </View>
+      <View style={styles.txnTextWrap}>
+        <Text style={styles.txnTitle} numberOfLines={1}>
+          {tx.counterpartyName || getFallbackLabel(tx.direction, tx.type)}
+        </Text>
+        <Text style={styles.txnDate}>{formatDate(tx.createdAt)}</Text>
+      </View>
+      <Text style={[styles.txnAmount, { color: cfg.amountColor }]}>
+        {cfg.prefix}
+        {formatNaira(tx.amount)}
+      </Text>
+    </Pressable>
+  );
+};
+
+const MonthGroupCard = ({
+  group,
+  expanded,
+  onToggle,
+  onSelectTx,
+}: {
+  group: MonthGroup;
+  expanded: boolean;
+  onToggle: () => void;
+  onSelectTx: (tx: Transaction) => void;
+}) => {
+  return (
+    <View style={styles.monthCard}>
+      <TouchableOpacity
+        onPress={onToggle}
+        activeOpacity={0.8}
+        style={styles.monthHeader}
+      >
+        <View style={styles.monthHeaderLeft}>
+          <Text style={styles.monthLabel}>{group.label}</Text>
+          <Text style={styles.monthTotals}>
+            +{formatNaira(group.totalIn)} / -{formatNaira(group.totalOut)}
+          </Text>
+        </View>
+        <ChevronDown
+          size={16}
+          color="#94a3b8"
+          style={{ transform: [{ rotate: expanded ? "180deg" : "0deg" }] }}
+        />
+      </TouchableOpacity>
+
+      {expanded && (
+        <View style={styles.monthBody}>
+          {group.transactions.map((tx) => (
+            <TransactionRow
+              key={tx.id}
+              tx={tx}
+              onPress={() => onSelectTx(tx)}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+};
 
 const Page = () => {
-  const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
-  const [page, setPage] = useState(1);
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const { data, isLoading } = useTransactions(activeFilter, page, true);
+  const { data, isLoading } = useTransactions(activeFilter, 1, true);
+  const transactions = React.useMemo(
+    () => data?.transactions ?? [],
+    [data?.transactions],
+  );
 
-  React.useEffect(() => {
-    if (data?.transactions) {
-      if (page === 1) {
-        setAllTransactions(data.transactions);
-      } else {
-        setAllTransactions((prev) => [...prev, ...data.transactions]);
-      }
-    }
-  }, [data, page]);
-
-  React.useEffect(() => {
-    setPage(1);
-    setAllTransactions([]);
-  }, [activeFilter]);
-
-  React.useEffect(() => {
-    if (allTransactions.length > 0) {
-      const mostRecent = formatMonthKey(allTransactions[0].createdAt);
-      setExpandedMonths(new Set([mostRecent]));
-    }
-  }, [allTransactions]);
-
-  const toggleMonth = (key: string) => {
-    setExpandedMonths((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  const loadMore = () => {
-    if (data?.hasMore && !isLoading) {
-      setPage((p) => p + 1);
-    }
-  };
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    setPage(1);
-    setAllTransactions([]);
-    setRefreshing(false);
-  }, []);
-
-  const monthGroups: MonthGroup[] = useMemo(() => {
+  const monthGroups: MonthGroup[] = React.useMemo(() => {
     const groups: Record<string, Transaction[]> = {};
-    for (const tx of allTransactions) {
+    for (const tx of transactions) {
       const key = formatMonthKey(tx.createdAt);
       if (!groups[key]) groups[key] = [];
       groups[key].push(tx);
@@ -177,271 +311,303 @@ const Page = () => {
           .reduce((s, t) => s + Math.abs(t.amount), 0);
         return {
           key,
-          label: formatMonthLabel(txs[0].createdAt),
+          label: formatMonthLabel(txs[0]!.createdAt),
           transactions: txs,
           totalIn,
           totalOut,
         };
       });
-  }, [allTransactions]);
+  }, [transactions]);
 
-  if (isLoading && page === 1) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#f8fafc",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <ActivityIndicator color="#4f46e5" size="large" />
-      </View>
-    );
-  }
-
-  const renderTransaction = (tx: Transaction) => {
-    const cfg = directionConfig(tx.direction);
-    const Icon = cfg.icon;
-    return (
-      <TouchableOpacity
-        key={tx.id}
-        onPress={() => setSelectedTx(tx)}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          padding: 12,
-          borderRadius: 12,
-        }}
-        activeOpacity={0.7}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: cfg.bg,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon size={20} color={cfg.color} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{ fontSize: 13, fontWeight: "600", color: "#0f172a" }}
-            numberOfLines={1}
-          >
-            {tx.counterpartyName || getFallbackLabel(tx.direction, tx.type)}
-          </Text>
-          <Text style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
-            {formatDate(tx.createdAt)}
-          </Text>
-        </View>
-        <Text
-          style={{ fontSize: 13, fontWeight: "700", color: cfg.amountColor }}
-        >
-          {cfg.prefix}
-          {formatNaira(Math.abs(tx.amount))}
-        </Text>
-      </TouchableOpacity>
-    );
+  const toggleMonth = (key: string) => {
+    setExpandedMonths((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   };
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: "#f8fafc", paddingTop: insets.top }}
-    >
-      <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "800",
-            color: "#0f172a",
-            textAlign: "center",
-          }}
-        >
-          Transaction History
-        </Text>
-        <Text
-          style={{
-            fontSize: 12,
-            color: "#64748b",
-            textAlign: "center",
-            marginTop: 2,
-          }}
-        >
-          View and manage all your transactions
-        </Text>
-      </View>
+    <View style={styles.root}>
+      <TransactionsHeader />
 
-      <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          {FILTERS.map((f) => (
-            <TouchableOpacity
-              key={f.key}
-              onPress={() => setActiveFilter(f.key)}
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                borderRadius: 16,
-                backgroundColor: activeFilter === f.key ? "#4f46e5" : "#f8fafc",
-                borderWidth: 1,
-                borderColor: activeFilter === f.key ? "#4f46e5" : "#e2e8f0",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: "600",
-                  color: activeFilter === f.key ? "#fff" : "#64748b",
-                }}
-              >
-                {f.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.screenContent}
+      >
+        <View style={styles.titleWrap}>
+          <Text style={styles.title}>Transaction History</Text>
+          <Text style={styles.subtitle}>
+            View and manage all your transactions
+          </Text>
         </View>
-      </View>
 
-      {allTransactions.length === 0 ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 32,
+        <FilterTabs
+          active={activeFilter}
+          onChange={(filter) => {
+            setActiveFilter(filter);
+            setSelectedTx(null);
           }}
-        >
-          <View
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              backgroundColor: "#f1f5f9",
-              borderWidth: 1,
-              borderColor: "#e2e8f0",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 16,
-            }}
-          >
-            <Receipt size={28} color="#94a3b8" />
+        />
+
+        {isLoading ? (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconWrap}>
+              <Receipt size={26} color="#94a3b8" />
+            </View>
+            <Text style={styles.emptyTitle}>Loading transactions…</Text>
+            <Text style={styles.emptySubtitle}>
+              Fetching your latest activity.
+            </Text>
           </View>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "600",
-              color: "#0f172a",
-              marginBottom: 4,
-            }}
-          >
-            No transactions yet
-          </Text>
-          <Text style={{ fontSize: 13, color: "#94a3b8", textAlign: "center" }}>
-            Your transaction history will show up here
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={monthGroups}
-          keyExtractor={(item) => item.key}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#4f46e5"
-            />
-          }
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.3}
-          renderItem={({ item: group }) => {
-            const isExpanded = expandedMonths.has(group.key);
-            return (
-              <View
-                style={{
-                  marginHorizontal: 16,
-                  marginBottom: 8,
-                  backgroundColor: "#fff",
-                  borderRadius: 16,
-                  borderWidth: 1,
-                  borderColor: "#e2e8f0",
-                  overflow: "hidden",
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => toggleMonth(group.key)}
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: 16,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontWeight: "700",
-                        color: "#334155",
-                      }}
-                    >
-                      {group.label}
-                    </Text>
-                    <Text style={{ fontSize: 11, color: "#94a3b8" }}>
-                      +{formatNaira(group.totalIn)} / -
-                      {formatNaira(group.totalOut)}
-                    </Text>
-                  </View>
-                  <ChevronDown
-                    size={16}
-                    color="#94a3b8"
-                    style={{
-                      transform: [{ rotate: isExpanded ? "180deg" : "0deg" }],
-                    }}
-                  />
-                </TouchableOpacity>
-                {isExpanded && (
-                  <View
-                    style={{
-                      borderTopWidth: 1,
-                      borderTopColor: "#f1f5f9",
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                    }}
-                  >
-                    {group.transactions.map((tx) => renderTransaction(tx))}
-                  </View>
-                )}
-              </View>
-            );
-          }}
-          ListFooterComponent={() =>
-            isLoading && page > 1 ? (
-              <View style={{ padding: 16, alignItems: "center" }}>
-                <ActivityIndicator color="#4f46e5" />
-              </View>
-            ) : null
-          }
-        />
-      )}
+        ) : transactions.length === 0 ? (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconWrap}>
+              <Receipt size={26} color="#94a3b8" />
+            </View>
+            <Text style={styles.emptyTitle}>No transactions yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Your transaction history will show up here
+            </Text>
+          </View>
+        ) : (
+          <View style={{ gap: 12 }}>
+            {monthGroups.map((group) => (
+              <MonthGroupCard
+                key={group.key}
+                group={group}
+                expanded={expandedMonths.has(group.key)}
+                onToggle={() => toggleMonth(group.key)}
+                onSelectTx={setSelectedTx}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
 
-      {selectedTx && (
-        <TransactionDetailModal
-          transaction={selectedTx}
-          onClose={() => setSelectedTx(null)}
-        />
-      )}
+      <TransactionDetailModal
+        transaction={selectedTx}
+        onClose={() => setSelectedTx(null)}
+      />
     </View>
   );
 };
 
 export default Page;
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: "#f8fafc" },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#4f46e5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  greetingText: { fontSize: 12, color: "#6b7280" },
+  greetingName: { fontSize: 15, fontWeight: "700", color: "#111827" },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headerIconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerBadge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#ef4444",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  headerBadgeText: { color: "#fff", fontSize: 9, fontWeight: "700" },
+
+  screen: { flex: 1 },
+  screenContent: { padding: 20, paddingBottom: 48, gap: 20 },
+
+  titleWrap: { alignItems: "center", marginTop: 8 },
+  title: { fontSize: 22, fontWeight: "800", color: "#0f172a" },
+  subtitle: { fontSize: 13, color: "#64748b", marginTop: 4 },
+
+  filterRow: {
+    gap: 8,
+    paddingVertical: 2,
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  filterChip: {
+    height: 36,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterChipActive: {
+    backgroundColor: "#4f46e5",
+    borderColor: "#4f46e5",
+  },
+  filterChipText: { fontSize: 13, fontWeight: "600", color: "#475569" },
+  filterChipTextActive: { color: "#fff" },
+
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 56,
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+  },
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#0f172a" },
+  emptySubtitle: {
+    fontSize: 13,
+    color: "#94a3b8",
+    textAlign: "center",
+    marginTop: 6,
+    maxWidth: 260,
+  },
+
+  monthCard: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    overflow: "hidden",
+  },
+  monthHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  monthHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+  monthLabel: { fontSize: 14, fontWeight: "700", color: "#334155" },
+  monthTotals: { fontSize: 11, color: "#94a3b8" },
+  monthBody: {
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    paddingHorizontal: 8,
+  },
+
+  txnRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f8fafc",
+  },
+  txnIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  txnTextWrap: { flex: 1 },
+  txnTitle: { fontSize: 14, fontWeight: "700", color: "#0f172a" },
+  txnDate: { fontSize: 12, color: "#94a3b8", marginTop: 2 },
+  txnAmount: { fontSize: 14, fontWeight: "700" },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  modalCard: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    position: "relative",
+  },
+  modalCloseBtn: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalStep: { alignItems: "center", paddingTop: 8, marginBottom: 20 },
+  modalIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  modalAmount: { fontSize: 24, fontWeight: "800" },
+  modalSubtitle: { fontSize: 14, color: "#64748b", marginTop: 4 },
+  modalDetailList: {
+    backgroundColor: "#f8fafc",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    padding: 16,
+    gap: 12,
+    marginBottom: 20,
+  },
+  modalDetailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalDetailLabel: { fontSize: 13, color: "#94a3b8", fontWeight: "600" },
+  modalDetailValue: {
+    fontSize: 13,
+    color: "#0f172a",
+    fontWeight: "700",
+    textTransform: "capitalize",
+  },
+  modalPrimaryBtn: {
+    backgroundColor: "#4f46e5",
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalPrimaryBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+});
