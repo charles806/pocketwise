@@ -182,3 +182,5 @@ export const ContributeToGoalModal = ({
     </Modal>
   );
 };
+
+export default ContributeToGoalModal;

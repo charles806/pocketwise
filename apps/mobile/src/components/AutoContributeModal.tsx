@@ -219,3 +219,5 @@ export const AutoContributeModal = ({ goal, onClose, onSave }: Props) => {
     </Modal>
   );
 };
+
+export default AutoContributeModal;

@@ -121,3 +121,5 @@ export const ConfirmCompleteModal = ({ goal, onClose, onConfirm }: Props) => {
     </Modal>
   );
 };
+
+export default ConfirmCompleteModal;

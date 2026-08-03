@@ -24,7 +24,7 @@ interface Transaction {
 }
 
 interface Props {
-  transaction: Transaction;
+  transaction: Transaction | null;
   onClose: () => void;
 }
 
@@ -94,6 +94,7 @@ function statusConfig(status: string) {
 
 export const TransactionDetailModal = ({ transaction, onClose }: Props) => {
   const [copied, setCopied] = useState(false);
+  if (!transaction) return null;
   const cfg = directionConfig(transaction.direction);
   const Icon = cfg.icon;
   const status = statusConfig(transaction.status);
@@ -292,3 +293,5 @@ export const TransactionDetailModal = ({ transaction, onClose }: Props) => {
     </Modal>
   );
 };
+
+export default TransactionDetailModal;

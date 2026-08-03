@@ -85,3 +85,5 @@ export const PauseGoalModal = ({ goal, onClose, onConfirm }: Props) => {
     </Modal>
   );
 };
+
+export default PauseGoalModal;
