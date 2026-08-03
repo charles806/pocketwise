@@ -309,7 +309,7 @@ const Page = () => {
             ) : transactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200/70 bg-white px-4 py-16 shadow-[0_4px_24px_rgba(15,23,42,0.06)]">
                 <div className="relative mb-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-linear-to-br from-slate-50 to-slate-100">
                     <Receipt className="h-7 w-7 text-slate-400" />
                   </div>
                   <div className="absolute inset-0 animate-ping rounded-2xl border-2 border-slate-200 opacity-30" />
