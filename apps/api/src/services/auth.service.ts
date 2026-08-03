@@ -432,7 +432,12 @@ const authService = {
       sendSMS(
         user.phone!,
         `Your PocketWise password reset OTP is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`,
-      ).catch(console.error);
+      ).catch((err) =>
+        console.error(
+          `[forgotPassword] SMS delivery failed for ${user.email}:`,
+          err,
+        ),
+      );
     }
 
     // sendOtpEmail(user.email, otp, user.firstName).catch(console.error);
@@ -646,7 +651,9 @@ const authService = {
     sendSMS(
       user.phone!,
       `Your PocketWise PIN reset OTP is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`,
-    ).catch(console.error);
+    ).catch((err) =>
+      console.error(`[forgotPin] SMS delivery failed for ${phone}:`, err),
+    );
 
     return {
       success: true,
