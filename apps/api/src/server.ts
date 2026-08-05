@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./utils/errors.js";
 import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import cors from "cors";
@@ -74,7 +75,7 @@ app.get("/", (req: Request, res: Response) => {
     sendSuccess(res, "Welcome to PocketWise API");
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Internal Server Error";
+      getErrorMessage(error, "Internal Server Error");
     sendError(res, message);
   }
 });

@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { authService } from "../services/auth.service.js";
 import { sendSuccess, sendError } from "../utils/response.js";
@@ -35,7 +36,7 @@ const signUp = async (req: Request, res: Response) => {
     );
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error creating account";
+      getErrorMessage(error, "Error creating account");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -52,13 +53,16 @@ const login = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const isMobile = req.headers["x-client-type"] === "mobile";
+
     sendSuccess(res, "Login successful", {
       accessToken: result.accessToken,
       user: result.user,
       requiresPinSetup: result.requiresPinSetup,
+      ...(isMobile ? { refreshToken: result.refreshToken } : {}),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Error logging in";
+    const message = getErrorMessage(error, "Error logging in");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -66,7 +70,10 @@ const login = async (req: Request, res: Response) => {
 
 const refresh = async (req: Request, res: Response) => {
   try {
-    const refreshToken = req.cookies?.refreshToken;
+    const isMobile = req.headers["x-client-type"] === "mobile";
+    const refreshToken = isMobile
+      ? (req.body?.refreshToken ?? req.cookies?.refreshToken)
+      : req.cookies?.refreshToken;
 
     if (!refreshToken) {
       return res.status(200).json({
@@ -86,10 +93,13 @@ const refresh = async (req: Request, res: Response) => {
       });
     }
 
-    sendSuccess(res, "Token refreshed", { accessToken: result.accessToken });
+    sendSuccess(res, "Token refreshed", {
+      accessToken: result.accessToken,
+      ...(isMobile ? { refreshToken: result.refreshToken } : {}),
+    });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error refreshing token";
+      getErrorMessage(error, "Error refreshing token");
     const status = (error as any)?.statusCode || 500;
 
     if (status === 401) {
@@ -130,7 +140,7 @@ const me = async (req: Request, res: Response) => {
     sendSuccess(res, "User profile fetched", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error fetching profile";
+      getErrorMessage(error, "Error fetching profile");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -153,7 +163,7 @@ const lookupUser = async (req: Request, res: Response) => {
     sendSuccess(res, "User found", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error looking up user";
+      getErrorMessage(error, "Error looking up user");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -180,7 +190,7 @@ const updateGoal = async (req: Request, res: Response) => {
     sendSuccess(res, "Goal updated successfuly", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error updating goal";
+      getErrorMessage(error, "Error updating goal");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -198,7 +208,7 @@ const setupPin = async (req: Request, res: Response) => {
     sendSuccess(res, result.message, result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error setting up PIN";
+      getErrorMessage(error, "Error setting up PIN");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -216,7 +226,7 @@ const changePin = async (req: Request, res: Response) => {
     sendSuccess(res, result.message, result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error changing PIN";
+      getErrorMessage(error, "Error changing PIN");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -232,7 +242,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error processing request";
+      getErrorMessage(error, "Error processing request");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -245,7 +255,7 @@ const verifyOtp = async (req: Request, res: Response) => {
     sendSuccess(res, "OTP verified successfully", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error verifying OTP";
+      getErrorMessage(error, "Error verifying OTP");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -263,7 +273,7 @@ const resetPassword = async (req: Request, res: Response) => {
     sendSuccess(res, result.message, { success: result.success });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error resetting password";
+      getErrorMessage(error, "Error resetting password");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -279,7 +289,7 @@ const forgotPin = async (req: Request, res: Response) => {
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error processing request";
+      getErrorMessage(error, "Error processing request");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -292,7 +302,7 @@ const verifyPinOtp = async (req: Request, res: Response) => {
     sendSuccess(res, "OTP verified successfully", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error verifying OTP";
+      getErrorMessage(error, "Error verifying OTP");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -305,7 +315,7 @@ const resetPin = async (req: Request, res: Response) => {
     sendSuccess(res, result.message, { success: result.success });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error resetting PIN";
+      getErrorMessage(error, "Error resetting PIN");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -320,7 +330,7 @@ const updateProfile = async (req: Request, res: Response) => {
     sendSuccess(res, "Profile updated successfully", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error updating profile";
+      getErrorMessage(error, "Error updating profile");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -335,7 +345,7 @@ const changePassword = async (req: Request, res: Response) => {
     sendSuccess(res, "Password updated successfully", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error changing password";
+      getErrorMessage(error, "Error changing password");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }
@@ -397,7 +407,7 @@ const uploadAvatar = async (req: Request, res: Response) => {
     sendSuccess(res, "Avatar uploaded successfully", result);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error uploading avatar";
+      getErrorMessage(error, "Error uploading avatar");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }

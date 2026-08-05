@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import prisma from "../lib/prisma.js";
 import type { KeepAliveResult } from "../types/keep-alive.types.js";
 
@@ -24,7 +25,7 @@ export const keepAliveService = {
     } catch (error) {
       const latencyMs = Date.now() - start;
       const message =
-        error instanceof Error ? error.message : "Unknown database error";
+        getErrorMessage(error, "Unknown database error");
 
       if (attempt < MAX_RETRIES) {
         const backoffMs = BASE_DELAY_MS * 2 ** (attempt - 1);

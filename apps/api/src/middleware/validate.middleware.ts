@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response, NextFunction } from "express";
 import { sendError } from "../utils/response.js";
 import { type ZodTypeAny } from "zod";
@@ -38,7 +39,7 @@ export const validate = (schema: ZodTypeAny) => {
       console.error("[Validation Middleware Exception]", error);
       sendError(
         res,
-        error instanceof Error ? error.message : "Invalid request",
+        getErrorMessage(error, "Invalid request"),
         400,
       );
     }

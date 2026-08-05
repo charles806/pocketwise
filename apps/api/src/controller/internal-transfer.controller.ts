@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 // internal-transfer.controller.ts
 
 import type { Request, Response } from "express";
@@ -34,7 +35,7 @@ export const internalTransferController = async (
   } catch (error) {
     return sendError(
       res,
-      error instanceof Error ? error.message : "Failed to process transfer",
+      getErrorMessage(error, "Failed to process transfer"),
       (error as any)?.statusCode || 500,
     );
   }

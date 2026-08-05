@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express"
 import { sendError, sendSuccess } from "../utils/response.js"
 import { EmergencyUnlockService } from "../services/emergency-unlock.service.js"
@@ -21,7 +22,7 @@ export const requestUnlockController = async (req: Request, res: Response) => {
     } catch (error) {
         return sendError(
             res,
-            error instanceof Error ? error.message : "Failed to process Unlock",
+            getErrorMessage(error, "Failed to process Unlock"),
             (error as any)?.statusCode || 500
         )
     }
@@ -40,7 +41,7 @@ export const getUnlockStatusController = async (req: Request, res: Response) => 
     } catch (error) {
         return sendError(
             res,
-            error instanceof Error ? error.message : "Failed to process Unlock",
+            getErrorMessage(error, "Failed to process Unlock"),
             (error as any)?.statusCode || 500
         )
     }

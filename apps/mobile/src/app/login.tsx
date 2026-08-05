@@ -14,9 +14,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Eye, EyeOff, ShieldCheck, ArrowRight } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useAuth } from "../context/AuthContext";
+import { api, ApiError } from "../services/api";
+import { loginSchema } from "../validation/authSchema";
 
 const Login = () => {
   const router = useRouter();
+  const { setAuth } = useAuth();
   const { width } = useWindowDimensions();
   const isSmall = width < 380;
 
@@ -24,11 +28,37 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    if (loading) return;
+    setError(null);
+
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Add login logic here
+      const res = await api.post<{
+        data: {
+          accessToken: string;
+          refreshToken: string;
+          user: any;
+        };
+      }>("/api/v1/auth/login", { email: email.trim(), password });
+
+      const d = res.data;
+      await setAuth(d.accessToken, d.refreshToken, d.user);
+      router.replace("/(tabs)/wallet");
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -54,6 +84,8 @@ const Login = () => {
         </View>
 
         <View style={styles.form}>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
           <View style={styles.fieldWrapper}>
             <Text style={styles.label}>Email address</Text>
             <TextInput
@@ -92,7 +124,7 @@ const Login = () => {
               </TouchableOpacity>
             </View>
             <TouchableOpacity
-            // create a forgot password page and link it here
+              // create a forgot password page and link it here
               // onPress={() => router.push("/forgot-password")}
               style={styles.forgotLink}
             >
@@ -162,6 +194,17 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   form: { gap: 20 },
+  error: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#dc2626",
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
   fieldWrapper: { gap: 6 },
   label: {
     fontSize: 13,

@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../../utils/errors.js";
 // notification.controller.ts
 
 import type { Request, Response } from "express"
@@ -20,7 +21,7 @@ export const getNotificationsController = async (req: Request, res: Response) =>
     } catch (error) {
         return sendError(
             res,
-            error instanceof Error ? error.message : "Failed to fetch notifications",
+            getErrorMessage(error, "Failed to fetch notifications"),
             500
         )
     }
@@ -45,7 +46,7 @@ export const markOneAsReadController = async (req: Request, res: Response) => {
     } catch (error) {
         return sendError(
             res,
-            error instanceof Error ? error.message : "Failed to mark notification as read",
+            getErrorMessage(error, "Failed to mark notification as read"),
             500
         )
     }
@@ -65,7 +66,7 @@ export const markAllAsReadController = async (req: Request, res: Response) => {
     } catch (error) {
         return sendError(
             res,
-            error instanceof Error ? error.message : "Failed to mark all notifications as read",
+            getErrorMessage(error, "Failed to mark all notifications as read"),
             500
         )
     }

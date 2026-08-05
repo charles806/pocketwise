@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import z from "zod";
 import {
@@ -41,7 +42,7 @@ export const createSavingsGoalController = async (
     return sendSuccess(res, "Success", result, 201);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error Creating Savings Goal";
+      getErrorMessage(error, "Error Creating Savings Goal");
 
     const status = (error as any)?.statusCode || 500;
 
@@ -109,7 +110,7 @@ export const updateSavingsGoalController = async (
   } catch (error) {
     return sendError(
       res,
-      error instanceof Error ? error.message : "Failed to update savings goal",
+      getErrorMessage(error, "Failed to update savings goal"),
       500,
       error,
     );
@@ -148,7 +149,7 @@ export const deleteSavingsGoalController = async (
   } catch (error) {
     return sendError(
       res,
-      error instanceof Error ? error.message : "Failed to delete savings goal",
+      getErrorMessage(error, "Failed to delete savings goal"),
       500,
       error,
     );
@@ -171,9 +172,7 @@ export const getUnallocatedSavingsController = async (
   } catch (error) {
     return sendError(
       res,
-      error instanceof Error
-        ? error.message
-        : "Failed to fetch unallocated savings",
+      getErrorMessage(error, "Failed to fetch unallocated savings"),
       (error as any)?.statusCode || 500,
     );
   }
@@ -212,7 +211,7 @@ export const completeGoalController = async (req: Request, res: Response) => {
   } catch (error) {
     return sendError(
       res,
-      error instanceof Error ? error.message : "Failed to complete goal",
+      getErrorMessage(error, "Failed to complete goal"),
       (error as any)?.statusCode || 500,
     );
   }
@@ -256,7 +255,7 @@ export const contributeToGoalController = async (
   } catch (error) {
     return sendError(
       res,
-      error instanceof Error ? error.message : "Failed to process contribution",
+      getErrorMessage(error, "Failed to process contribution"),
       (error as any)?.statusCode || 500,
     );
   }

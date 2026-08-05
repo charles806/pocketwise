@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { sendError, sendSuccess } from "../utils/response.js";
 import { transactionService } from "../services/transaction.service.js";
@@ -31,7 +32,7 @@ export const getTransactions = async (req: Request, res: Response) => {
     sendSuccess(res, "Transactions fetched successfully", result, 200);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error fetching transactions";
+      getErrorMessage(error, "Error fetching transactions");
     const status = (error as any)?.statusCode || 500;
     sendError(res, message, status);
   }

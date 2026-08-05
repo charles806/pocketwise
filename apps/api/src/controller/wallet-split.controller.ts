@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { sendError, sendSuccess } from "../utils/response.js";
 import { walletSplitConfigSchema } from "../validators/wallet-split.validator.js";
@@ -33,9 +34,7 @@ export const setWalletSplitConfigController = async (
     return sendSuccess(res, "Success", result, 201);
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Error setting wallet split config";
+      getErrorMessage(error, "Error setting wallet split config");
 
     const status = (error as any)?.statusCode || 500;
 
@@ -56,9 +55,7 @@ export const getWalletSplitConfigController = async (
     return sendSuccess(res, "Success", result, 200);
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Error fetching wallet split config";
+      getErrorMessage(error, "Error fetching wallet split config");
 
     const status = (error as any)?.statusCode || 500;
 
@@ -95,9 +92,7 @@ export const updateWalletSplitConfigController = async (
     return sendSuccess(res, "Success", result, 200);
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Error updating wallet split config";
+      getErrorMessage(error, "Error updating wallet split config");
 
     const status = (error as any)?.statusCode || 500;
 

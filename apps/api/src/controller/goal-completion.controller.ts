@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { savingsGoalService } from "../services/saving-goal.service.js";
@@ -35,7 +36,7 @@ export const completeGoalsController = async (
         results.push({ id: goal.id, title: goal.title, success: true });
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Unknown error";
+          getErrorMessage(error, "Unknown error");
         results.push({
           id: goal.id,
           title: goal.title,
@@ -51,7 +52,7 @@ export const completeGoalsController = async (
       results,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = getErrorMessage(error, "Unknown error");
     sendError(res, message, 500);
   }
 };

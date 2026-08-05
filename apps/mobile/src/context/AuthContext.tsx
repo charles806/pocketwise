@@ -10,8 +10,9 @@ import {
 import { useRouter } from "expo-router";
 import { AppState, type AppStateStatus } from "react-native";
 import { secureStorage } from "../utils/secureStorage";
+import { getApiUrl } from "../services/api";
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL;
+const API_BASE = getApiUrl();
 const INACTIVITY_LIMIT = 45 * 60 * 1000; // 45 minutes
 
 const REFRESH_TOKEN_KEY = "pocketwise_refresh_token";
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = useCallback(async () => {
     try {
       const refreshToken = await secureStorage.getItemAsync(REFRESH_TOKEN_KEY);
+      console.log("Refresh token from storage:", refreshToken);
       if (!refreshToken) {
         setIsLoading(false);
         return;
@@ -71,7 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Client-Type": "mobile",
+        },
         body: JSON.stringify({ refreshToken }),
       });
 
@@ -84,6 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data.success && data.data?.accessToken) {
         setAccessToken(data.data.accessToken);
+
+        if (data.data?.refreshToken) {
+          await secureStorage.setItemAsync(
+            REFRESH_TOKEN_KEY,
+            data.data.refreshToken,
+          );
+        }
 
         const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
           headers: { Authorization: `Bearer ${data.data.accessToken}` },

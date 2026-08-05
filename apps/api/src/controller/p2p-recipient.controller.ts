@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { sendError, sendSuccess } from "../utils/response.js";
 import { p2pRecipientService } from "../services/p2p-recipient.service.js";
@@ -14,7 +15,7 @@ export const getRecentRecipients = async (req: Request, res: Response) => {
     sendSuccess(res, "Recent recipients fetched successfully", result, 200);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error fetching recipients";
+      getErrorMessage(error, "Error fetching recipients");
 
     const status = (error as any)?.statusCode || 500;
 

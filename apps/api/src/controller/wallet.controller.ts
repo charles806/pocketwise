@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { bankTransferService, transferService, walletService } from "../services/wallet.service.js";
 import { sendSuccess, sendError } from "../utils/response.js";
@@ -14,7 +15,7 @@ export const getWallets = async (req: Request, res: Response) => {
     sendSuccess(res, "Wallets fetched successfully", result, 200);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error fetching wallets";
+      getErrorMessage(error, "Error fetching wallets");
 
     const status = (error as any)?.statusCode || 500;
 
@@ -39,7 +40,7 @@ export const transfer = async (req: Request, res: Response) => {
     sendSuccess(res, "Transfer successful", result, 200);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Error fetching wallets";
+      getErrorMessage(error, "Error fetching wallets");
 
     const status = (error as any)?.statusCode || 500;
 
@@ -71,7 +72,7 @@ export const bankTransfer = async (req: Request, res: Response) => {
     sendSuccess(res, "Transfer Successful", result, 200)
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Transfer failed";
+      getErrorMessage(error, "Transfer failed");
 
     const status = (error as any)?.statusCode || 500;
 

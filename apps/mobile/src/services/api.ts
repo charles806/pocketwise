@@ -1,11 +1,11 @@
 import { Platform } from "react-native";
 
-function getApiUrl(): string {
+export function getApiUrl(): string {
   const raw = process.env.EXPO_PUBLIC_API_URL;
 
   if (!raw) {
     throw new Error(
-      "EXPO_PUBLIC_API_URL is not set. Check your .env file and restart Metro with --clear."
+      "EXPO_PUBLIC_API_URL is not set. Check your .env file and restart Metro with --clear.",
     );
   }
 
@@ -47,7 +47,7 @@ async function request<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, headers = {}, timeout = 10000 } = options;
+  const { method = "GET", body, headers = {}, timeout = 30000 } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -57,6 +57,7 @@ async function request<T>(
       method,
       headers: {
         "Content-Type": "application/json",
+        "X-Client-Type": "mobile",
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,

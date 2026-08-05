@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { keepAliveService } from "../services/keep-alive.service.js";
 import { keepAliveMonitor } from "../utils/keep-alive-monitor.js";
@@ -25,7 +26,7 @@ export const pingController = async (
     }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Keep-alive ping failed";
+      getErrorMessage(error, "Keep-alive ping failed");
     keepAliveMonitor.recordFailure(message);
     sendError(res, message, 500);
   }
