@@ -21,6 +21,7 @@ import bankRecipientRouter from "./routes/bank-recipent.routes.js";
 import p2pRecipientRouter from "./routes/p2p-recipient.routes.js";
 import emergencyUnlockRouter from "./routes/emergency-unlock.routes.js";
 import prisma from "./lib/prisma.js";
+import { checkRedisConnection } from "./lib/redis.js";
 import { walletHelper } from "./helper/wallet-helpers.js";
 import { savingsGoalService } from "./services/saving-goal.service.js";
 import { notificationService } from "./features/notifications/notification.service.js";
@@ -74,8 +75,7 @@ app.get("/", (req: Request, res: Response) => {
   try {
     sendSuccess(res, "Welcome to PocketWise API");
   } catch (error) {
-    const message =
-      getErrorMessage(error, "Internal Server Error");
+    const message = getErrorMessage(error, "Internal Server Error");
     sendError(res, message);
   }
 });
@@ -248,8 +248,9 @@ app.get(
 //Error Handling Middleware
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
+  await checkRedisConnection();
 });
 
 export default app;

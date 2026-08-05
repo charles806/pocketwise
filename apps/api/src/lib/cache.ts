@@ -1,7 +1,8 @@
-import { redis } from "./redis.js";
+import { redis, isRedisAvailable } from "./redis.js";
 
 export const cache = {
   async get<T>(key: string): Promise<T | null> {
+    if (!isRedisAvailable()) return null;
     try {
       const data = await redis.get(key);
       return data as T | null;
@@ -12,6 +13,7 @@ export const cache = {
   },
 
   async set(key: string, value: unknown, ttlSeconds: number) {
+    if (!isRedisAvailable()) return;
     try {
       await redis.setex(key, ttlSeconds, JSON.stringify(value));
     } catch (error) {
@@ -20,6 +22,7 @@ export const cache = {
   },
 
   async del(key: string) {
+    if (!isRedisAvailable()) return;
     try {
       await redis.del(key);
     } catch (error) {
@@ -28,6 +31,7 @@ export const cache = {
   },
 
   async delMany(pattern: string) {
+    if (!isRedisAvailable()) return;
     try {
       const keys = await redis.keys(pattern);
       if (keys.length > 0) {
