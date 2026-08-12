@@ -1,5 +1,6 @@
-import { getErrorMessage } from "./utils/errors.js";
 import "dotenv/config";
+import { Sentry } from "./lib/sentry.js";
+import { getErrorMessage } from "./utils/errors.js";
 import express, { type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -244,6 +245,12 @@ app.get(
     }
   },
 );
+
+app.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("My first Sentry error!");
+});
+
+Sentry.setupExpressErrorHandler(app);
 
 //Error Handling Middleware
 app.use(errorMiddleware);
