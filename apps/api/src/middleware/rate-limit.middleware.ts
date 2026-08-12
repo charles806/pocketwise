@@ -78,8 +78,6 @@ function memoryCheck(
 }
 
 export const rateLimit = (config: RateLimitConfig) => {
-  const instanceId = crypto.randomUUID();
-
   return async (req: Request, res: Response, next: NextFunction) => {
     const identifiers: string[] = [];
 
@@ -102,8 +100,12 @@ export const rateLimit = (config: RateLimitConfig) => {
       return next();
     }
 
+    const routeKey = `${req.method}:${(req.baseUrl || "")}${
+      req.path
+    }`.replace(/\/+$/, "");
+
     for (const identifier of identifiers) {
-      const key = `rl:${instanceId}:${identifier}`;
+      const key = `rl:${routeKey}:${identifier}`;
 
       let result: { allowed: boolean; resetIn: number };
       try {

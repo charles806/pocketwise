@@ -55,17 +55,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     setUser(null);
     setAccessToken(null);
+    const refreshToken = await secureStorage.getItemAsync(REFRESH_TOKEN_KEY);
     await secureStorage.deleteItemAsync(REFRESH_TOKEN_KEY);
     await secureStorage.deleteItemAsync(LAST_ACTIVE_KEY);
 
-    fetch(`${API_BASE}/api/v1/auth/logout`, { method: "POST" }).catch(() => {});
+    fetch(`${API_BASE}/api/v1/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Client-Type": "mobile",
+      },
+      body: JSON.stringify({ refreshToken }),
+    }).catch(() => {});
     router.replace("/login");
   }, [router]);
 
   const refreshSession = useCallback(async () => {
     try {
       const refreshToken = await secureStorage.getItemAsync(REFRESH_TOKEN_KEY);
-      console.log("Refresh token from storage:", refreshToken);
       if (!refreshToken) {
         setIsLoading(false);
         return;

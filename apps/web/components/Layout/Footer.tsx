@@ -15,7 +15,7 @@ const footerLinks: Record<string, { title: string; href: string }[]> = {
   ],
   Company: [
     { title: "About Us", href: "/about" },
-    { title: "Contact", href: "mailto:hello@getpocketwise.xyz" },
+    { title: "Contact", href: "mailto:support@getpocketwise.xyz" },
   ],
   Legal: [
     { title: "Privacy Policy", href: "/privacy" },
@@ -131,11 +131,11 @@ export default function Footer() {
               every naira so you can focus on what matters.
             </p>
             <a
-              href="mailto:hello@getpocketwise.xyz"
+              href="mailto:support@getpocketwise.xyz"
               className="text-[#9ca3af] text-sm hover:text-white transition-colors duration-200 flex items-center gap-2 w-fit cursor-pointer"
             >
               <Mail size={16} />
-              hello@getpocketwise.xyz
+              support@getpocketwise.xyz
             </a>
           </motion.div>
 

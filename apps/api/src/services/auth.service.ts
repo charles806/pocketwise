@@ -25,6 +25,35 @@ interface LoginInput {
   password: string;
 }
 
+const OTP_MAX_ATTEMPTS = 5;
+
+const safeCompare = (a: string, b: string): boolean => {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+};
+
+const consumeOtpAttempt = async (
+  attemptsKey: string,
+  otpKey: string,
+): Promise<boolean> => {
+  try {
+    const count = await redis.incr(attemptsKey);
+    if (count === 1) {
+      await redis.expire(attemptsKey, TTL.OTP).catch(() => {});
+    }
+    if (count > OTP_MAX_ATTEMPTS) {
+      await redis.del(attemptsKey).catch(() => {});
+      await cache.del(otpKey);
+      return false;
+    }
+    return true;
+  } catch {
+    return true;
+  }
+};
+
 const authService = {
   async signup(data: SignupInput) {
     const {
@@ -452,15 +481,31 @@ const authService = {
   async verifyOtp(identifier: string, otp: string) {
     const isEmail = identifier.includes("@");
     const key = isEmail ? identifier.toLowerCase() : identifier;
-    const storedOtp = await cache.get<string>(CACHE_KEYS.otpReset(key));
+    const otpKey = CACHE_KEYS.otpReset(key);
+    const attemptsKey = `otp:attempts:reset:${key}`;
+    const storedOtp = await cache.get<string>(otpKey);
 
-    if (!storedOtp || storedOtp !== otp) {
+    if (!storedOtp) {
       const error = new Error("Invalid or expired OTP") as any;
       error.statusCode = 400;
       throw error;
     }
 
-    await cache.del(CACHE_KEYS.otpReset(key));
+    const allowed = await consumeOtpAttempt(attemptsKey, otpKey);
+    if (!allowed) {
+      const error = new Error("Too many attempts. Request a new OTP") as any;
+      error.statusCode = 429;
+      throw error;
+    }
+
+    if (!safeCompare(storedOtp, otp)) {
+      const error = new Error("Invalid or expired OTP") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await cache.del(otpKey);
+    await redis.del(attemptsKey).catch(() => {});
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     await cache.set(CACHE_KEYS.resetToken(key), resetToken, TTL.RESET_TOKEN);
@@ -664,15 +709,31 @@ const authService = {
   },
 
   async verifyPinOtp(phone: string, otp: string) {
-    const storedOtp = await cache.get<string>(CACHE_KEYS.pinOtpReset(phone));
+    const otpKey = CACHE_KEYS.pinOtpReset(phone);
+    const attemptsKey = `otp:attempts:pin:${phone}`;
+    const storedOtp = await cache.get<string>(otpKey);
 
-    if (!storedOtp || storedOtp !== otp) {
+    if (!storedOtp) {
       const error = new Error("Invalid or expired OTP") as any;
       error.statusCode = 400;
       throw error;
     }
 
-    await cache.del(CACHE_KEYS.pinOtpReset(phone));
+    const allowed = await consumeOtpAttempt(attemptsKey, otpKey);
+    if (!allowed) {
+      const error = new Error("Too many attempts. Request a new OTP") as any;
+      error.statusCode = 429;
+      throw error;
+    }
+
+    if (!safeCompare(storedOtp, otp)) {
+      const error = new Error("Invalid or expired OTP") as any;
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await cache.del(otpKey);
+    await redis.del(attemptsKey).catch(() => {});
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     await cache.set(

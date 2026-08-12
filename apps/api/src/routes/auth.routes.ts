@@ -94,7 +94,17 @@ router.post(
 );
 router.post(
   "/verify-otp",
-  rateLimit({ windowMs: 60_000, max: 5, keyBy: "ip" }),
+  rateLimit({
+    windowMs: 60_000,
+    max: 5,
+    keyBy: "ip",
+    keyFn: (req) => {
+      const identifier = (req.body as { identifier?: string })?.identifier;
+      return identifier
+        ? `otp-verify:${identifier.trim().toLowerCase()}`
+        : undefined;
+    },
+  }),
   validate(verifyOtpSchema),
   verifyOtp,
 );
@@ -113,7 +123,15 @@ router.post(
 );
 router.post(
   "/verify-pin-otp",
-  rateLimit({ windowMs: 60_000, max: 5, keyBy: "ip" }),
+  rateLimit({
+    windowMs: 60_000,
+    max: 5,
+    keyBy: "ip",
+    keyFn: (req) => {
+      const phone = (req.body as { phone?: string })?.phone;
+      return phone ? `otp-verify:pin:${phone.trim()}` : undefined;
+    },
+  }),
   validate(verifyPinOtpSchema),
   verifyPinOtp,
 );

@@ -8,16 +8,26 @@ const verifyAnchorSignature = (
   signature: string,
   secret: string,
 ): boolean => {
-  const hash = crypto
-    .createHmac("sha1", secret)
-    .update(rawBody)
-    .digest("base64");
+  const candidates = ["sha256", "sha1"].flatMap((algorithm) =>
+    (["hex", "base64"] as const).map((encoding) =>
+      crypto
+        .createHmac(algorithm, secret)
+        .update(rawBody)
+        .digest(encoding),
+    ),
+  );
 
-  const hashBuffer = Buffer.from(hash);
   const sigBuffer = Buffer.from(signature);
 
-  if (hashBuffer.length !== sigBuffer.length) return false;
-  return crypto.timingSafeEqual(hashBuffer, sigBuffer);
+  for (const candidate of candidates) {
+    const candidateBuffer = Buffer.from(candidate);
+    if (candidateBuffer.length !== sigBuffer.length) continue;
+    if (crypto.timingSafeEqual(candidateBuffer, sigBuffer)) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 export const webhook = async (req: Request, res: Response) => {

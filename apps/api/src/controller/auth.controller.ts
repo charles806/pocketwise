@@ -119,7 +119,10 @@ const logout = async (req: Request, res: Response) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
   });
-  const token = req.cookies.refreshToken;
+  const isMobile = req.headers["x-client-type"] === "mobile";
+  const token = isMobile
+    ? (req.body?.refreshToken ?? req.cookies?.refreshToken)
+    : req.cookies?.refreshToken;
 
   if (token) {
     await redis.setex(`blacklist:${token}`, 7 * 24 * 60 * 60, "1");
