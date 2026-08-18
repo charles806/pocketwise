@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx prisma generate && tsc",
     "dev": "nodemon --watch src --ext ts,json --exec tsx src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "check-types": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

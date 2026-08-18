@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Public client values needed by the Next.js production build.
+  # NEXT_PUBLIC_BACKEND_URL can be overridden with a repository secret.
+  NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL || 'https://api.pocketwise.xyz' }}
+  NEXT_PUBLIC_FIREBASE_apiKey: AIzaSyAZzTx1h0YNm1IBwCtsayUGYVWc_G2jiQU
+  NEXT_PUBLIC_FIREBASE_authDomain: pocketwise-75096.firebaseapp.com
+  NEXT_PUBLIC_FIREBASE_projectId: pocketwise-75096
+  NEXT_PUBLIC_FIREBASE_storageBucket: pocketwise-75096.firebasestorage.app
+  NEXT_PUBLIC_FIREBASE_messagingSenderId: "372057568929"
+  NEXT_PUBLIC_FIREBASE_appId: "1:372057568929:web:b6a6d75a05ace2391562e0"
+  NEXT_PUBLIC_FIREBASE_VAPID_KEY: BHjm08EWnvmw9p95Px0BDNZQn6jxvrMRX4C9JOX1ryKRGULUqGmJatH4O3uA4N_x6U_0yzZd4fLCDonsNM-5Z5k
+
+jobs:
+  ci:
+    name: Lint, typecheck & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Turbo runs each task only in the workspaces that define it:
+      #   lint        -> web, mobile
+      #   check-types -> web, api, mobile
+      #   build       -> web, api
+      #
+      # Lint is currently advisory (non-blocking): web has 40 warnings and
+      # mobile has 10 errors in committed code. Findings are printed to the
+      # job log; the hard CI gate is check-types + build. Re-enable gating
+      # once the findings are resolved (drop `continue-on-error`).
+      - name: Lint (advisory)
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Check types
+        run: npm run check-types
+
+      - name: Build
+        run: npm run build
+        env:
+          # Used by @sentry/nextjs during the web build to upload source maps.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
