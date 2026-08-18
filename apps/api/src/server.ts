@@ -194,43 +194,54 @@ app.get(
         select: { id: true, email: true, firstName: true, fcmToken: true },
       });
 
+      const CONCURRENCY = 10;
+
       let notifiedCount = 0;
 
-      for (const user of users) {
-        const summary = await walletHelper.getWeeklySummary(user.id);
-        const message = await walletHelper.buildWeeklySummaryMessage(summary);
+      for (let i = 0; i < users.length; i += CONCURRENCY) {
+        const batch = users.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(
+          batch.map(async (user) => {
+            const summary = await walletHelper.getWeeklySummary(user.id);
+            const message =
+              await walletHelper.buildWeeklySummaryMessage(summary);
 
-        if (summary.thisWeekSpent === 0 && summary.thisWeekSaved === 0) {
-          continue;
-        }
+            if (
+              summary.thisWeekSpent === 0 &&
+              summary.thisWeekSaved === 0
+            ) {
+              return false;
+            }
 
-        let sentSomething = false;
+            let sentSomething = false;
 
-        if (user.fcmToken) {
-          try {
-            await fcmMessaging.send({
-              token: user.fcmToken,
-              notification: {
-                title: "Your Weekly PocketWise Summary",
-                body: message,
-              },
-            });
-            sentSomething = true;
-          } catch (error) {
-            console.error(`FCM failed for user ${user.id}:`, error);
-          }
-        }
+            if (user.fcmToken) {
+              try {
+                await fcmMessaging.send({
+                  token: user.fcmToken,
+                  notification: {
+                    title: "Your Weekly PocketWise Summary",
+                    body: message,
+                  },
+                });
+                sentSomething = true;
+              } catch (error) {
+                console.error(`FCM failed for user ${user.id}:`, error);
+              }
+            }
 
-        try {
-          await notificationService.notifyWeeklySummary(user.id, summary);
-          sentSomething = true;
-        } catch (error) {
-          console.error(`Notification failed for user ${user.id}:`, error);
-        }
+            try {
+              await notificationService.notifyWeeklySummary(user.id, summary);
+              sentSomething = true;
+            } catch (error) {
+              console.error(`Notification failed for user ${user.id}:`, error);
+            }
 
-        if (sentSomething) {
-          notifiedCount++;
-        }
+            return sentSomething;
+          }),
+        );
+
+        notifiedCount += results.filter((sent) => sent).length;
       }
 
       return sendSuccess(
