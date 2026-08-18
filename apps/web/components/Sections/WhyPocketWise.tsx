@@ -8,32 +8,33 @@ const cards = [
     icon: Bot,
     title: "Automated Discipline",
     body: "No spreadsheets. No manual budgeting. Money is split automatically the second it lands — before you can spend it wrong.",
-    color: "#5B4FCF",
-    bgLight: "#EDE9FF",
+    color: "#4f46e5",
+    bgLight: "#EEF2FF",
     delay: 0,
   },
   {
     icon: Brain,
     title: "AI Money Coach",
-    body: "Weekly spending insights, behavior warnings, and celebrations. Your coach celebrates wins and flags problems before they grow.",
-    color: "#7C3AED",
-    bgLight: "#F3E8FF",
+    body: "Coming soon — weekly spending insights, behavior warnings, and celebrations that keep you on track.",
+    color: "#4338ca",
+    bgLight: "#E0E7FF",
+    badge: "Coming Soon",
     delay: 0.1,
   },
   {
     icon: Lock,
     title: "Emergency Wallet Lock",
     body: "Your emergency fund is locked by default. Accessing it requires friction — a confirmation step that makes you pause before dipping in.",
-    color: "#059669",
-    bgLight: "#D1FAE5",
+    color: "#10b981",
+    bgLight: "#ECFDF5",
     delay: 0.2,
   },
   {
     icon: BarChart3,
     title: "Built for Nigerian Reality",
     body: "Supports ₦1000 minimum transactions. Works with bank transfer and USSD. No dollar cards or foreign infrastructure needed.",
-    color: "#DC2626",
-    bgLight: "#FEE2E2",
+    color: "#f59e0b",
+    bgLight: "#FFFBEB",
     delay: 0.3,
   },
 ];
@@ -65,14 +66,14 @@ export default function WhySection() {
     <section
       id="why"
       className="py-20 sm:py-28 relative overflow-hidden"
-      style={{ background: "#EDE9FF" }}
+      style={{ background: "#EEF2FF" }}
     >
       {/* Decorative */}
       <div
         className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(91,79,207,0.12) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%)",
           filter: "blur(50px)",
         }}
       />
@@ -80,7 +81,7 @@ export default function WhySection() {
         className="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(91,79,207,0.08) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.07) 0%, transparent 70%)",
           filter: "blur(40px)",
         }}
       />
@@ -95,7 +96,7 @@ export default function WhySection() {
         >
           <span
             className="inline-flex items-center gap-1.5 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4"
-            style={{ background: "rgba(91,79,207,0.15)", color: "#5B4FCF" }}
+            style={{ background: "rgba(79,70,229,0.1)", color: "#4f46e5" }}
           >
             Why PocketWise
           </span>
@@ -141,6 +142,22 @@ export default function WhySection() {
               />
 
               <div className="relative z-10">
+                {card?.badge && (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[11px] font-jakarta font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
+                    style={{
+                      background: `${card.color}12`,
+                      color: card.color,
+                      border: `1px solid ${card.color}30`,
+                    }}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full animate-pulse"
+                      style={{ background: card.color }}
+                    />
+                    {card.badge}
+                  </span>
+                )}
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -153,7 +170,7 @@ export default function WhySection() {
                     strokeWidth={1.5}
                   />
                 </motion.div>
-                <h3 className="font-jakarta font-bold text-foreground text-lg mb-3 group-hover:text-[#5B4FCF] transition-colors">
+                <h3 className="font-jakarta font-bold text-foreground text-lg mb-3 group-hover:text-[#4f46e5] transition-colors">
                   {card?.title}
                 </h3>
                 <p className="text-secondary text-sm leading-relaxed group-hover:text-foreground/80 transition-colors">

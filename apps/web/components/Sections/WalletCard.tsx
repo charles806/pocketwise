@@ -2,13 +2,13 @@
 
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Wallet, Sparkles } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 const wallets = [
-  { label: "Spend", pct: "50%", color: "#F97316" },
-  { label: "Savings", pct: "30%", color: "#22C55E" },
-  { label: "Emergency", pct: "10%", color: "#EF4444" },
-  { label: "Flex", pct: "10%", color: "#3B82F6" },
+  { label: "Spend", pct: "50%", color: "#4f46e5" },
+  { label: "Savings", pct: "30%", color: "#10b981" },
+  { label: "Emergency", pct: "10%", color: "#f43f5e" },
+  { label: "Flex", pct: "10%", color: "#f59e0b" },
 ];
 
 export default function WalletCard() {
@@ -51,7 +51,7 @@ export default function WalletCard() {
         className="relative w-[320px] h-[190px] rounded-2xl overflow-hidden cursor-pointer"
       >
         {/* Card background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-[#4f46e5] to-indigo-800" />
 
         {/* Glassmorphism overlay */}
         <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
@@ -112,7 +112,7 @@ export default function WalletCard() {
         </div>
 
         {/* Shadow */}
-        <div className="absolute inset-0 rounded-2xl shadow-[0_25px_50px_-12px_rgba(91,79,207,0.5)] pointer-events-none" />
+        <div className="absolute inset-0 rounded-2xl shadow-[0_25px_50px_-12px_rgba(79,70,229,0.5)] pointer-events-none" />
       </motion.div>
 
       {/* 4 mini wallet tiles */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import {
   // Wallet,
@@ -10,8 +11,6 @@ import {
   ArrowRightLeft,
   Target,
   TrendingDown,
-  Sparkles,
-  // ChevronRight,
   Calculator,
   Clock,
   Lock,
@@ -30,25 +29,25 @@ function InteractiveDepositCard() {
     {
       label: "Spend",
       pct: 50,
-      color: "#5B4FCF",
-      bgLight: "#EEEFFC",
+      color: "#4f46e5",
+      bgLight: "#EEF2FF",
       icon: CreditCard,
     },
     {
       label: "Savings",
       pct: 30,
-      color: "#10B981",
-      bgLight: "#E7F8F1",
+      color: "#10b981",
+      bgLight: "#ECFDF5",
       icon: PiggyBank,
     },
     {
       label: "Emergency",
       pct: 10,
-      color: "#F59E0B",
-      bgLight: "#FFF4E0",
+      color: "#f43f5e",
+      bgLight: "#FFF1F2",
       icon: Lock,
     },
-    { label: "Flex", pct: 10, color: "#EC4899", bgLight: "#FDE7F2", icon: Zap },
+    { label: "Flex", pct: 10, color: "#f59e0b", bgLight: "#FFFBEB", icon: Zap },
   ];
 
   const handleDeposit = () => {
@@ -71,9 +70,9 @@ function InteractiveDepositCard() {
       <div className="flex items-center gap-2 mb-5 cursor-pointer">
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: "#EDE9FF" }}
+          style={{ background: "#EEF2FF" }}
         >
-          <Calculator size={18} style={{ color: "#5B4FCF" }} />
+          <Calculator size={18} style={{ color: "#4f46e5" }} />
         </div>
         <p className="font-jakarta font-bold text-foreground text-sm">
           Try the Split Calculator
@@ -92,7 +91,7 @@ function InteractiveDepositCard() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
-              className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 font-jakarta text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B4FCF]/20 focus:border-[#5B4FCF] transition-all"
+              className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 font-jakarta text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all"
             />
           </div>
           <motion.button
@@ -101,7 +100,7 @@ function InteractiveDepositCard() {
             onClick={handleDeposit}
             disabled={!amount || parseFloat(amount) <= 0}
             className="w-full py-3 rounded-xl font-jakarta font-semibold cursor-pointer text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: "#5B4FCF" }}
+            style={{ background: "#4f46e5" }}
           >
             Split My Money
           </motion.button>
@@ -196,28 +195,28 @@ function WalletSplitCard() {
       name: "Spend",
       pct: "50%",
       purpose: "Day-to-day",
-      color: "#5B4FCF",
+      color: "#4f46e5",
       icon: CreditCard,
     },
     {
       name: "Savings",
       pct: "30%",
       purpose: "Long-term",
-      color: "#10B981",
+      color: "#10b981",
       icon: PiggyBank,
     },
     {
       name: "Emergency",
       pct: "10%",
       purpose: "Safety net",
-      color: "#F59E0B",
+      color: "#f43f5e",
       icon: Shield,
     },
     {
       name: "Flex",
       pct: "10%",
       purpose: "Treats",
-      color: "#EC4899",
+      color: "#f59e0b",
       icon: Zap,
     },
   ];
@@ -276,7 +275,7 @@ function TransferCard() {
         <motion.div
           whileHover={{ scale: 1.1, rotate: 5 }}
           className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold"
-          style={{ background: "#5B4FCF" }}
+          style={{ background: "#4f46e5" }}
         >
           ₦
         </motion.div>
@@ -290,11 +289,11 @@ function TransferCard() {
           animate={{ x: isHovered ? 4 : 0, opacity: isHovered ? 1 : 0.5 }}
           className="ml-auto"
         >
-          <ArrowRightLeft size={16} className="text-[#5B4FCF]" />
+          <ArrowRightLeft size={16} className="text-[#4f46e5]" />
         </motion.div>
       </motion.div>
       <motion.div
-        whileHover={{ borderColor: "#5B4FCF40" }}
+        whileHover={{ borderColor: "#4f46e540" }}
         className="rounded-xl border border-gray-200 p-3 mb-3 transition-colors"
       >
         <p className="text-xs text-secondary mb-1 font-medium">
@@ -302,7 +301,7 @@ function TransferCard() {
         </p>
         <p className="text-sm text-foreground font-medium flex items-center gap-2">
           Bought groceries at Shoprite
-          <ShoppingCart size={16} className="text-[#5B4FCF]" />
+          <ShoppingCart size={16} className="text-[#4f46e5]" />
         </p>
       </motion.div>
       <div className="flex items-center gap-2 text-xs text-secondary">
@@ -334,9 +333,9 @@ function GoalCard() {
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
-            style={{ background: "#EDE9FF" }}
+            style={{ background: "#EEF2FF" }}
           >
-            <Target size={20} style={{ color: "#5B4FCF" }} />
+            <Target size={20} style={{ color: "#4f46e5" }} />
           </div>
           <div>
             <p className="font-jakarta font-bold text-foreground text-sm">
@@ -347,7 +346,7 @@ function GoalCard() {
         </div>
         <span
           className="text-xs font-bold font-jakarta px-3 py-1 rounded-full cursor-pointer text-white"
-          style={{ background: "#5B4FCF" }}
+          style={{ background: "#4f46e5" }}
         >
           {progress}%
         </span>
@@ -356,7 +355,7 @@ function GoalCard() {
         <motion.div
           ref={ref}
           className="h-full rounded-full"
-          style={{ background: "#5B4FCF" }}
+          style={{ background: "#4f46e5" }}
           initial={{ width: "0%" }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
@@ -368,7 +367,7 @@ function GoalCard() {
       </div>
       <div className="flex items-center gap-2 text-xs text-secondary mt-3">
         <Clock size={12} />
-        <span>On track · Est. completion: Aug 2026</span>
+        <span>On track · Est. completion: Nov 2026</span>
       </div>
     </div>
   );
@@ -380,22 +379,15 @@ function WeeklySummaryCard() {
       label: "Spent",
       value: "₦12,400",
       sub: "49.6% of Spend wallet",
-      color: "#5B4FCF",
+      color: "#4f46e5",
       icon: TrendingDown,
     },
     {
       label: "Saved",
       value: "₦7,500",
       sub: "Toward MacBook goal",
-      color: "#10B981",
+      color: "#10b981",
       icon: PiggyBank,
-    },
-    {
-      label: "AI Note",
-      value: "Food spend down 18%",
-      sub: "Great week!",
-      color: "#8B5CF6",
-      icon: Sparkles,
     },
   ];
 
@@ -404,15 +396,15 @@ function WeeklySummaryCard() {
       <div className="flex items-center gap-3 mb-4">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: "#EDE9FF" }}
+          style={{ background: "#EEF2FF" }}
         >
-          <BarChart3 size={20} style={{ color: "#5B4FCF" }} />
+          <BarChart3 size={20} style={{ color: "#4f46e5" }} />
         </div>
         <div>
           <p className="font-jakarta font-bold text-foreground text-sm">
             Weekly Pulse
           </p>
-          <p className="text-xs text-secondary">Week of Apr 1 – 7, 2026</p>
+          <p className="text-xs text-secondary">Week of Aug 3 – 9, 2026</p>
         </div>
       </div>
       <div className="flex flex-col gap-2">
@@ -484,7 +476,7 @@ const features = [
     id: "weekly",
     eyebrow: "Weekly Summary",
     title: "Your Weekly Financial Pulse",
-    body: "Every week, PocketWise sends you a summary of how you spent, what you saved, and what your AI coach noticed. No surprises. Just clarity.",
+    body: "Every week, PocketWise sends you a summary of how you spent and what you saved. No surprises. Just clarity.",
     card: <WeeklySummaryCard />,
     textLeft: true,
   },
@@ -496,9 +488,11 @@ const features = [
     card: (
       <div className="bg-white cursor-pointer rounded-3xl shadow-card p-2 border border-gray-100 overflow-hidden">
         <div className="relative w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
-          <img
+          <Image
             src="/1.jpg"
             alt="End manual budgeting"
+            width={735}
+            height={956}
             className="w-full cursor-pointer max-h-90 object-cover object-center"
           />
         </div>
@@ -553,7 +547,7 @@ function FeatureRow({ feature }: { feature: (typeof features)[0] }) {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
           className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest mb-3"
-          style={{ color: "#5B4FCF" }}
+          style={{ color: "#4f46e5" }}
         >
           <SparklesIcon size={14} />
           {feature.eyebrow}
@@ -605,7 +599,7 @@ export default function FeaturesSection() {
         className="absolute top-20 left-0 w-64 h-64 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(91,79,207,0.08) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.07) 0%, transparent 70%)",
           filter: "blur(40px)",
         }}
       />
@@ -613,7 +607,7 @@ export default function FeaturesSection() {
         className="absolute bottom-20 right-0 w-80 h-80 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.05) 0%, transparent 70%)",
           filter: "blur(50px)",
         }}
       />
@@ -629,7 +623,7 @@ export default function FeaturesSection() {
         >
           <span
             className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4"
-            style={{ background: "#EDE9FF", color: "#5B4FCF" }}
+            style={{ background: "#EEF2FF", color: "#4f46e5" }}
           >
             <SparklesIcon size={14} />
             Features

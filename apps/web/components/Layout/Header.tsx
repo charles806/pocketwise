@@ -68,7 +68,7 @@ export default function Header() {
               ))}
               <a
                 href="#waitlist"
-                className="btn-primary flex items-center gap-2 text-sm font-semibold font-jakarta px-5 py-2.5 rounded-full shadow-lg shadow-violet-600/25 hover:shadow-violet-600/40"
+                className="btn-primary flex items-center gap-2 text-sm font-semibold font-jakarta px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40"
               >
                 <Sparkles className="w-4 h-4" />
                 Join Waitlist
@@ -103,7 +103,7 @@ export default function Header() {
               key={l?.href}
               href={l?.href}
               onClick={() => setMenuOpen(false)}
-              className="text-2xl font-jakarta font-semibold text-gray-900 py-4 border-b border-gray-100 hover:text-violet-600 transition-colors"
+              className="text-2xl font-jakarta font-semibold text-gray-900 py-4 border-b border-gray-100 hover:text-indigo-600 transition-colors"
             >
               {l?.label}
             </a>
@@ -113,7 +113,7 @@ export default function Header() {
           <a
             href="#waitlist"
             onClick={() => setMenuOpen(false)}
-            className="btn-primary flex items-center justify-center gap-2 text-center text-base font-semibold font-jakarta px-6 py-4 rounded-2xl shadow-lg shadow-violet-600/25"
+            className="btn-primary flex items-center justify-center gap-2 text-center text-base font-semibold font-jakarta px-6 py-4 rounded-xl shadow-lg shadow-indigo-600/25"
           >
             <Sparkles className="w-4 h-4" />
             Join Waitlist →

@@ -14,28 +14,28 @@ const wallets = [
     label: "Spend",
     amount: 25000,
     pct: "50%",
-    color: "#5B4FCF",
+    color: "#4f46e5",
     sublabel: "50% of deposits",
   },
   {
     label: "Savings",
     amount: 15000,
     pct: "30%",
-    color: "#10B981",
+    color: "#10b981",
     sublabel: "30% of deposits",
   },
   {
     label: "Emergency",
     amount: 5000,
     pct: "10%",
-    color: "#F59E0B",
+    color: "#f43f5e",
     sublabel: "10% of deposits",
   },
   {
     label: "Flex",
     amount: 5000,
     pct: "10%",
-    color: "#EC4899",
+    color: "#f59e0b",
     sublabel: "10% of deposits",
   },
 ];
@@ -121,10 +121,11 @@ function WonderWalletCard() {
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="flex flex-col bg-white border-t border-b border-l border-r shadow-2xl rounded-3xl p-8 gap-6 border-[#f0f0f5] w-full max-w-175 cursor-pointer mx-auto lg:mx-0 transition-transform duration-200 ease-out"
+      className="flex flex-col bg-white border-t border-b border-l border-r shadow-2xl rounded-3xl p-8 gap-6 border-[#eef2ff] w-full max-w-175 cursor-pointer mx-auto lg:mx-0 transition-transform duration-200 ease-out"
       style={{
         transformStyle: "preserve-3d",
-        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)",
+        boxShadow:
+          "0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.06), 0 24px 48px -12px rgba(79,70,229,0.12)",
       }}
     >
       {/* Header */}
@@ -134,7 +135,7 @@ function WonderWalletCard() {
             Good morning,
           </span>
           <span className="text-[#0f0f1a] font-sans text-xl font-bold">
-            Charles 👋
+            Adaeze 👋
           </span>
         </div>
         <div className="flex items-center bg-primary-light rounded-xl px-4 py-2">
@@ -149,10 +150,8 @@ function WonderWalletCard() {
         {wallets.map((w, i) => (
           <div
             key={w.label}
-            className="flex justify-between items-center rounded-2xl p-4 transition-all duration-300 hover:bg-gray-50"
-            // style={{
-            //   borderLeft: `3px solid ${w.color}`,
-            // }}
+            className="flex justify-between items-center rounded-2xl p-4 transition-all duration-300 hover:bg-gray-50 border-l-3"
+            style={{ borderLeft: `3px solid ${w.color}` }}
           >
             <div className="flex items-center gap-3">
               <div
@@ -192,18 +191,29 @@ export default function Hero() {
     setVisible(true);
 
     const fetchCount = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/waitlist/count`,
-        );
-        const data = await res.json();
-        if (data.data?.count !== undefined) {
-          setWaitlistCount(data.data.count);
+      const endpoints = [
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/waitlist/count`,
+        "/api/v1/waitlist/count",
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            signal: AbortSignal.timeout(8000),
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          const count =
+            data.data?.count !== undefined ? data.data.count : data.count;
+          if (typeof count === "number") {
+            setWaitlistCount(count);
+            break;
+          }
+        } catch {
+          // try next endpoint
         }
-        setCountLoaded(true);
-      } catch {
-        setCountLoaded(true);
       }
+      setCountLoaded(true);
     };
 
     fetchCount();
@@ -213,14 +223,14 @@ export default function Hero() {
     <section
       id="hero"
       className="relative min-h-screen flex items-center  pb-16 overflow-hidden"
-      style={{ background: "#FAFAFA" }}
+      style={{ background: "#f8fafc" }}
     >
       {/* Subtle gradient mesh - muted */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(139,92,246,0.06) 0%, transparent 50%)",
+            "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(79,70,229,0.07) 0%, transparent 50%)",
         }}
       />
 
@@ -237,7 +247,7 @@ export default function Hero() {
               }`}
               style={{ transitionDelay: "0ms" }}
             >
-              <span className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full border border-violet-200 text-violet-700 bg-violet-50">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full border border-indigo-200 text-indigo-700 bg-indigo-50">
                 <Sparkles className="w-3 h-3" />
                 Smart Wallet for Nigerians who want control
               </span>
@@ -245,15 +255,15 @@ export default function Hero() {
 
             {/* Headline */}
             <h1
-              className={`font-jakarta font-bold text-gray-900 mt-6 mb-5 leading-tight transform transition-all duration-700 ${
+              className={`font-jakarta font-extrabold text-gray-900 mt-6 mb-5 leading-tight transform transition-all duration-700 ${
                 visible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
               }`}
               style={{
-                fontSize: "clamp(32px, 4.5vw, 52px)",
-                letterSpacing: "-0.5px",
-                lineHeight: 1.1,
+                fontSize: "clamp(34px, 4.8vw, 56px)",
+                letterSpacing: "-1.5px",
+                lineHeight: 1.05,
               }}
             >
               Your money splits itself
@@ -282,19 +292,19 @@ export default function Hero() {
               }`}
             >
               <span className="flex items-center gap-1.5 text-gray-600">
-                <span className="w-2 h-2 rounded-full bg-violet-600" />
+                <span className="w-2 h-2 rounded-full bg-indigo-600" />
                 50% Spend
               </span>
               <span className="flex items-center gap-1.5 text-gray-600">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 30% Save
               </span>
               <span className="flex items-center gap-1.5 text-gray-600">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
                 10% Emergency
               </span>
               <span className="flex items-center gap-1.5 text-gray-600">
-                <span className="w-2 h-2 rounded-full bg-pink-500" />
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
                 10% Flex
               </span>
             </div>
@@ -322,14 +332,14 @@ export default function Hero() {
             >
               <a
                 href="#waitlist"
-                className="inline-flex items-center gap-2 font-jakarta font-semibold text-base px-8 py-4 rounded-2xl text-white bg-primary hover:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="inline-flex items-center gap-2 font-jakarta font-semibold text-base px-8 py-4 rounded-xl text-white bg-primary hover:bg-primary-dark shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 transition-all duration-200"
               >
                 <Sparkles className="w-4 h-4" />
                 Join the Waitlist
               </a>
               <a
                 href="#how-it-works"
-                className="inline-flex items-center gap-2 font-jakarta font-semibold text-base px-6 py-4 rounded-2xl text-gray-600 hover:text-gray-900 transition-colors"
+                className="inline-flex items-center gap-2 font-jakarta font-semibold text-base px-6 py-4 rounded-xl text-gray-600 hover:text-gray-900 transition-colors"
               >
                 See how it works
                 <ArrowDown className="w-4 h-4" />

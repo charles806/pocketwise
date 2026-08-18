@@ -76,7 +76,7 @@ export default function FAQSection() {
         className="absolute top-40 left-0 w-48 h-48 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(91,79,207,0.06) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.05) 0%, transparent 70%)",
           filter: "blur(30px)",
         }}
       />
@@ -84,7 +84,7 @@ export default function FAQSection() {
         className="absolute bottom-40 right-0 w-56 h-56 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.04) 0%, transparent 70%)",
           filter: "blur(40px)",
         }}
       />
@@ -100,7 +100,7 @@ export default function FAQSection() {
         >
           <span
             className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4"
-            style={{ background: "#EDE9FF", color: "#5B4FCF" }}
+            style={{ background: "#EEF2FF", color: "#4f46e5" }}
           >
             <Sparkles size={14} />
             FAQ
@@ -146,7 +146,7 @@ export default function FAQSection() {
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ background: "#5B4FCF" }}
+                    style={{ background: "#4f46e5" }}
                   >
                     <ChevronDown
                       size={16}

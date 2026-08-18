@@ -9,41 +9,41 @@ const wallets = [
     label: "Spend",
     pct: "50%",
     amount: "₦25,000",
-    color: "#F97316",
-    bg: "#FFF7ED",
+    color: "#4f46e5",
+    bg: "#EEF2FF",
     icon: Wallet,
   },
   {
     label: "Savings",
     pct: "30%",
     amount: "₦15,000",
-    color: "#22C55E",
-    bg: "#F0FDF4",
+    color: "#10b981",
+    bg: "#ECFDF5",
     icon: PiggyBank,
   },
   {
     label: "Emergency",
     pct: "10%",
     amount: "₦5,000",
-    color: "#EF4444",
-    bg: "#FEF2F2",
+    color: "#f43f5e",
+    bg: "#FFF1F2",
     icon: Shield,
   },
   {
     label: "Flex",
     pct: "10%",
     amount: "₦5,000",
-    color: "#3B82F6",
-    bg: "#EFF6FF",
+    color: "#f59e0b",
+    bg: "#FFFBEB",
     icon: Sparkles,
   },
 ];
 
 const donutSegments = [
-  { color: "#F97316", percent: 50, delay: 0 },
-  { color: "#22C55E", percent: 30, delay: 0.2 },
-  { color: "#EF4444", percent: 10, delay: 0.4 },
-  { color: "#3B82F6", percent: 10, delay: 0.5 },
+  { color: "#4f46e5", percent: 50, delay: 0 },
+  { color: "#10b981", percent: 30, delay: 0.2 },
+  { color: "#f43f5e", percent: 10, delay: 0.4 },
+  { color: "#f59e0b", percent: 10, delay: 0.5 },
 ];
 
 export default function MoneySplitViz() {
@@ -78,7 +78,7 @@ export default function MoneySplitViz() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 bg-violet-50 text-violet-700 border border-violet-200">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 bg-indigo-50 text-indigo-700 border border-indigo-200">
             How It Works
           </span>
           <h2
@@ -98,7 +98,7 @@ export default function MoneySplitViz() {
           <div className="flex justify-center">
             <div className="relative w-56 h-56">
               <svg viewBox="0 0 180 180" className="w-full h-full -rotate-90">
-                {donutSegments.map((seg, i) => {
+                {donutSegments.map((seg) => {
                   const offset = cumulativePercent;
                   const length = (seg.percent / 100) * circumference;
                   cumulativePercent += seg.percent;
