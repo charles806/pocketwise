@@ -36,6 +36,12 @@ export const webhook = async (req: Request, res: Response) => {
     const rawBody = req.body.toString();
     const secret = process.env.ANCHOR_WEBHOOK_SECRET!;
 
+    console.log("[Webhook Debug] Body (first 100):", rawBody.substring(0, 100));
+    console.log("[Webhook Debug] Signature header:", JSON.stringify(signature));
+    console.log("[Webhook Debug] Secret length:", secret?.length);
+    console.log("[Webhook Debug] Body is Buffer:", Buffer.isBuffer(req.body));
+    console.log("[Webhook Debug] Computed (sha1/base64):", crypto.createHmac("sha1", secret).update(rawBody).digest("base64"));
+
     if (!signature || !verifyAnchorSignature(rawBody, signature, secret)) {
       return sendError(res, "Invalid signature", 401);
     }
