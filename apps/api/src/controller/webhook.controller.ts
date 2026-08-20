@@ -17,6 +17,15 @@ const verifyAnchorSignature = (
     ),
   );
 
+  // Anchor sends base64(hex(HMAC_SHA1(body, key))) — double-encoded
+  for (const algorithm of ["sha256", "sha1"]) {
+    const hexDigest = crypto
+      .createHmac(algorithm, secret)
+      .update(rawBody)
+      .digest("hex");
+    candidates.push(Buffer.from(hexDigest).toString("base64"));
+  }
+
   const sigBuffer = Buffer.from(signature);
 
   for (const candidate of candidates) {
@@ -36,23 +45,21 @@ export const webhook = async (req: Request, res: Response) => {
     const rawBody = req.body.toString();
     const secret = process.env.ANCHOR_WEBHOOK_SECRET!;
 
-    console.log("[Webhook Debug] Body (first 100):", rawBody.substring(0, 100));
-    console.log("[Webhook Debug] Signature header:", JSON.stringify(signature));
-    console.log("[Webhook Debug] Secret length:", secret?.length);
-    console.log("[Webhook Debug] Body is Buffer:", Buffer.isBuffer(req.body));
-    console.log("[Webhook Debug] Computed (sha1/base64):", crypto.createHmac("sha1", secret).update(rawBody).digest("base64"));
-
     if (!signature || !verifyAnchorSignature(rawBody, signature, secret)) {
       return sendError(res, "Invalid signature", 401);
     }
 
     const payload = JSON.parse(rawBody);
 
-    if (!payload || !payload.event || !payload.data) {
+    if (!payload) {
       return sendError(res, "Invalid webhook payload structure", 400);
     }
 
-    const eventType = payload.event as string;
+    const eventType = (payload.event || payload.type) as string;
+
+    if (!eventType) {
+      return sendError(res, "Missing event type in payload", 400);
+    }
 
     if (eventType === "nip.inbound.completed") {
       const result = await webhookService.processAnchorDepositWebhook(payload);
@@ -60,7 +67,7 @@ export const webhook = async (req: Request, res: Response) => {
     }
 
     if (eventType === "customer.created") {
-      console.log("[Webhook] customer.created received:", payload.data);
+      console.log("[Webhook] customer.created received:", payload.data || payload.attributes);
       return sendSuccess(res, "Webhook acknowledged", null, 200);
     }
 
