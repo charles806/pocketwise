@@ -46,9 +46,20 @@ export const webhook = async (req: Request, res: Response) => {
       return sendError(res, "Invalid webhook payload structure", 400);
     }
 
-    const result = await webhookService.processAnchorDepositWebhook(payload);
+    const eventType = payload.event as string;
 
-    sendSuccess(res, "Webhook processed successfully", result, 200);
+    if (eventType === "nip.inbound.completed") {
+      const result = await webhookService.processAnchorDepositWebhook(payload);
+      return sendSuccess(res, "Webhook processed successfully", result, 200);
+    }
+
+    if (eventType === "customer.created") {
+      console.log("[Webhook] customer.created received:", payload.data);
+      return sendSuccess(res, "Webhook acknowledged", null, 200);
+    }
+
+    console.log("[Webhook] Unhandled event type:", eventType);
+    return sendSuccess(res, "Webhook acknowledged", null, 200);
   } catch (error) {
     console.error(error);
     sendError(res, "Internal server error", 500);
