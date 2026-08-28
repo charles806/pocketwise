@@ -121,5 +121,14 @@ export const changePasswordSchema = z
     path: ["confirmNewPassword"],
   });
 
+export const addressSchema = z.object({
+  addressLine1: z.string().min(1, "Street address is required"),
+  addressLine2: z.string().optional(),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  postalCode: z.string().optional(),
+});
+
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type AddressInput = z.infer<typeof addressSchema>;

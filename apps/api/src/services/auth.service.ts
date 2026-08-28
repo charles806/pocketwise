@@ -295,6 +295,12 @@ const authService = {
         createdAt: true,
         profilePicture: true,
         transferPin: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        country: true,
       },
     });
 
@@ -612,6 +618,52 @@ const authService = {
         .del(CACHE_KEYS.userLookup("account", oldUser.accountNumber))
         .catch(() => {});
     }
+
+    return { ...updated, requiresPinSetup: false };
+  },
+
+  async updateAddress(
+    userId: string,
+    data: {
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      postalCode?: string;
+    },
+  ) {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2 ?? null,
+        city: data.city,
+        state: data.state,
+        postalCode: data.postalCode ?? null,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
+        email: true,
+        phone: true,
+        kycTier: true,
+        isSimulationMode: true,
+        onboardingComplete: true,
+        primaryGoal: true,
+        createdAt: true,
+        profilePicture: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        country: true,
+      },
+    });
+
+    await cache.del(CACHE_KEYS.userProfile(userId));
 
     return { ...updated, requiresPinSetup: false };
   },

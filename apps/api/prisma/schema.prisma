@@ -37,6 +37,12 @@ model User {
   baasCustomerId        String?                  @map("baas_customer_id")
   fcmToken                String?                  @map("fcm_token")
   profilePicture          String?                  @map("profile_picture")
+  addressLine1            String?                  @map("address_line_1")
+  addressLine2            String?                  @map("address_line_2")
+  city                    String?
+  state                   String?
+  postalCode              String?                  @map("postal_code")
+  country                 String?                  @default("NG")
   aiInsights              AIInsight[]
   bankRecipients          BankRecipient[]
   emergencyUnlockRequests EmergencyUnlockRequest[]

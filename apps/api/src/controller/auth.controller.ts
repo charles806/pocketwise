@@ -416,6 +416,21 @@ const uploadAvatar = async (req: Request, res: Response) => {
   }
 };
 
+const updateAddress = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, "Unauthorized", 401);
+
+    const result = await authService.updateAddress(userId, req.body);
+    sendSuccess(res, "Address saved successfully", result);
+  } catch (error) {
+    const message =
+      getErrorMessage(error, "Error saving address");
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
 export {
   signUp,
   login,
@@ -433,6 +448,7 @@ export {
   verifyPinOtp,
   resetPin,
   updateProfile,
+  updateAddress,
   changePassword,
   uploadAvatar,
 };
