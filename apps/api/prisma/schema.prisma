@@ -122,6 +122,7 @@ model SavingsGoal {
   deletedAt      DateTime? @map("deleted_at")
   status         String    @default("ACTIVE")
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  autoContributions AutoContribution[]
 
   @@map("savings_goals")
 }
@@ -269,4 +270,17 @@ enum NotificationCategory {
   SECURITY
   SYSTEM
   PROMOTION
+}
+
+model AutoContribution {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  goalId    String        @map("goal_id") @db.Uuid
+  weekStart DateTime      @map("week_start")
+  amount    Decimal       @db.Decimal(12, 2)
+  createdAt DateTime      @default(now()) @map("created_at")
+  goal      SavingsGoal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@unique([goalId, weekStart])
+  @@index([goalId])
+  @@map("auto_contributions")
 }

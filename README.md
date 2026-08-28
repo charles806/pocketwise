@@ -122,6 +122,11 @@ npm run dev
 | `FIREBASE_*`            | Firebase Admin SDK credentials  |
 | `UPSTASH_REDIS_URL`     | Rate limiting / cache           |
 | `KEEP_ALIVE_SECRET`     | Internal cron endpoint auth     |
+| `QSTASH_URL`            | QStash API URL (region endpoint) |
+| `QSTASH_TOKEN`          | QStash client token            |
+| `QSTASH_CURRENT_SIGNING_KEY` | QStash JWT signing key (current) |
+| `QSTASH_NEXT_SIGNING_KEY`    | QStash JWT signing key (next)    |
+| `APP_BASE_URL`          | Public API base URL that QStash calls back (job runners) |
 
 ### Frontend (`apps/web/.env.local`)
 

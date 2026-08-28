@@ -13,22 +13,14 @@ import walletRouter from "./routes/wallet.routes.js";
 import transactionRouter from "./routes/transaction.routes.js";
 import savingsGoalRouter from "./routes/savings-goal.routes.js";
 import keepAliveRouter from "./routes/keep-alive.routes.js";
-import { keepAliveAuthMiddleware } from "./middleware/keep-alive-auth.middleware.js";
-import { completeGoalsController } from "./controller/goal-completion.controller.js";
 import walletSplitRouter from "./routes/wallet-split.routes.js";
 import notificationsRouter from "./features/notifications/notification.routes.js";
 import internalTransferRouter from "./routes/internal-transfer.routes.js";
 import bankRecipientRouter from "./routes/bank-recipent.routes.js";
 import p2pRecipientRouter from "./routes/p2p-recipient.routes.js";
 import emergencyUnlockRouter from "./routes/emergency-unlock.routes.js";
-import prisma from "./lib/prisma.js";
 import { checkRedisConnection } from "./lib/redis.js";
-import { walletHelper } from "./helper/wallet-helpers.js";
-import { savingsGoalService } from "./services/saving-goal.service.js";
-import { notificationService } from "./features/notifications/notification.service.js";
-import { fcmMessaging } from "./lib/firebase.js";
 import bankTransferRouter from "./routes/bank-transfer.routes.js";
-import { rateLimitMiddleware } from "./middleware/rate-limit.middleware.js";
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const MOBILE_URL = process.env.MOBILE_URL;
@@ -56,7 +48,10 @@ app.use(
 app.use(cookieParser());
 //DO NOT TOUCH OR MOVE LINE 35 to 37 Don't touch !!!!!!!!!!
 import { webhookRoutes } from "./routes/webhook.routes.js";
+import { jobsRouter } from "./routes/jobs.routes.js";
 app.use("/api/v1/webhooks", webhookRoutes);
+// Mounted here (before express.json) so QStash runner routes keep their raw bodies.
+app.use("/api/internal/jobs", jobsRouter);
 app.use(express.json({ limit: "10mb" }));
 if (!FRONTEND_URL) {
   throw new Error("FRONTEND_URL environment variable is required");
@@ -102,162 +97,6 @@ app.use("/api/v1/wallets/emergency-unlock", emergencyUnlockRouter);
 app.use("/api/v1/transfers/bank", bankTransferRouter);
 //Internal Routes
 app.use("/api/internal/keep-alive", keepAliveRouter);
-/*
- * cron-job.org registration:
- * Endpoint: GET /api/internal/auto-contribute
- * Schedule: Weekly (ideally a few hours before /api/internal/weekly-summary)
- * Purpose: Moves weeklyAmount from unallocated savings into each goal where autoContribute is enabled
- */
-app.get(
-  "/api/internal/auto-contribute",
-  keepAliveAuthMiddleware,
-  rateLimitMiddleware,
-  async (_req: Request, res: Response) => {
-    try {
-      const goals = await prisma.savingsGoal.findMany({
-        where: {
-          autoContribute: true,
-          status: "ACTIVE",
-          deletedAt: null,
-        },
-        include: {
-          user: {
-            select: { id: true, email: true, firstName: true },
-          },
-        },
-      });
-
-      let contributedCount = 0;
-
-      for (const goal of goals) {
-        const unallocated = await walletHelper.getUnallocatedSavings(
-          goal.userId,
-        );
-
-        if (unallocated < Number(goal.weeklyAmount)) {
-          continue;
-        }
-
-        try {
-          await savingsGoalService.contributeToGoal(
-            goal.userId,
-            goal.id,
-            Number(goal.weeklyAmount),
-          );
-
-          try {
-            await notificationService.notifyAutoContribution(
-              goal.userId,
-              goal.title,
-              Number(goal.weeklyAmount),
-            );
-          } catch (notifyError) {
-            console.error(
-              `[AutoContribute] Notification failed for goal ${goal.id}:`,
-              notifyError,
-            );
-          }
-
-          contributedCount++;
-        } catch (contributeError) {
-          console.error(
-            `[AutoContribute] Contribution failed for goal ${goal.id}:`,
-            contributeError,
-          );
-        }
-      }
-
-      return sendSuccess(res, "Auto-contribution complete", {
-        contributedCount,
-      });
-    } catch (error) {
-      console.error("[AutoContribute] Job failed:", error);
-      return sendError(res, "Failed to process auto-contributions", 500);
-    }
-  },
-);
-
-app.post(
-  "/api/internal/complete-goals",
-  keepAliveAuthMiddleware,
-  rateLimitMiddleware,
-  completeGoalsController,
-);
-
-app.get(
-  "/api/internal/weekly-summary",
-  keepAliveAuthMiddleware,
-  rateLimitMiddleware,
-  async (req: Request, res: Response) => {
-    try {
-      const users = await prisma.user.findMany({
-        select: { id: true, email: true, firstName: true, fcmToken: true },
-      });
-
-      const CONCURRENCY = 10;
-
-      let notifiedCount = 0;
-
-      for (let i = 0; i < users.length; i += CONCURRENCY) {
-        const batch = users.slice(i, i + CONCURRENCY);
-        const results = await Promise.all(
-          batch.map(async (user) => {
-            const summary = await walletHelper.getWeeklySummary(user.id);
-            const message =
-              await walletHelper.buildWeeklySummaryMessage(summary);
-
-            if (
-              summary.thisWeekSpent === 0 &&
-              summary.thisWeekSaved === 0
-            ) {
-              return false;
-            }
-
-            let sentSomething = false;
-
-            if (user.fcmToken) {
-              try {
-                await fcmMessaging.send({
-                  token: user.fcmToken,
-                  notification: {
-                    title: "Your Weekly PocketWise Summary",
-                    body: message,
-                  },
-                });
-                sentSomething = true;
-              } catch (error) {
-                console.error(`FCM failed for user ${user.id}:`, error);
-              }
-            }
-
-            try {
-              await notificationService.notifyWeeklySummary(user.id, summary);
-              sentSomething = true;
-            } catch (error) {
-              console.error(`Notification failed for user ${user.id}:`, error);
-            }
-
-            return sentSomething;
-          }),
-        );
-
-        notifiedCount += results.filter((sent) => sent).length;
-      }
-
-      return sendSuccess(
-        res,
-        "Weekly summaries processed",
-        { notifiedCount },
-        200,
-      );
-    } catch (error) {
-      console.error("[WeeklySummary] Job failed:", error);
-      return sendError(res, "Failed to process weekly summaries", 500);
-    }
-  },
-);
-
-
 
 Sentry.setupExpressErrorHandler(app);
 

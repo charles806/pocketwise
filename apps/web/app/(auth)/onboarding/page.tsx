@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import StepOne from "./components/StepOne";
 import StepTwo from "./components/StepTwo";
 import StepThree from "./components/StepThree";
+import StepFourAddress from "./components/StepFourAddress";
 import StepFour from "./components/StepFour";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingAnimation from "./components/LoadingAnimation";
@@ -23,7 +24,7 @@ const Onboarding = () => {
   // Prefetch wallet data in background during onboarding so that it's cached!
   useWallet(accessToken);
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 5));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleComplete = async (goal: string | null = null) => {
@@ -100,8 +101,11 @@ const Onboarding = () => {
               />
             )}
             {step === 4 && (
+              <StepFourAddress onNext={nextStep} onPrev={prevStep} />
+            )}
+            {step === 5 && (
               <StepFour
-                onPrev={() => setStep(3)}
+                onPrev={prevStep}
                 onSkip={() => handleComplete(selectedGoal)}
                 onComplete={() => handleComplete(selectedGoal)}
               />
