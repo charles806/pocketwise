@@ -227,51 +227,52 @@ const authService = {
   },
 
   async refresh(refreshToken: string) {
+    let decoded: any;
     try {
-      const decoded = jwt.verify(
+      decoded = jwt.verify(
         refreshToken,
         process.env.JWT_REFRESH_SECRET!,
         { algorithms: ["HS256"] },
       ) as any;
-
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: { id: true },
-      });
-      if (!user) {
-        const error = new Error("Invalid token") as any;
-        error.statusCode = 401;
-        throw error;
-      }
-
-      const isBlacklisted = await redis.get(`blacklist:${refreshToken}`);
-      if (isBlacklisted) {
-        throw Object.assign(new Error("Token has been invalidated"), {
-          statusCode: 401,
-        });
-      }
-
-      // Rotate: blacklist old refresh token and issue a new one
-      await redis.setex(`blacklist:${refreshToken}`, 7 * 24 * 60 * 60, "1");
-
-      const newRefreshToken = jwt.sign(
-        { id: user.id, email: decoded.email },
-        process.env.JWT_REFRESH_SECRET!,
-        { expiresIn: "7d" },
-      );
-
-      const accessToken = jwt.sign(
-        { id: user.id, email: decoded.email },
-        process.env.JWT_ACCESS_SECRET!,
-        { expiresIn: "45m" },
-      );
-
-      return { accessToken, refreshToken: newRefreshToken };
     } catch {
       const error = new Error("Invalid or expired refresh token") as any;
       error.statusCode = 401;
       throw error;
     }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true },
+    });
+    if (!user) {
+      const error = new Error("Invalid token") as any;
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const isBlacklisted = await redis.get(`blacklist:${refreshToken}`);
+    if (isBlacklisted) {
+      throw Object.assign(new Error("Token has been invalidated"), {
+        statusCode: 401,
+      });
+    }
+
+    // Rotate: blacklist old refresh token and issue a new one
+    await redis.setex(`blacklist:${refreshToken}`, 7 * 24 * 60 * 60, "1");
+
+    const newRefreshToken = jwt.sign(
+      { id: user.id, email: decoded.email },
+      process.env.JWT_REFRESH_SECRET!,
+      { expiresIn: "7d" },
+    );
+
+    const accessToken = jwt.sign(
+      { id: user.id, email: decoded.email },
+      process.env.JWT_ACCESS_SECRET!,
+      { expiresIn: "45m" },
+    );
+
+    return { accessToken, refreshToken: newRefreshToken };
   },
 
   async me(userId: string) {

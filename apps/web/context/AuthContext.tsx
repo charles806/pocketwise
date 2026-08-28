@@ -267,6 +267,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
               : "";
 
         if (API_BASE && requestUrl.startsWith(API_BASE)) {
+          if (
+            requestUrl.endsWith("/api/v1/auth/refresh") ||
+            requestUrl.endsWith("/api/v1/auth/me")
+          ) {
+            return response;
+          }
           const pathname = window.location.pathname;
           if (pathname !== "/login" && pathname !== "/register") {
             logout();

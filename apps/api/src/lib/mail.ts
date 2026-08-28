@@ -1,21 +1,33 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = `"PocketWise" <onboarding@pocketwise.xyz>`;
 
 export const sendWelcomeEmail = async (email: string, firstName: string) => {
   try {
-    await transporter.sendMail({
-      from: `"PocketWise" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: FROM,
       to: email,
+      replyTo: "support@pocketwise.xyz",
       subject: "Welcome to PocketWise",
+      headers: {
+        "List-Unsubscribe": "<https://pocketwise.xyz/unsubscribe>",
+      },
+      text: `Hey ${firstName},
+
+Welcome to PocketWise — your money's new home.
+
+Your smart finance journey starts now. We'll help you split, save, and spend smarter, all from one place.
+
+Get started: https://pocketwise.xyz
+
+Cheers,
+The PocketWise Team
+
+You received this because you created a PocketWise account.
+Unsubscribe: https://pocketwise.xyz/unsubscribe`,
       html: `
-<body style="margin:0; padding:24px 16px; background:['#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
+<body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
   <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
     <tr>
       <td style="background:#ffffff; border-radius:24px; box-shadow:0 4px 24px rgba(79,70,229,0.08), 0 2px 8px rgba(0,0,0,0.04); border-top:4px solid #4f46e5; padding:0;">
@@ -61,7 +73,9 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
         </div>
 
         <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
-          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+          <p style="margin:0 0 4px; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+          <p style="margin:0; color:#94a3b8; font-size:11px;">You received this because you created a PocketWise account.</p>
+          <p style="margin:4px 0 0;"><a href="https://pocketwise.xyz/unsubscribe" style="color:#94a3b8; font-size:11px; text-decoration:underline;">Unsubscribe</a></p>
         </div>
 
       </td>
@@ -76,10 +90,26 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
 
 export const sendWaitlistEmail = async (email: string) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"PocketWise" <${process.env.EMAIL_USER}>`,
+    const info = await resend.emails.send({
+      from: FROM,
       to: email,
+      replyTo: "support@pocketwise.xyz",
       subject: "You're on the waitlist 🚀",
+      headers: {
+        "List-Unsubscribe": "<https://pocketwise.xyz/unsubscribe>",
+      },
+      text: `Hey there,
+
+Thanks for joining the PocketWise waitlist.
+
+We're building something exciting — and you'll be among the first to know when we launch.
+
+Stay tuned — big things coming soon 🚀
+
+— The PocketWise Team
+
+You received this because you signed up for the PocketWise waitlist.
+Unsubscribe: https://pocketwise.xyz/unsubscribe`,
       html: `
 <body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
   <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
@@ -122,7 +152,9 @@ export const sendWaitlistEmail = async (email: string) => {
         </div>
 
         <div style="border-top:1px solid #e2e8f0; padding:16px 32px; text-align:center;">
-          <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+          <p style="margin:0 0 4px; color:#94a3b8; font-size:12px; line-height:1.5;">PocketWise — Your Smart Finance Partner</p>
+          <p style="margin:0; color:#94a3b8; font-size:11px;">You received this because you signed up for the PocketWise waitlist.</p>
+          <p style="margin:4px 0 0;"><a href="https://pocketwise.xyz/unsubscribe" style="color:#94a3b8; font-size:11px; text-decoration:underline;">Unsubscribe</a></p>
         </div>
 
       </td>
@@ -143,10 +175,20 @@ export const sendOtpEmail = async (
   firstName: string,
 ) => {
   try {
-    await transporter.sendMail({
-      from: `"PocketWise" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: FROM,
       to: email,
+      replyTo: "support@pocketwise.xyz",
       subject: "Your Password Reset OTP",
+      text: `Hey ${firstName},
+
+We received a request to reset your PocketWise password. Use the OTP below to proceed:
+
+${otp}
+
+This code expires in 10 minutes. If you didn't request this, you can safely ignore this email.
+
+— The PocketWise Team`,
       html: `
 <body style="margin:0; padding:24px 16px; background:#f8fafc; font-family:'DM Sans',Arial,sans-serif;">
   <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%; margin:0 auto;">
@@ -209,11 +251,15 @@ export const sendSavingsNotificationEmail = async (
   html: string,
 ) => {
   try {
-    return await transporter.sendMail({
-      from: `"PocketWise" <${process.env.EMAIL_USER}>`,
+    return await resend.emails.send({
+      from: FROM,
       to: email,
+      replyTo: "support@pocketwise.xyz",
       subject,
       html,
+      headers: {
+        "List-Unsubscribe": "<https://pocketwise.xyz/unsubscribe>",
+      },
     });
   } catch (error) {
     console.error("Failed to send email:", error);
