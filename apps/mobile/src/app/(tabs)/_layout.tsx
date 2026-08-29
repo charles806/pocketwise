@@ -98,6 +98,24 @@ export default function TabsLayout() {
         }}
       />
 
+      <Tabs.Screen
+        name="goals/create"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/change-pin"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/forgot-pin"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
