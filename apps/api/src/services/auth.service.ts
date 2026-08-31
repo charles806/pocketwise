@@ -5,7 +5,7 @@ import { sendWelcomeEmail, sendOtpEmail } from "../lib/mail.js";
 import crypto from "crypto";
 import { generateMockAccountNumber } from "../utils/account.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
-import { redis } from "../lib/redis.js";
+import { redis, safeRedis } from "../lib/redis.js";
 import { sendSMS } from "../lib/sms.js";
 
 interface SignupInput {
@@ -227,51 +227,59 @@ const authService = {
   },
 
   async refresh(refreshToken: string) {
+    let decoded: any;
     try {
-      const decoded = jwt.verify(
+      decoded = jwt.verify(
         refreshToken,
         process.env.JWT_REFRESH_SECRET!,
         { algorithms: ["HS256"] },
       ) as any;
-
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: { id: true },
-      });
-      if (!user) {
-        const error = new Error("Invalid token") as any;
-        error.statusCode = 401;
-        throw error;
-      }
-
-      const isBlacklisted = await redis.get(`blacklist:${refreshToken}`);
-      if (isBlacklisted) {
-        throw Object.assign(new Error("Token has been invalidated"), {
-          statusCode: 401,
-        });
-      }
-
-      // Rotate: blacklist old refresh token and issue a new one
-      await redis.setex(`blacklist:${refreshToken}`, 7 * 24 * 60 * 60, "1");
-
-      const newRefreshToken = jwt.sign(
-        { id: user.id, email: decoded.email },
-        process.env.JWT_REFRESH_SECRET!,
-        { expiresIn: "7d" },
-      );
-
-      const accessToken = jwt.sign(
-        { id: user.id, email: decoded.email },
-        process.env.JWT_ACCESS_SECRET!,
-        { expiresIn: "45m" },
-      );
-
-      return { accessToken, refreshToken: newRefreshToken };
     } catch {
       const error = new Error("Invalid or expired refresh token") as any;
       error.statusCode = 401;
       throw error;
     }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true },
+    });
+    if (!user) {
+      const error = new Error("Invalid token") as any;
+      error.statusCode = 401;
+      throw error;
+    }
+
+    // Best-effort blacklist check. When Redis is unavailable we fail open:
+    // a cache outage must never invalidate a valid refresh token.
+    const isBlacklisted =
+      (await safeRedis.get(`blacklist:${refreshToken}`)) !== null;
+    if (isBlacklisted) {
+      throw Object.assign(new Error("Token has been invalidated"), {
+        statusCode: 401,
+      });
+    }
+
+    // Rotate: blacklist old refresh token and issue a new one
+    await safeRedis.setex(
+      `blacklist:${refreshToken}`,
+      7 * 24 * 60 * 60,
+      "1",
+    );
+
+    const newRefreshToken = jwt.sign(
+      { id: user.id, email: decoded.email },
+      process.env.JWT_REFRESH_SECRET!,
+      { expiresIn: "7d" },
+    );
+
+    const accessToken = jwt.sign(
+      { id: user.id, email: decoded.email },
+      process.env.JWT_ACCESS_SECRET!,
+      { expiresIn: "45m" },
+    );
+
+    return { accessToken, refreshToken: newRefreshToken };
   },
 
   async me(userId: string) {
@@ -295,6 +303,12 @@ const authService = {
         createdAt: true,
         profilePicture: true,
         transferPin: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        country: true,
       },
     });
 
@@ -612,6 +626,52 @@ const authService = {
         .del(CACHE_KEYS.userLookup("account", oldUser.accountNumber))
         .catch(() => {});
     }
+
+    return { ...updated, requiresPinSetup: false };
+  },
+
+  async updateAddress(
+    userId: string,
+    data: {
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      postalCode?: string;
+    },
+  ) {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2 ?? null,
+        city: data.city,
+        state: data.state,
+        postalCode: data.postalCode ?? null,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
+        email: true,
+        phone: true,
+        kycTier: true,
+        isSimulationMode: true,
+        onboardingComplete: true,
+        primaryGoal: true,
+        createdAt: true,
+        profilePicture: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        country: true,
+      },
+    });
+
+    await cache.del(CACHE_KEYS.userProfile(userId));
 
     return { ...updated, requiresPinSetup: false };
   },

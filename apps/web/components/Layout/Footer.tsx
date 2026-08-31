@@ -15,7 +15,7 @@ const footerLinks: Record<string, { title: string; href: string }[]> = {
   ],
   Company: [
     { title: "About Us", href: "/about" },
-    { title: "Contact", href: "mailto:support@getpocketwise.xyz" },
+    { title: "Contact", href: "mailto:support@pocketwise.xyz" },
   ],
   Legal: [
     { title: "Privacy Policy", href: "/privacy" },
@@ -83,8 +83,8 @@ export default function Footer() {
       <div
         className="absolute top-0 left-1/4 w-64 h-64 rounded-full pointer-events-none"
         style={{
-          background:
-            "radial-gradient(circle, rgba(91,79,207,0.08) 0%, transparent 70%)",
+background:
+              "radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)",
           filter: "blur(40px)",
         }}
       />
@@ -92,7 +92,7 @@ export default function Footer() {
         className="absolute bottom-0 right-1/4 w-48 h-48 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%)",
           filter: "blur(30px)",
         }}
       />
@@ -131,11 +131,11 @@ export default function Footer() {
               every naira so you can focus on what matters.
             </p>
             <a
-              href="mailto:support@getpocketwise.xyz"
+              href="mailto:support@pocketwise.xyz"
               className="text-[#9ca3af] text-sm hover:text-white transition-colors duration-200 flex items-center gap-2 w-fit cursor-pointer"
             >
               <Mail size={16} />
-              support@getpocketwise.xyz
+              support@pocketwise.xyz
             </a>
           </motion.div>
 
@@ -148,7 +148,7 @@ export default function Footer() {
               <div key={category} className="flex flex-col gap-4">
                 <span className="text-white text-sm font-semibold flex items-center gap-2">
                   {category === "Product" && (
-                    <Sparkles size={14} className="text-[#5B4FCF]" />
+                    <Sparkles size={14} className="text-[#4f46e5]" />
                   )}
                   {category}
                 </span>
@@ -175,7 +175,7 @@ export default function Footer() {
           className="relative rounded-2xl p-1"
           style={{
             background:
-              "linear-gradient(135deg, rgba(91,79,207,0.3) 0%, rgba(139,92,246,0.3) 100%)",
+              "linear-gradient(135deg, rgba(79,70,229,0.3) 0%, rgba(79,70,229,0.3) 100%)",
           }}
         >
           <div
@@ -192,8 +192,8 @@ export default function Footer() {
             </div>
             <Link
               href="/waitlist"
-              className="flex items-center gap-2 px-5 py-3 rounded-xl font-jakarta font-semibold text-sm text-white whitespace-nowrap hover:scale-105 transition-transform cursor-pointer"
-              style={{ background: "#5B4FCF" }}
+className="flex items-center gap-2 px-5 py-3 rounded-xl font-jakarta font-semibold text-sm text-white whitespace-nowrap hover:scale-105 transition-transform cursor-pointer"
+            style={{ background: "#4f46e5" }}
             >
               Join Waitlist
               <ArrowRight size={16} />
@@ -230,7 +230,7 @@ export default function Footer() {
                 aria-label={label}
                 className="size-9 flex justify-center items-center
                   bg-white/5 text-[#9ca3af] rounded-lg
-                  hover:bg-[#5B4FCF]/20 hover:text-[#5B4FCF] hover:scale-110
+                  hover:bg-[#4f46e5]/20 hover:text-[#4f46e5] hover:scale-110
                   transition-all duration-200 cursor-pointer"
               >
                 {icon}

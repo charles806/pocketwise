@@ -47,7 +47,7 @@ interface AuthContextType {
   isLoading: boolean;
   setAuth: (token: string, userData: User) => void;
   logout: () => void;
-  refreshSession: () => Promise<void>;
+  refreshSession: () => Promise<string | null>;
   refreshUser: () => Promise<void>;
 }
 
@@ -96,20 +96,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         credentials: "include",
       });
 
-      if (!response.ok) {
+      // Only a genuine auth failure (401) invalidates the session.
+      // Transient outages (5xx, network) must NOT log the user out —
+      // keep the current token so the user can keep working.
+      if (response.status === 401) {
         logout();
-        return;
+        return null;
       }
+
+      if (!response.ok) return null;
 
       const data = await response.json();
 
       if (data.success && data.data?.accessToken) {
-        setAccessToken(data.data.accessToken);
+        const freshToken = data.data.accessToken as string;
+        setAccessToken(freshToken);
         setSessionCookie();
 
         const meResponse = await fetch(`${API_BASE}/api/v1/auth/me`, {
           headers: {
-            Authorization: `Bearer ${data.data.accessToken}`,
+            Authorization: `Bearer ${freshToken}`,
           },
           credentials: "include",
         });
@@ -120,11 +126,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(meData.data);
           }
         }
-      } else {
-        logout();
+
+        return freshToken;
       }
-    } catch {
+
+      // 200 + success:false means no refresh token cookie was sent —
+      // the session is genuinely gone.
       logout();
+      return null;
+    } catch {
+      // Network error — keep the current session, do not log out.
+      return null;
     }
   }, [logout]);
 
@@ -161,11 +173,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           credentials: "include",
         });
 
-        if (!response.ok) {
+        // 401 = refresh token genuinely invalid/expired → full redirect.
+        // Any other failure (5xx, network) is transient — keep the current
+        // page and any in-memory session instead of booting the user out.
+        if (response.status === 401) {
           const path = window.location.pathname;
           if (path !== "/login" && path !== "/register") {
             router.push("/login");
           }
+          setIsLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
           setIsLoading(false);
           return;
         }
@@ -267,6 +287,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
               : "";
 
         if (API_BASE && requestUrl.startsWith(API_BASE)) {
+          if (
+            requestUrl.endsWith("/api/v1/auth/refresh") ||
+            requestUrl.endsWith("/api/v1/auth/me")
+          ) {
+            return response;
+          }
           const pathname = window.location.pathname;
           if (pathname !== "/login" && pathname !== "/register") {
             logout();

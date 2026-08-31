@@ -52,11 +52,11 @@ export default function WaitlistSection() {
     }
   };
 
-  const socialPills = [
-    { icon: Smartphone, text: "Mobile App — Coming Soon" },
-    { icon: Building2, text: "Real Money via Anchor BaaS" },
-    { icon: Globe2, text: "Built in Nigeria, for Nigeria" },
-  ];
+const socialPills = [
+  { icon: Smartphone, text: "Mobile App — September 2026" },
+  { icon: Building2, text: "Real Money via Anchor BaaS" },
+  { icon: Globe2, text: "Built in Nigeria, for Nigeria" },
+];
 
   return (
     <section
@@ -97,9 +97,9 @@ export default function WaitlistSection() {
           <span
             className="inline-flex items-center gap-2 text-sm font-semibold font-jakarta px-4 py-2 rounded-full cursor-default"
             style={{
-              background: "rgba(91,79,207,0.35)",
-              color: "#c4baff",
-              border: "1px solid rgba(91,79,207,0.4)",
+              background: "rgba(79,70,229,0.35)",
+              color: "#c7d2fe",
+              border: "1px solid rgba(79,70,229,0.4)",
             }}
           >
             <Rocket size={16} />
@@ -165,7 +165,7 @@ export default function WaitlistSection() {
                     }
                   }}
                   placeholder="Enter your email address"
-                  className="w-full pl-11 pr-4 py-4 text-sm font-medium text-white bg-white/10 border border-white/15 placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#5B4FCF]/60 focus:border-[#5B4FCF]/60 transition-all rounded-2xl"
+                  className="w-full pl-11 pr-4 py-4 text-sm font-medium text-white bg-white/10 border border-white/15 placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/60 focus:border-[#4f46e5]/60 transition-all rounded-xl"
                 />
               </div>
               <motion.button
@@ -173,8 +173,8 @@ export default function WaitlistSection() {
                 disabled={status === "loading"}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="btn-primary font-jakarta font-semibold text-sm px-6 py-4 rounded-2xl whitespace-nowrap shrink-0 disabled:opacity-70 cursor-pointer flex items-center justify-center gap-2"
-                style={{ background: "#5B4FCF" }}
+                className="btn-primary font-jakarta font-semibold text-sm px-6 py-4 rounded-xl whitespace-nowrap shrink-0 disabled:opacity-70 cursor-pointer flex items-center justify-center gap-2"
+                style={{ background: "#4f46e5" }}
               >
                 {status === "loading" ? (
                   <>

@@ -218,7 +218,16 @@ export const savingsGoalService = {
     return completedGoal;
   },
 
-  async contributeToGoal(userId: string, goalId: string, amount: number) {
+  async contributeToGoal(
+    userId: string,
+    goalId: string,
+    amount: number,
+    weekStart?: Date | string,
+  ) {
+    const weekStartDate =
+      weekStart instanceof Date
+        ? weekStart
+        : new Date(`${weekStart}T00:00:00.000Z`);
     const findGoal = await prisma.savingsGoal.findFirst({
       where: {
         id: goalId,
@@ -240,8 +249,17 @@ export const savingsGoalService = {
       throw error;
     }
 
-    const { update, previousProgress, newProgress } = await prisma.$transaction(
+    const result = await prisma.$transaction(
       async (tx) => {
+        if (weekStart) {
+          const alreadyContributed = await tx.autoContribution.findUnique({
+            where: {
+              goalId_weekStart: { goalId, weekStart: weekStartDate },
+            },
+          });
+          if (alreadyContributed) return null;
+        }
+
         await tx.$queryRaw`
         SELECT id FROM wallets WHERE user_id = ${userId}::uuid AND type = 'savings' FOR UPDATE
       `;
@@ -288,9 +306,25 @@ export const savingsGoalService = {
           update.targetAmount.toNumber(),
         );
 
+        if (weekStart) {
+          await tx.autoContribution.create({
+            data: {
+              goalId,
+              weekStart: weekStartDate,
+              amount,
+            },
+          });
+        }
+
         return { update, previousProgress, newProgress };
       },
     );
+
+    if (!result) {
+      return { skipped: true } as any;
+    }
+
+    const { update, previousProgress, newProgress } = result;
 
     const milestones = [25, 50, 75] as const;
 

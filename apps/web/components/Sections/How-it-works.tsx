@@ -56,7 +56,7 @@ function StepCard({
           animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
           transition={{ duration: 0.8, delay: index * 0.3, ease: "easeOut" }}
           className="absolute left-1/2 top-16 w-[calc(100%+4rem)] h-0.5 origin-left"
-          style={{ background: "linear-gradient(90deg, #8B5CF6, #A78BFA)" }}
+          style={{ background: "linear-gradient(90deg, #4f46e5, #a5b4fc)" }}
         />
 
         {/* Step card */}
@@ -66,21 +66,24 @@ function StepCard({
           transition={{ duration: 0.5, delay: index * 0.2 }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="relative flex flex-col items-center text-center p-6 pt-12 rounded-3xl border border-gray-100 bg-white w-64 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-violet-200"
+          className="relative flex flex-col items-center text-center p-6 pt-12 rounded-3xl border border-gray-100 bg-white w-64 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-indigo-200"
           style={{
             transform: isHovered ? "translateY(-8px)" : "translateY(0)",
+            boxShadow: isHovered
+              ? "0 20px 40px -12px rgba(79,70,229,0.15)"
+              : "0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.06)",
           }}
         >
           {/* Number badge */}
-          <div className="absolute -top-6 w-12 h-12 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/30">
+          <div className="absolute -top-6 w-12 h-12 rounded-full bg-linear-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-600/30">
             <span className="text-white font-jakarta font-bold text-sm">
               {step.number}
             </span>
           </div>
 
           {/* Icon */}
-          <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
-            <step.icon className="w-7 h-7 text-violet-600" />
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+            <step.icon className="w-7 h-7 text-indigo-600" />
           </div>
 
           <h3 className="font-jakarta font-bold text-gray-900 text-lg mb-2">
@@ -100,13 +103,13 @@ function StepCard({
             initial={{ scaleY: 0 }}
             animate={isInView ? { scaleY: 1 } : {}}
             transition={{ duration: 0.6, delay: index * 0.2 }}
-            className="w-0.5 h-16 bg-violet-200 origin-top"
+            className="w-0.5 h-16 bg-indigo-200 origin-top"
           />
           <motion.div
             initial={{ scaleY: 0 }}
             animate={isInView ? { scaleY: 1 } : {}}
             transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
-            className="w-0.5 flex-1 bg-violet-200 origin-top"
+            className="w-0.5 flex-1 bg-indigo-200 origin-top"
           />
         </div>
 
@@ -115,7 +118,7 @@ function StepCard({
           initial={{ scale: 0 }}
           animate={isInView ? { scale: 1 } : {}}
           transition={{ type: "spring", delay: index * 0.2 }}
-          className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg"
+          className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg"
         >
           <span className="text-white font-jakarta font-bold text-xs">
             {step.number}
@@ -129,8 +132,8 @@ function StepCard({
           transition={{ duration: 0.4, delay: index * 0.2 + 0.1 }}
           className="flex-1 pb-8"
         >
-          <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center mb-3">
-            <step.icon className="w-5 h-5 text-violet-600" />
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
+            <step.icon className="w-5 h-5 text-indigo-600" />
           </div>
           <h3 className="font-jakarta font-bold text-gray-900 text-base mb-1">
             {step.title}
@@ -161,7 +164,7 @@ export default function HowItWorksSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 bg-violet-50 text-violet-700 border border-violet-200">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold font-jakarta uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 bg-indigo-50 text-indigo-700 border border-indigo-200">
             How It Works
           </span>
           <h2
@@ -212,8 +215,8 @@ export default function HowItWorksSection() {
           transition={{ duration: 0.5, delay: 0.8 }}
           className="mt-12 flex justify-center"
         >
-          <div className="inline-flex items-center gap-3 text-sm font-medium px-6 py-3 rounded-2xl bg-white border border-gray-100 shadow-sm">
-            <Shield className="w-4 h-4 text-violet-600" />
+          <div className="inline-flex items-center gap-3 text-sm font-medium px-6 py-3 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <Shield className="w-4 h-4 text-indigo-600" />
             <span className="text-gray-600">
               Powered by <strong className="text-gray-900">Anchor BaaS</strong>{" "}
               — CBN licensed. Your money is real and protected.

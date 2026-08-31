@@ -17,6 +17,15 @@ const verifyAnchorSignature = (
     ),
   );
 
+  // Anchor sends base64(hex(HMAC_SHA1(body, key))) — double-encoded
+  for (const algorithm of ["sha256", "sha1"]) {
+    const hexDigest = crypto
+      .createHmac(algorithm, secret)
+      .update(rawBody)
+      .digest("hex");
+    candidates.push(Buffer.from(hexDigest).toString("base64"));
+  }
+
   const sigBuffer = Buffer.from(signature);
 
   for (const candidate of candidates) {
@@ -42,13 +51,28 @@ export const webhook = async (req: Request, res: Response) => {
 
     const payload = JSON.parse(rawBody);
 
-    if (!payload || !payload.event || !payload.data) {
+    if (!payload) {
       return sendError(res, "Invalid webhook payload structure", 400);
     }
 
-    const result = await webhookService.processAnchorDepositWebhook(payload);
+    const eventType = (payload.event || payload.type) as string;
 
-    sendSuccess(res, "Webhook processed successfully", result, 200);
+    if (!eventType) {
+      return sendError(res, "Missing event type in payload", 400);
+    }
+
+    if (eventType === "nip.inbound.completed") {
+      const result = await webhookService.processAnchorDepositWebhook(payload);
+      return sendSuccess(res, "Webhook processed successfully", result, 200);
+    }
+
+    if (eventType === "customer.created") {
+      console.log("[Webhook] customer.created received:", payload.data || payload.attributes);
+      return sendSuccess(res, "Webhook acknowledged", null, 200);
+    }
+
+    console.log("[Webhook] Unhandled event type:", eventType);
+    return sendSuccess(res, "Webhook acknowledged", null, 200);
   } catch (error) {
     console.error(error);
     sendError(res, "Internal server error", 500);

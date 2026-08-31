@@ -165,7 +165,7 @@ interface StepFourProps {
 }
 
 const StepFour = ({ onComplete, onPrev, onSkip }: StepFourProps) => {
-  const { accessToken } = useAuth();
+  const { accessToken, refreshSession } = useAuth();
   const [splits, setSplits] = useState<SplitValues>(DEFAULT_SPLITS);
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -184,16 +184,25 @@ const StepFour = ({ onComplete, onPrev, onSkip }: StepFourProps) => {
   );
 
   const handleSave = async () => {
-    if (!isValid || isSaving || !accessToken) return;
+    if (!isValid || isSaving) return;
     setIsSaving(true);
     setError("");
 
     try {
+      let token = accessToken;
+      if (!token) {
+        token = await refreshSession();
+      }
+      if (!token) {
+        setError("Session expired. Please sign in again.");
+        return;
+      }
+
       const res = await fetch(`${API_BASE}/api/v1/wallet-split`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(splits),
       });
@@ -279,7 +288,7 @@ const StepFour = ({ onComplete, onPrev, onSkip }: StepFourProps) => {
           >
             <div className="size-1.5 bg-indigo-600 rounded-full" />
             <span className="text-indigo-600 font-sans text-[10px] font-bold tracking-widest uppercase">
-              Step 4 of 4
+              Step 5 of 5
             </span>
           </motion.div>
 
@@ -413,10 +422,11 @@ const StepFour = ({ onComplete, onPrev, onSkip }: StepFourProps) => {
           </button>
 
           <div className="flex items-center gap-1.5">
-            <div className="size-1.5 bg-indigo-600 rounded-full" />
-            <div className="size-1.5 bg-indigo-600 rounded-full" />
-            <div className="size-1.5 bg-indigo-600 rounded-full" />
-            <div className="size-1.5 bg-indigo-600 rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
+            <div className="size-1.5 bg-slate-200 rounded-full" />
+            <div className="w-8 h-1.5 bg-indigo-600 rounded-full" />
           </div>
 
           <motion.button

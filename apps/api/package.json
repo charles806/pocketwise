@@ -6,7 +6,10 @@
   "scripts": {
     "build": "npx prisma generate && tsc",
     "dev": "nodemon --watch src --ext ts,json --exec tsx src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "check-types": "tsc --noEmit",
+    "test:jobs": "tsx scripts/test-jobs.ts",
+    "test:anchor-customer": "tsx scripts/test-anchor-customer.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +22,6 @@
     "@types/node": "^25.9.5",
     "@types/node-cron": "^3.0.11",
     "@types/node-fetch": "^2.6.13",
-    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.20.0",
     "nodemon": "^3.1.14",
     "prisma": "^6.19.3",
@@ -32,6 +34,7 @@
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^6.19.3",
     "@sentry/node": "^10.70.0",
+    "@upstash/qstash": "^2.11.3",
     "@upstash/redis": "^1.38.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
@@ -46,7 +49,6 @@
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
-    "nodemailer": "^8.0.5",
     "pg": "^8.20.0",
     "resend": "^6.10.0",
     "zod": "^4.3.6"

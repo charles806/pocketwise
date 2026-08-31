@@ -6,7 +6,7 @@ import { rateLimit } from "../middleware/rate-limit.middleware.js";
 export const webhookRoutes = Router();
 
 webhookRoutes.post(
-  "/anchor/deposit",
+  "/anchor",
   rateLimit({ windowMs: 60_000, max: 100, keyBy: "ip" }),
   express.raw({ type: "application/json" }),
   webhook,

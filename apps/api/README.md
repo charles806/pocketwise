@@ -161,7 +161,11 @@ All responses follow this shape:
 
 ### Internal Cron Endpoints — `/api/internal`
 
-These are protected by `Keep-Alive-Auth` header (matching `KEEP_ALIVE_SECRET` env var) and rate-limited.
+These are protected by a secret passed via the `x-keep-alive-secret` **header** (matching `KEEP_ALIVE_SECRET` env var), and rate-limited. The secret is **only** accepted as a header — passing it as a `?secret=` query parameter returns `401`. Configure each cron-job.org request with the header, e.g.:
+
+```
+x-keep-alive-secret: <KEEP_ALIVE_SECRET>
+```
 
 | Method | Endpoint           | Schedule     | Description                                      |
 | ------ | ------------------ | ------------ | ------------------------------------------------ |

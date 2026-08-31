@@ -2,7 +2,7 @@ import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { authService } from "../services/auth.service.js";
 import { sendSuccess, sendError } from "../utils/response.js";
-import { redis } from "../lib/redis.js";
+import { safeRedis } from "../lib/redis.js";
 import { z } from "zod/v4";
 
 const lookupQuerySchema = z.object({
@@ -125,7 +125,11 @@ const logout = async (req: Request, res: Response) => {
     : req.cookies?.refreshToken;
 
   if (token) {
-    await redis.setex(`blacklist:${token}`, 7 * 24 * 60 * 60, "1");
+    await safeRedis.setex(
+      `blacklist:${token}`,
+      7 * 24 * 60 * 60,
+      "1",
+    );
   }
 
   sendSuccess(res, "Logged out successfully");
@@ -416,6 +420,21 @@ const uploadAvatar = async (req: Request, res: Response) => {
   }
 };
 
+const updateAddress = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, "Unauthorized", 401);
+
+    const result = await authService.updateAddress(userId, req.body);
+    sendSuccess(res, "Address saved successfully", result);
+  } catch (error) {
+    const message =
+      getErrorMessage(error, "Error saving address");
+    const status = (error as any)?.statusCode || 500;
+    sendError(res, message, status);
+  }
+};
+
 export {
   signUp,
   login,
@@ -433,6 +452,7 @@ export {
   verifyPinOtp,
   resetPin,
   updateProfile,
+  updateAddress,
   changePassword,
   uploadAvatar,
 };

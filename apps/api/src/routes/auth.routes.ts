@@ -16,6 +16,7 @@ import {
   verifyPinOtp,
   resetPin,
   updateProfile,
+  updateAddress,
   changePassword,
   uploadAvatar,
 } from "../controller/auth.controller.js";
@@ -32,6 +33,7 @@ import {
   verifyPinOtpSchema,
   resetPinSchema,
   profileSchema,
+  addressSchema,
   changePasswordSchema,
 } from "../schemas/auth.schema.js";
 import { setupPinSchema, changePinSchema } from "../schemas/pin.schema.js";
@@ -71,6 +73,13 @@ router.post("/logout", looseIpLimit, logout);
 router.get("/me", looseIpLimit, authMiddleware, me);
 router.get("/lookup", looseIpLimit, authMiddleware, lookupUser);
 router.patch("/goal", looseIpLimit, authMiddleware, updateGoal);
+router.patch(
+  "/onboarding/address",
+  authMiddleware,
+  rateLimit({ windowMs: 60_000, max: 10, keyBy: "ip" }),
+  validate(addressSchema),
+  updateAddress,
+);
 router.post(
   "/setup-pin",
   authMiddleware,

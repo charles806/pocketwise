@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { WalletHeader } from "@/components/wallet/Header";
 import { PinSetupModal } from "@/components/wallet/PinSetupModal";
 import { GoalModal } from "@/components/wallet/GoalModal";
+import { AddressModal } from "@/components/wallet/AddressModal";
 import { BalanceCard } from "@/components/wallet/BalanceCard";
 import { WalletCards } from "@/components/wallet/WalletCard";
 import { RecentTransactions } from "@/components/wallet/RecentTransactions";
@@ -38,6 +39,7 @@ const Wallet = () => {
     return (
       <View style={{ flex: 1, backgroundColor: "#f8fafc" }}>
         <WalletHeader />
+        <AddressModal />
         <PinSetupModal />
         <GoalModal />
         <ScrollView
@@ -73,6 +75,7 @@ const Wallet = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "#f8fafc" }}>
       <WalletHeader />
+      <AddressModal />
       <PinSetupModal />
       <GoalModal />
       <ScrollView
