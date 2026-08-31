@@ -54,7 +54,7 @@ interface StepFourAddressProps {
 }
 
 const StepFourAddress = ({ onNext, onPrev }: StepFourAddressProps) => {
-  const { accessToken } = useAuth();
+  const { accessToken, refreshSession } = useAuth();
   const shouldReduceMotion = useReducedMotion();
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -67,16 +67,25 @@ const StepFourAddress = ({ onNext, onPrev }: StepFourAddressProps) => {
   const isValid = addressLine1.trim().length > 0 && city.trim().length > 0 && state.length > 0;
 
   const handleSave = async () => {
-    if (!isValid || isSaving || !accessToken) return;
+    if (!isValid || isSaving) return;
     setIsSaving(true);
     setError("");
 
     try {
+      let token = accessToken;
+      if (!token) {
+        token = await refreshSession();
+      }
+      if (!token) {
+        setError("Session expired. Please sign in again.");
+        return;
+      }
+
       const res = await fetch(`${API_BASE}/api/v1/auth/onboarding/address`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           addressLine1: addressLine1.trim(),

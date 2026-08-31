@@ -2,7 +2,7 @@ import { getErrorMessage } from "../utils/errors.js";
 import type { Request, Response } from "express";
 import { authService } from "../services/auth.service.js";
 import { sendSuccess, sendError } from "../utils/response.js";
-import { redis } from "../lib/redis.js";
+import { safeRedis } from "../lib/redis.js";
 import { z } from "zod/v4";
 
 const lookupQuerySchema = z.object({
@@ -125,7 +125,11 @@ const logout = async (req: Request, res: Response) => {
     : req.cookies?.refreshToken;
 
   if (token) {
-    await redis.setex(`blacklist:${token}`, 7 * 24 * 60 * 60, "1");
+    await safeRedis.setex(
+      `blacklist:${token}`,
+      7 * 24 * 60 * 60,
+      "1",
+    );
   }
 
   sendSuccess(res, "Logged out successfully");

@@ -5,7 +5,7 @@ import { sendWelcomeEmail, sendOtpEmail } from "../lib/mail.js";
 import crypto from "crypto";
 import { generateMockAccountNumber } from "../utils/account.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
-import { redis } from "../lib/redis.js";
+import { redis, safeRedis } from "../lib/redis.js";
 import { sendSMS } from "../lib/sms.js";
 
 interface SignupInput {
@@ -250,7 +250,10 @@ const authService = {
       throw error;
     }
 
-    const isBlacklisted = await redis.get(`blacklist:${refreshToken}`);
+    // Best-effort blacklist check. When Redis is unavailable we fail open:
+    // a cache outage must never invalidate a valid refresh token.
+    const isBlacklisted =
+      (await safeRedis.get(`blacklist:${refreshToken}`)) !== null;
     if (isBlacklisted) {
       throw Object.assign(new Error("Token has been invalidated"), {
         statusCode: 401,
@@ -258,7 +261,11 @@ const authService = {
     }
 
     // Rotate: blacklist old refresh token and issue a new one
-    await redis.setex(`blacklist:${refreshToken}`, 7 * 24 * 60 * 60, "1");
+    await safeRedis.setex(
+      `blacklist:${refreshToken}`,
+      7 * 24 * 60 * 60,
+      "1",
+    );
 
     const newRefreshToken = jwt.sign(
       { id: user.id, email: decoded.email },

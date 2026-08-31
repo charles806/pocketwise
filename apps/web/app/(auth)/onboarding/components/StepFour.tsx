@@ -165,7 +165,7 @@ interface StepFourProps {
 }
 
 const StepFour = ({ onComplete, onPrev, onSkip }: StepFourProps) => {
-  const { accessToken } = useAuth();
+  const { accessToken, refreshSession } = useAuth();
   const [splits, setSplits] = useState<SplitValues>(DEFAULT_SPLITS);
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -184,16 +184,25 @@ const StepFour = ({ onComplete, onPrev, onSkip }: StepFourProps) => {
   );
 
   const handleSave = async () => {
-    if (!isValid || isSaving || !accessToken) return;
+    if (!isValid || isSaving) return;
     setIsSaving(true);
     setError("");
 
     try {
+      let token = accessToken;
+      if (!token) {
+        token = await refreshSession();
+      }
+      if (!token) {
+        setError("Session expired. Please sign in again.");
+        return;
+      }
+
       const res = await fetch(`${API_BASE}/api/v1/wallet-split`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(splits),
       });
