@@ -22,7 +22,7 @@ model User {
   phone                   String?                  @unique
   passwordHash            String                   @map("password_hash")
   dateOfBirth             DateTime                 @map("date_of_birth")
-  kycTier                 Int                      @default(1) @map("kyc_tier")
+  kycTier                 Int                      @default(0) @map("kyc_tier")
   isSimulationMode        Boolean                  @default(false) @map("is_simulation_mode")
   onboardingComplete      Boolean                  @default(false) @map("onboarding_complete")
   createdAt               DateTime                 @default(now()) @map("created_at")
@@ -32,9 +32,12 @@ model User {
   lastName                String                   
   userName                String                   @unique
   accountNumber           String?                  @unique
+  bankName                String?                  @map("bank_name")
+  accountName             String?                  @map("account_name")
+  showAccountModal        Boolean                  @default(false) @map("show_account_modal")
   transferPin             String?                  @map("transfer_pin")
-  baasAccountId         String?                  @map("baas_account_id")
-  baasCustomerId        String?                  @map("baas_customer_id")
+baasAccountId   String?  @unique @map("baas_account_id")
+baasCustomerId  String?  @unique @map("baas_customer_id")
   fcmToken                String?                  @map("fcm_token")
   profilePicture          String?                  @map("profile_picture")
   addressLine1            String?                  @map("address_line_1")
@@ -43,6 +46,7 @@ model User {
   state                   String?
   postalCode              String?                  @map("postal_code")
   country                 String?                  @default("NG")
+  isFrozen                Boolean                  @default(false) @map("is_frozen")
   aiInsights              AIInsight[]
   bankRecipients          BankRecipient[]
   emergencyUnlockRequests EmergencyUnlockRequest[]
@@ -190,6 +194,7 @@ model BankRecipient {
   bankName      String   @map("bank_name")
   accountNumber String   @map("account_number")
   accountName   String   @map("account_name")
+  counterPartyId String?  @map("counter_party_id")
   lastSentAt    DateTime @default(now()) @map("last_sent_at")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

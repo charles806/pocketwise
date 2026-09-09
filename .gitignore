@@ -35,3 +35,4 @@ yarn-error.log*
 
 # Foglamp scan state (edit token is a secret)
 .foglamp/
+handoff.md

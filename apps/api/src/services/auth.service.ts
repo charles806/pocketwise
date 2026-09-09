@@ -6,7 +6,8 @@ import crypto from "crypto";
 import { generateMockAccountNumber } from "../utils/account.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
 import { redis, safeRedis } from "../lib/redis.js";
-import { sendSMS } from "../lib/sms.js";
+import { sendSMS, formatNigerianPhone } from "../lib/sms.js";
+import { createCustomer } from "../lib/baas.js";
 
 interface SignupInput {
   firstName: string;
@@ -309,6 +310,10 @@ const authService = {
         state: true,
         postalCode: true,
         country: true,
+        accountNumber: true,
+        bankName: true,
+        accountName: true,
+        showAccountModal: true,
       },
     });
 
@@ -668,12 +673,46 @@ const authService = {
         state: true,
         postalCode: true,
         country: true,
+        baasCustomerId: true,
       },
     });
 
     await cache.del(CACHE_KEYS.userProfile(userId));
 
-    return { ...updated, requiresPinSetup: false };
+    // Best-effort: register the user with Anchor as an IndividualCustomer.
+    // Must never fail the request — the address is already saved, and this can
+    // be retried later. Anchor errors are logged, not surfaced to the client.
+    try {
+      if (!updated.baasCustomerId) {
+        const anchorId = await createCustomer(userId, {
+          firstName: updated.firstName,
+          lastName: updated.lastName,
+          email: updated.email,
+          phoneNumber: formatNigerianPhone(updated.phone ?? ""),
+          addressLine1: updated.addressLine1 ?? "",
+          city: updated.city ?? "",
+          state: (updated.state ?? "").toUpperCase(),
+          postalCode: updated.postalCode ?? "",
+        });
+
+        if (anchorId) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { baasCustomerId: anchorId },
+          });
+          await cache.del(CACHE_KEYS.userProfile(userId));
+        }
+      }
+    } catch (error) {
+      console.error(
+        `[updateAddress] Anchor customer creation failed for user ${userId}:`,
+        error,
+      );
+    }
+
+    const { baasCustomerId: _baasCustomerId, ...publicUser } = updated;
+
+    return { ...publicUser, requiresPinSetup: false };
   },
 
   async changePassword(

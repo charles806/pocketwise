@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { WalletHeader } from "../../UI/Header";
+import { RequireKyc } from "../../UI/RequireKyc";
 import { useAuth } from "../../../../../context/AuthContext";
 import { useWallet } from "../../../../../hooks/useWallet";
 import { useToast } from "../../../../../context/ToastContext";
@@ -195,6 +196,7 @@ const Page = () => {
   return (
     <>
       <WalletHeader />
+      <RequireKyc>
       <main
         className="flex min-h-screen flex-col gap-4 py-4 min-[480px]:gap-6 sm:gap-8 sm:py-6 md:gap-10"
         style={{ backgroundColor: "#f8fafc" }}
@@ -532,6 +534,7 @@ const Page = () => {
           </div>
         </div>
       </main>
+      </RequireKyc>
     </>
   );
 };
