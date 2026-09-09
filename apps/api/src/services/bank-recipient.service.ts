@@ -5,12 +5,13 @@ interface upsertRecipientInterface {
     bankCode: string,
     bankName: string,
     accountNumber: string,
-    accountName: string
+    accountName: string,
+    counterPartyId?: string
 }
 
 export const bankRecipientService = {
     async upsertRecipient(userId: string, data: upsertRecipientInterface) {
-        const { bankCode, bankName, accountNumber, accountName } = data
+        const { bankCode, bankName, accountNumber, accountName, counterPartyId } = data
 
         const check = await prisma.bankRecipient.findUnique({
             where: {
@@ -31,7 +32,8 @@ export const bankRecipientService = {
                     }
                 },
                 data: {
-                    lastSentAt: new Date()
+                    lastSentAt: new Date(),
+                    ...(counterPartyId ? { counterPartyId } : {})
                 }
             })
         } else {
@@ -42,10 +44,27 @@ export const bankRecipientService = {
                     bankName,
                     accountNumber,
                     accountName,
+                    ...(counterPartyId ? { counterPartyId } : {}),
                     lastSentAt: new Date()
                 }
             });
         }
+    },
+
+    async getByAccount(userId: string, accountNumber: string) {
+        return prisma.bankRecipient.findUnique({
+            where: {
+                userId_accountNumber: {
+                    userId,
+                    accountNumber
+                }
+            },
+            select: {
+                counterPartyId: true,
+                accountNumber: true,
+                accountName: true,
+            }
+        });
     },
 
     async getRecentRecipients(userId: string) {

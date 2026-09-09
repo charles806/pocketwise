@@ -13,6 +13,7 @@ import { EmergencyUnlockService } from "./emergency-unlock.service.js";
 import { walletHelper } from "../helper/wallet-helpers.js";
 import { feeCalculator } from "../helper/fee-calculator.js";
 import { bankRecipientService } from "./bank-recipient.service.js";
+import { createCounterParty, initiateNIPTransfer } from "../lib/baas.js";
 
 interface TransferInterface {
   userId: string;
@@ -469,7 +470,11 @@ export const bankTransferService = {
   async sendToBank(userId: string, data: BankTransferInterface) {
     const getUser = await prisma.user.findFirst({
       where: { id: userId },
-      select: { id: true, transferPin: true },
+      select: {
+        id: true,
+        transferPin: true,
+        baasAccountId: true,
+      },
     });
 
     if (!getUser) {
@@ -487,12 +492,45 @@ export const bankTransferService = {
       throw Object.assign(new Error("Invalid PIN"), { statusCode: 401 });
     }
 
+    if (!getUser.baasAccountId) {
+      throw Object.assign(
+        new Error(
+          "Bank transfers are not available yet. Please complete your KYC to enable them.",
+        ),
+        { statusCode: 400 },
+      );
+    }
+
     const fee = feeCalculator(data.amount) ?? 0;
     const totalDeduction = data.amount + fee;
 
     const bankName = BANK_CODES[data.bankCode] ?? "Unknown Bank";
     const reference = crypto.randomUUID();
+    const anchorReference = reference.replace(/-/g, "");
+    const amountInKobo = Math.round(data.amount * 100);
 
+    // 1. Counterparty resolution: reuse a persisted one if it exists, otherwise
+    // create it at Anchor and persist the id onto the recipient record.
+    let counterPartyId: string;
+    const existingRecipient = await bankRecipientService.getByAccount(
+      userId,
+      data.accountNumber,
+    );
+
+    if (existingRecipient?.counterPartyId) {
+      counterPartyId = existingRecipient.counterPartyId;
+    } else {
+      const counterParty = await createCounterParty(
+        data.bankCode,
+        data.accountNumber,
+        data.accountName,
+      );
+      counterPartyId = counterParty.id;
+    }
+
+    // 2. Single DB transaction: lock the Spend wallet, verify balance, deduct
+    // the amount + fee, and record a PENDING transaction. Nothing is credited
+    // or marked successful here — the Anchor call happens after commit.
     const result = await prisma.$transaction(async (tx) => {
       await tx.$queryRawUnsafe(
         `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
@@ -520,46 +558,106 @@ export const bankTransferService = {
         data: { balance: { decrement: totalDeduction } },
       });
 
-      // TODO: Replace this comment with real Anchor NIP Transfer API call
-      // when CAC registration is complete and Anchor sandbox is funded.
-      // Example:
-      // await anchor.nipTransfer({ bankCode, accountNumber, amount, reference });
-      // If Anchor call fails, re-credit wallet and throw error.
-
-      await tx.transaction.create({
+      const transaction = await tx.transaction.create({
         data: {
           userId,
           walletId: spendWallet.id,
           type: "transfer",
           amount: -totalDeduction,
-          status: "success",
+          status: "pending",
           reason: data.reason,
           reference,
         },
       });
 
       return {
-        reference,
-        amount: data.amount,
-        fee,
-        totalDeduction,
+        transaction,
         newBalance: deductedWallet.balance,
       };
     });
 
-    //  Upsert recipient for recent recipients list
+    // 3. After commit, initiate the actual NIP transfer at Anchor.
+    let transferId: string | undefined;
+    try {
+      transferId = await initiateNIPTransfer(
+        getUser.baasAccountId,
+        counterPartyId,
+        amountInKobo,
+        data.reason,
+        anchorReference,
+      );
+    } catch (error) {
+      // 4. If the Anchor call itself fails, re-credit amount + fee and mark the
+      // transaction failed, then notify the user.
+      await prisma.$transaction(async (tx) => {
+        await tx.$queryRawUnsafe(
+          `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
+          userId,
+        );
+
+        await tx.wallet.updateMany({
+          where: { userId, type: "spend" },
+          data: { balance: { increment: totalDeduction } },
+        });
+
+        await tx.transaction.update({
+          where: { id: result.transaction.id },
+          data: { status: "failed" },
+        });
+      });
+
+      notificationService
+        .notifyTransferFailed(
+          userId,
+          data.amount,
+          `${data.accountName} at ${bankName}`,
+        )
+        .catch(() => {});
+
+      cache.del(CACHE_KEYS.userWallets(userId));
+
+      throw Object.assign(
+        new Error(
+          "We couldn't complete this transfer. Your money has been returned to your Spend wallet. Please try again.",
+        ),
+        { statusCode: (error as any)?.statusCode || 502 },
+      );
+    }
+
+    // Anchor already accepted the transfer — persist its reference. This is
+    // deliberately OUTSIDE the refund path: if this update ever fails, the
+    // money has still moved, and the transfer webhook will reconcile the
+    // transaction by baasRef instead.
+    await prisma.transaction
+      .update({
+        where: { id: result.transaction.id },
+        data: { baasRef: transferId },
+      })
+      .catch((error) => {
+        console.error(
+          "[sendToBank] Transfer initiated but failed to persist baasRef:",
+          error,
+        );
+      });
+
+    //  Upsert recipient for recent recipients list (with counterparty id)
     await bankRecipientService.upsertRecipient(userId, {
       bankCode: data.bankCode,
       bankName,
       accountNumber: data.accountNumber,
       accountName: data.accountName,
+      counterPartyId,
       userId: userId,
     });
 
     cache.del(CACHE_KEYS.userWallets(userId));
 
     return {
-      ...result,
+      reference,
+      amount: data.amount,
+      fee,
+      totalDeduction,
+      newBalance: result.newBalance,
       bankName,
       accountName: data.accountName,
       accountNumber: data.accountNumber,

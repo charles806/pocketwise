@@ -10,7 +10,8 @@ export const middleware = async (request: NextRequest) => {
   const isDashboard =
     request.nextUrl.pathname.startsWith("/wallet") ||
     request.nextUrl.pathname.startsWith("/goals") ||
-    request.nextUrl.pathname.startsWith("/transactions");
+    request.nextUrl.pathname.startsWith("/transactions") ||
+    request.nextUrl.pathname.startsWith("/kyc");
 
   if (!token && isDashboard) {
     const loginUrl = new URL("/login", request.url);
@@ -21,5 +22,5 @@ export const middleware = async (request: NextRequest) => {
 };
 
 export const config = {
-  matcher: ["/wallet/:path*", "/goals/:path*", "/transactions/:path*"],
+  matcher: ["/wallet/:path*", "/goals/:path*", "/transactions/:path*", "/kyc/:path*"],
 };

@@ -50,6 +50,18 @@ const transferReceivedTemplate = Handlebars.compile(
   transferReceivedTemplateSource,
 );
 
+const transferSentTemplateSource = fs.readFileSync(
+  path.join(__dirname, "templates", "transfer-sent.hbs"),
+  "utf-8",
+);
+const transferSentTemplate = Handlebars.compile(transferSentTemplateSource);
+
+const transferFailedTemplateSource = fs.readFileSync(
+  path.join(__dirname, "templates", "transfer-failed.hbs"),
+  "utf-8",
+);
+const transferFailedTemplate = Handlebars.compile(transferFailedTemplateSource);
+
 const weeklySummaryTemplateSource = fs.readFileSync(
   path.join(__dirname, "templates", "weekly-summary.hbs"),
   "utf-8",
@@ -295,6 +307,52 @@ export const notificationService = {
     const emailHtml = transferReceivedTemplate({
       formattedAmount,
       senderName,
+    }).trimEnd();
+
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "TRANSACTION",
+      subject: title,
+      emailHtml,
+    });
+  },
+
+  async notifyTransferSent(userId: string, amount: number, recipientName: string) {
+    const formattedAmount = amount.toLocaleString("en-NG");
+    const title = "✅ Transfer Successful";
+    const message = `Your transfer of ₦${formattedAmount} to ${recipientName} was successful. The money has left your Spend wallet.`;
+
+    const emailHtml = transferSentTemplate({
+      formattedAmount,
+      recipientName,
+    }).trimEnd();
+
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "TRANSACTION",
+      subject: title,
+      emailHtml,
+    });
+  },
+
+  async notifyTransferFailed(
+    userId: string,
+    amount: number,
+    recipientName: string,
+    reason?: string,
+  ) {
+    const formattedAmount = amount.toLocaleString("en-NG");
+    const title = "⚠️ Transfer Failed";
+    const message = `Your transfer of ₦${formattedAmount} to ${recipientName} could not be completed. The full amount has been returned to your Spend wallet.${reason ? ` ${reason}` : ""}`;
+
+    const emailHtml = transferFailedTemplate({
+      formattedAmount,
+      recipientName,
+      reason: reason ?? null,
     }).trimEnd();
 
     return this.sendNotification({

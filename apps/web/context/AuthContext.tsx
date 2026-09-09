@@ -39,6 +39,10 @@ interface User {
   onboardingComplete?: boolean;
   primaryGoal?: string | null;
   requiresPinSetup?: boolean;
+  accountNumber?: string;
+  bankName?: string;
+  accountName?: string;
+  showAccountModal?: boolean;
 }
 
 interface AuthContextType {

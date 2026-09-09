@@ -21,6 +21,8 @@ import p2pRecipientRouter from "./routes/p2p-recipient.routes.js";
 import emergencyUnlockRouter from "./routes/emergency-unlock.routes.js";
 import { checkRedisConnection } from "./lib/redis.js";
 import bankTransferRouter from "./routes/bank-transfer.routes.js";
+import kycRouter from "./routes/kyc.routes.js";
+import adminAccountRouter from "./routes/admin-account.routes.js";
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const MOBILE_URL = process.env.MOBILE_URL;
@@ -95,6 +97,9 @@ app.use("/api/v1/wallets/recent-recipients", bankRecipientRouter);
 app.use("/api/v1/wallets/recent-p2p-recipients", p2pRecipientRouter);
 app.use("/api/v1/wallets/emergency-unlock", emergencyUnlockRouter);
 app.use("/api/v1/transfers/bank", bankTransferRouter);
+app.use("/api/v1/kyc", kycRouter);
+//Admin Routes
+app.use("/api/v1/admin/accounts", adminAccountRouter);
 //Internal Routes
 app.use("/api/internal/keep-alive", keepAliveRouter);
 

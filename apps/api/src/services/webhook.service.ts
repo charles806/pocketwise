@@ -7,51 +7,107 @@ import {
 import crypto from "crypto";
 import { cache, CACHE_KEYS } from "../lib/cache.js";
 
-interface AnchorDepositPayload {
-  event: string;
-  data: {
-    reference: string;
-    amount: number | string | Prisma.Decimal;
-    userId: string;
-    status: string;
+interface AnchorEventPayload {
+  event?: string;
+  type?: string;
+  data?: {
+    id?: string;
+    type?: string;
+    attributes?: { createdAt?: string };
+    relationships?: Record<string, { data?: { id?: string } }>;
+  };
+  included?: Array<{
+    id?: string;
+    type?: string;
+    attributes?: {
+      amount?: number | string;
+      reference?: string;
+      status?: string;
+    };
+  }>;
+}
+
+interface InboundNIPTransfer {
+  id?: string;
+  type?: string;
+  attributes?: {
+    amount?: number | string;
+    reference?: string;
+    status?: string;
   };
 }
 
+// Anchor events may arrive either flat at the top level
+// ({ relationships: { account: { data: { id } } } }) or wrapped under a
+// `data` key ({ data: { relationships: { account: { data: { id } } } } }).
+// Resolve the deposit account ID defensively across both envelopes.
+const extractDepositAccountId = (payload: any): string | undefined =>
+  payload?.relationships?.account?.data?.id ??
+  payload?.data?.relationships?.account?.data?.id;
+
+// When "support included" is enabled, Anchor embeds the full InboundNIPTransfer
+// resource in the event's `included` array. It holds the real amount (in KOBO)
+// and the reference.
+const findIncludedTransfer = (payload: any): InboundNIPTransfer | undefined =>
+  (payload?.included ?? []).find(
+    (res: any) => res?.type === "InboundNIPTransfer",
+  );
+
 export const webhookService = {
-  async processAnchorDepositWebhook(payload: AnchorDepositPayload) {
-    const { event, data } = payload;
-
-    // 1. Validation has already been partially done by the controller,
-    // but we ensure all expected data fields exist here securely.
-    if (!data.status || !data.reference || !data.amount || !data.userId) {
-      const error = new Error("Missing required data fields in payload") as any;
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const anchorReference = data.reference;
-    const amount = Number(data.amount);
-
-    if (isNaN(amount) || amount <= 0) {
-      const error = new Error("Invalid deposit amount") as any;
-      error.statusCode = 400;
-      throw error;
-    }
-
-    // 2. Idempotency Check (outside transaction — optimization to avoid work)
-    const existingTransaction = await prisma.transaction.findFirst({
-      where: { baasRef: anchorReference },
-    });
-
-    if (existingTransaction) {
-      return { success: true, message: "Webhook already processed" };
-    }
+  async processAnchorDepositWebhook(payload: AnchorEventPayload) {
+    const event = payload.type ?? payload.event;
 
     if (event === "nip.inbound.completed") {
-      const userId = data.userId;
-      const amount = Number(data.amount) / 100;
+      // 1. Resolve the user from the deposit account ID (Anchor's event does
+      // not include userId or the amount at the top level).
+      const depositAccountId = extractDepositAccountId(payload);
 
-      const split = calculateWalletSplits(new Prisma.Decimal(amount), {
+      if (!depositAccountId) {
+        console.error(
+          "[Webhook] nip.inbound.completed missing deposit account ID",
+        );
+        return { success: true, message: "Deposit account ID not found" };
+      }
+
+      const user = await prisma.user.findFirst({
+        where: { baasAccountId: depositAccountId },
+      });
+
+      if (!user) {
+        console.error(
+          `[Webhook] nip.inbound.completed user not found for baasAccountId: ${depositAccountId}`,
+        );
+        return { success: true, message: "User not found for baasAccountId" };
+      }
+
+      const userId = user.id;
+
+      // 2. Amount (in KOBO) and reference come from the included
+      // InboundNIPTransfer resource.
+      const transfer = findIncludedTransfer(payload);
+      const amount = Number(transfer?.attributes?.amount ?? NaN);
+      const anchorReference = transfer?.attributes?.reference;
+
+      if (!anchorReference || isNaN(amount) || amount <= 0) {
+        console.error(
+          `[Webhook] nip.inbound.completed invalid transfer data for user ${userId}`,
+        );
+        return { success: true, message: "Invalid transfer data" };
+      }
+
+      // Amount is in KOBO — divide by 100.
+      const amountInNaira = amount / 100;
+
+      // 3. Idempotency Check (outside transaction — optimization to avoid work)
+      const existingTransaction = await prisma.transaction.findFirst({
+        where: { baasRef: anchorReference },
+      });
+
+      if (existingTransaction) {
+        return { success: true, message: "Webhook already processed" };
+      }
+
+      const split = calculateWalletSplits(new Prisma.Decimal(amountInNaira), {
         spendPercent: new Prisma.Decimal(
           DEFAULT_WALLET_SPLIT_CONFIG.spendPercent,
         ),
@@ -103,7 +159,7 @@ export const webhookService = {
               type: "deposit",
               amount: allocation.amount,
               status: "success",
-              baasRef: `${data.reference}-${allocation.walletType}`,
+              baasRef: `${anchorReference}-${allocation.walletType}`,
               reference: crypto.randomUUID(),
             },
           });
@@ -114,7 +170,7 @@ export const webhookService = {
 
       return {
         success: true,
-        reference: data.reference,
+        reference: anchorReference,
         walletsUpdated: split.length,
       };
     }

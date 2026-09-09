@@ -9,6 +9,7 @@ import {
   Camera,
   Copy,
   Check,
+  CheckCircle2,
   Eye,
   EyeOff,
   Loader2,
@@ -351,18 +352,47 @@ function Page() {
             <div className="mt-3">
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  ((user as any)?.kycTier ?? 1) >= 1
+                  ((user as any)?.kycTier ?? 0) >= 1
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-amber-100 text-amber-700"
                 }`}
               >
-                Tier {(user as any)?.kycTier ?? 1}
+                Tier {((user as any)?.kycTier ?? 0) + 1}
               </span>
               <p className="text-xs text-slate-400 mt-1">
-                Tier {(user as any)?.kycTier ?? 1} &mdash; Basic access
+                Level {((user as any)?.kycTier ?? 0) + 1} account &mdash;{" "}
+                {((user as any)?.kycTier ?? 0) >= 1
+                  ? "Verified access"
+                  : "Basic access"}
               </p>
             </div>
           </div>
+        </section>
+
+        {/* ─── Section 1b: Identity Verification ─── */}
+        <section className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_4px_24px_rgba(15,23,42,0.06)] p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-1">
+            Identity Verification
+          </h3>
+          <p className="text-sm text-slate-500 mb-4">
+            Verify your identity to unlock full access.
+          </p>
+          {((user as any)?.kycTier ?? 0) >= 1 ? (
+            <div className="flex items-center gap-2 text-emerald-600">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-sm font-medium">
+                Identity Verified
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={() => router.push("/kyc")}
+              className="flex items-center gap-2 bg-[#4f46e5] text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:bg-[#4338ca] active:scale-[0.99]"
+            >
+              Verify Identity
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </section>
 
         {/* ─── Section 2: Edit Profile ─── */}

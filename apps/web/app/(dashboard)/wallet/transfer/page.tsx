@@ -11,6 +11,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { WalletHeader } from "../UI/Header";
+import { RequireKyc } from "../UI/RequireKyc";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../../context/AuthContext";
 
@@ -50,6 +51,7 @@ const Transfer = () => {
     <>
       <WalletHeader />
 
+      <RequireKyc>
       <main
         className="min-h-screen flex flex-col gap-6 sm:gap-8 py-4 sm:py-6"
         style={{ backgroundColor: "#f8fafc" }}
@@ -228,6 +230,7 @@ const Transfer = () => {
           </div>
         </div>
       </main>
+      </RequireKyc>
     </>
   );
 };

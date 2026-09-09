@@ -5,6 +5,8 @@ import { createDepositAccount, getDepositAccount, getAccountNumber } from "../li
 import prisma from "../lib/prisma.js";
 import { cache, CACHE_KEYS } from "../lib/cache.js";
 import crypto from "crypto";
+import { notificationService } from "../features/notifications/notification.service.js";
+import { bankRecipientService } from "../services/bank-recipient.service.js";
 
 const verifyAnchorSignature = (
   rawBody: string,
@@ -64,6 +66,119 @@ const extractSettlementAccountId = (payload: any): string | undefined =>
   payload?.relationships?.settlementAccount?.data?.id ??
   payload?.data?.relationships?.settlementAccount?.data?.id;
 
+// Outbound transfer events expose the Anchor transfer id via the `transfer`
+// relationship, or (with "support included") inside the included NIPTransfer
+// resource. This id is what we persist in Transaction.baasRef, so it is the
+// field that correlates a webhook event back to the original transfer.
+const extractTransferId = (payload: any): string | undefined =>
+  payload?.relationships?.transfer?.data?.id ??
+  payload?.data?.relationships?.transfer?.data?.id ??
+  findIncludedNIPTransfer(payload)?.id;
+
+const findIncludedNIPTransfer = (payload: any): any =>
+  (payload?.included ?? []).find(
+    (res: any) =>
+      res?.type === "NIPTransfer" || res?.type === "NIP_TRANSFER",
+  );
+
+// Resolve a human-readable recipient label for notifications. The webhook
+// doesn't carry destination bank details on the transaction, so fall back to
+// the user's most recently used bank recipient.
+const resolveRecipientName = async (userId: string): Promise<string> => {
+  const recipients = await bankRecipientService.getRecentRecipients(userId);
+  const recipient = recipients[0];
+  return recipient
+    ? `${recipient.accountName} at ${recipient.bankName}`
+    : "your bank account";
+};
+
+const transferredAmountFromWebhook = (
+  payload: any,
+  fallbackNaira: number,
+): number => {
+  const amountInKobo = Number(findIncludedNIPTransfer(payload)?.attributes?.amount ?? NaN);
+  if (!Number.isNaN(amountInKobo) && amountInKobo > 0) {
+    return amountInKobo / 100;
+  }
+  return fallbackNaira;
+};
+
+// Processes webhook events for outbound NIP transfers. Correlation happens by
+// Anchor transfer id against Transaction.baasRef. Idempotent: once the
+// transaction has moved out of "pending" we skip reprocessing, so Anchor
+// retries can never double-credit a refund.
+const processOutboundTransferWebhook = async (
+  payload: any,
+  finalStatus: "success" | "failed",
+) => {
+  const transferId = extractTransferId(payload);
+  if (!transferId) {
+    console.error("[Webhook] Outbound transfer event missing transfer id");
+    return;
+  }
+
+  const transaction = await prisma.transaction.findFirst({
+    where: { baasRef: transferId },
+  });
+
+  if (!transaction) {
+    console.error(
+      `[Webhook] Outbound transfer event for unknown transfer: ${transferId}`,
+    );
+    return;
+  }
+
+  if (transaction.status !== "pending") {
+    console.log(
+      `[Webhook] Outbound transfer ${transferId} already ${transaction.status} — skipping`,
+    );
+    return;
+  }
+
+  // The debit record holds -(amount + fee); reverse exactly what was taken.
+  const totalDeducted = Math.abs(Number(transaction.amount));
+  const notifiedAmount = transferredAmountFromWebhook(payload, totalDeducted);
+  const recipientName = await resolveRecipientName(transaction.userId);
+
+  if (finalStatus === "success") {
+    await prisma.transaction.update({
+      where: { id: transaction.id },
+      data: { status: "success" },
+    });
+
+    notificationService
+      .notifyTransferSent(transaction.userId, notifiedAmount, recipientName)
+      .catch(() => {});
+
+    cache.del(CACHE_KEYS.userWallets(transaction.userId));
+    return;
+  }
+
+  // failed / reversed → refund amount + fee to the Spend wallet
+  await prisma.$transaction(async (tx) => {
+    await tx.$queryRawUnsafe(
+      `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
+      transaction.userId,
+    );
+
+    await tx.wallet.update({
+      where: { id: transaction.walletId },
+      data: { balance: { increment: totalDeducted } },
+    });
+
+    await tx.transaction.update({
+      where: { id: transaction.id },
+      data: { status: "failed" },
+    });
+  });
+
+  notificationService
+    .notifyTransferFailed(transaction.userId, notifiedAmount, recipientName)
+    .catch(() => {});
+
+  cache.del(CACHE_KEYS.userWallets(transaction.userId));
+};
+
 export const webhook = async (req: Request, res: Response) => {
   try {
     const signature = req.headers["x-anchor-signature"] as string;
@@ -102,6 +217,29 @@ export const webhook = async (req: Request, res: Response) => {
       return sendSuccess(res, "Webhook acknowledged", null, 200);
     }
 
+    if (eventType === "nip.transfer.initiated") {
+      console.log("[Webhook] nip.transfer.initiated received:", payload.data || payload.attributes);
+      return sendSuccess(res, "Webhook acknowledged", null, 200);
+    }
+
+    if (eventType === "nip.transfer.successful") {
+      try {
+        await processOutboundTransferWebhook(payload, "success");
+      } catch (error) {
+        console.error("[Webhook] Failed to process nip.transfer.successful:", error);
+      }
+      return sendSuccess(res, "Webhook acknowledged", null, 200);
+    }
+
+    if (eventType === "nip.transfer.failed" || eventType === "nip.transfer.reversed") {
+      try {
+        await processOutboundTransferWebhook(payload, "failed");
+      } catch (error) {
+        console.error(`[Webhook] Failed to process ${eventType}:`, error);
+      }
+      return sendSuccess(res, "Webhook acknowledged", null, 200);
+    }
+
     if (eventType === "customer.created") {
       console.log("[Webhook] customer.created received:", payload.data || payload.attributes);
       return sendSuccess(res, "Webhook acknowledged", null, 200);
@@ -121,6 +259,13 @@ export const webhook = async (req: Request, res: Response) => {
           console.log(
             `[Webhook] Deposit account created for user ${user.id}: ${accountId}`,
           );
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { kycTier: 1 },
+          });
+          await cache.del(CACHE_KEYS.userProfile(user.id));
+          console.log(`[Webhook] Updated kycTier to 1 for user ${user.id}`);
         } else {
           console.warn(
             `[Webhook] KYC approved but no user found for baasCustomerId: ${customerId}`,
@@ -181,6 +326,8 @@ export const webhook = async (req: Request, res: Response) => {
         if (depositAccountId) {
           const accountNumberObj = await getAccountNumber(depositAccountId);
           const nuban = accountNumberObj?.attributes?.accountNumber;
+          const bankName = accountNumberObj?.attributes?.bank?.name;
+          const accountName = accountNumberObj?.attributes?.accountName;
 
           const user = await prisma.user.findFirst({
             where: { baasAccountId: depositAccountId },
@@ -189,7 +336,11 @@ export const webhook = async (req: Request, res: Response) => {
           if (user && nuban) {
             await prisma.user.update({
               where: { id: user.id },
-              data: { accountNumber: nuban },
+              data: {
+                accountNumber: nuban,
+                ...(bankName ? { bankName } : {}),
+                ...(accountName ? { accountName } : {}),
+              },
             });
             cache.del(CACHE_KEYS.userProfile(user.id));
             console.log(
