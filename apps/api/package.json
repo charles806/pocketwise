@@ -49,6 +49,7 @@
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
+    "node-gyp-build": "^4.8.4",
     "pg": "^8.20.0",
     "resend": "^6.10.0",
     "zod": "^4.3.6"
