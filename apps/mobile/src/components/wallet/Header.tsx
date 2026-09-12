@@ -43,11 +43,11 @@ export const WalletHeader = () => {
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 16,
-        paddingBottom: 12,
+        paddingBottom: 15,
         backgroundColor: "#fff",
         borderBottomWidth: 1,
         borderBottomColor: "#e2e8f0",
-        paddingTop: insets.top * 1.75,
+        paddingTop: insets.top * 1.5,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -66,8 +66,8 @@ export const WalletHeader = () => {
           </Text>
         </View>
         <View>
-          <Text style={{ fontSize: 12, color: "#6b7280" }}>{greeting}</Text>
-          <Text style={{ fontSize: 15, fontWeight: "700", color: "#111827" }}>
+          <Text style={{ fontSize: 18, color: "#6b7280" }}>{greeting}</Text>
+          <Text style={{ fontSize: 22.5, fontWeight: "700", color: "#111827" }}>
             {user?.firstName || "User"} 👋
           </Text>
         </View>
