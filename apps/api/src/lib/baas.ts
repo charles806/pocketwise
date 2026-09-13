@@ -312,3 +312,90 @@ export async function initiateNIPTransfer(sourceAccountId: string, counterPartyI
 
     return response.data.id as string
 }
+
+export async function initiateBookTransfer(sourceAccountId: string, destinationAccountId: string, amountInKobo: number, reason: string, reference: string) {
+    const payload = {
+        data: {
+            type: "BookTransfer",
+            attributes: {
+                amount: amountInKobo,
+                currency: "NGN",
+                reason,
+                reference
+            },
+            relationships: {
+                account: {
+                    data: { id: sourceAccountId, type: "DepositAccount" }
+                },
+                destinationAccount: {
+                    data: { id: destinationAccountId, type: "DepositAccount" }
+                }
+            }
+        }
+    }
+
+    const response = await baasRequest("POST", "/api/v1/transfers", payload)
+
+    return response.data.id as string
+}
+
+export interface RewardsAccountId {
+    id: string;
+    type: "DepositAccount";
+}
+
+// Create an Anchor Reward — a ledger-moved credit from MASTER to the user's
+// deposit account, labelled as a Reward (distinct from a transfer/fee) for
+// reporting. Amount is in the LOWEST currency unit (kobo for NGN). The source
+// MUST be the org's MASTER account (ANCHOR_REWARDS_SOURCE_ACCOUNT_ID), which
+// funds every reward; the reward fails at Anchor with "Insufficient funds" if
+// that account isn't funded.
+export async function createReward(
+    sourceAccountId: string,
+    destinationAccountId: string,
+    amountInKobo: number,
+    description: string,
+    metadata: Record<string, string>,
+) {
+    const payload = {
+        data: {
+            type: "Reward",
+            attributes: {
+                description,
+                currency: "NGN",
+                amount: amountInKobo,
+                metadata,
+            },
+            relationships: {
+                sourceAccount: {
+                    data: { id: sourceAccountId, type: "DepositAccount" },
+                },
+                destinationAccount: {
+                    data: { id: destinationAccountId, type: "DepositAccount" },
+                },
+            },
+        },
+    };
+
+    const res = await baasRequest("POST", "/api/v1/rewards", payload);
+
+    // The id is persisted as Transaction.baasRef — the same correlation field
+    // used for transfers — so reward status can be looked up later and a
+    // backing transaction row linked to it.
+    return {
+        id: res.data.id as string,
+        status: res.data.attributes?.status as string | undefined,
+    };
+}
+
+// Fetch the live status of a Reward. Anchor fires NO webhook when a reward's
+// status changes (its event-types list has no reward.* events), so completion
+// can only be detected by polling this endpoint — the reward-reconciliation
+// QStash job does exactly that.
+export async function getReward(rewardId: string) {
+    const res = await baasRequest("GET", `/api/v1/rewards/${rewardId}`);
+    return {
+        id: res.data.id as string,
+        status: res.data.attributes?.status as string | undefined,
+    };
+}

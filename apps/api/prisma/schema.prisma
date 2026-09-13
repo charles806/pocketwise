@@ -5,13 +5,19 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Waitlist {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  // Precomputed once (one-time script, after the waitlist closes) to lock in
+  // the "first 100 by signup order" rule. A flag frozen at a single point in
+  // time is immune to the drift a live "count rows created before mine" query
+  // would suffer (concurrent inserts, clock/timezone skew) — see
+  // scripts/flag-waitlist-eligible.ts.
+  isEligibleForBonus Boolean  @default(false) @map("is_eligible_for_bonus")
+  createdAt          DateTime @default(now()) @map("created_at")
 
   @@map("waitlist")
 }
@@ -37,7 +43,11 @@ model User {
   showAccountModal        Boolean                  @default(false) @map("show_account_modal")
   transferPin             String?                  @map("transfer_pin")
 baasAccountId   String?  @unique @map("baas_account_id")
-baasCustomerId  String?  @unique @map("baas_customer_id")
+  baasCustomerId  String?  @unique @map("baas_customer_id")
+  // Set atomically at claim time (first successful deposit) to guarantee the
+  // one-time-per-user waitlist bonus can never be paid twice, even if Anchor
+  // re-delivers the same webhook or two deposits race. NULL = not yet claimed.
+  waitlistBonusCreditedAt DateTime? @map("waitlist_bonus_credited_at")
   fcmToken                String?                  @map("fcm_token")
   profilePicture          String?                  @map("profile_picture")
   addressLine1            String?                  @map("address_line_1")
@@ -255,6 +265,10 @@ enum TransactionType {
   referral_credit
   goal_completion
   internal_transfer
+  // One-time waitlist signup bonus (first 100 eligible users). Kept distinct
+  // from `deposit`/`transfer` so the bonus can never be confused with, or
+  // routed through, the standard wallet split.
+  promo_credit
 }
 
 enum TransactionStatus {

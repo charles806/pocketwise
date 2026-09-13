@@ -2,10 +2,6 @@ import type { TransactionType, WalletType } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import { Prisma } from "@prisma/client";
-import {
-  calculateWalletSplits,
-  DEFAULT_WALLET_SPLIT_CONFIG,
-} from "../services/split.service.js";
 import { notificationService } from "../features/notifications/notification.service.js";
 import { p2pRecipientService } from "./p2p-recipient.service.js";
 import { cache, CACHE_KEYS, TTL } from "../lib/cache.js";
@@ -13,13 +9,21 @@ import { EmergencyUnlockService } from "./emergency-unlock.service.js";
 import { walletHelper } from "../helper/wallet-helpers.js";
 import { feeCalculator } from "../helper/fee-calculator.js";
 import { bankRecipientService } from "./bank-recipient.service.js";
-import { createCounterParty, initiateNIPTransfer } from "../lib/baas.js";
+import { createCounterParty, initiateNIPTransfer, initiateBookTransfer } from "../lib/baas.js";
+import { isVerifiedUser, requireVerifiedError } from "../utils/verification.js";
 
 interface TransferInterface {
   userId: string;
   receiverUserId: string;
   amount: number;
   reason?: string;
+}
+
+interface BookTransferInterface {
+  userId: string;
+  receiverUserId: string;
+  amount: number;
+  reason?: string | undefined;
 }
 
 interface internalWalletTransferInterface {
@@ -140,168 +144,51 @@ const transferService = {
       throw error;
     }
 
-    const senderWalletCheck = await prisma.wallet.findUnique({
-      where: { userId_type: { userId, type: "spend" } },
-      select: { id: true },
-    });
+    const [user, receiver] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, kycTier: true, baasAccountId: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: receiverUserId },
+        select: { id: true, kycTier: true, baasAccountId: true },
+      }),
+    ]);
 
-    if (!senderWalletCheck) {
-      const error = new Error("Sender spend wallet not found") as any;
+    if (!user) {
+      const error = new Error("User not found") as any;
       error.statusCode = 404;
       throw error;
     }
 
-    const receiverCheck = await prisma.user.findUnique({
-      where: { id: receiverUserId },
-      select: { id: true, firstName: true, lastName: true, userName: true },
-    });
-
-    if (!receiverCheck) {
+    if (!receiver) {
       const error = new Error("Receiver not found") as any;
       error.statusCode = 404;
       throw error;
     }
 
-    const transferReference = crypto.randomUUID();
+    // Transfers require both parties to be verified (KYC + Anchor account). An
+    // unverified user has no real-money path, so there is no ledger-only
+    // fallback — this is always an Anchor book transfer.
+    if (!isVerifiedUser(user)) {
+      throw requireVerifiedError;
+    }
 
-    const result = await prisma.$transaction(
-      async (tx) => {
-        await tx.$queryRawUnsafe(
-          `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
-          userId,
-        );
+    if (!isVerifiedUser(receiver)) {
+      throw Object.assign(
+        new Error(
+          "The recipient must complete identity verification (KYC) before receiving transfers.",
+        ),
+        { statusCode: 400 },
+      );
+    }
 
-        const senderWallet = await tx.wallet.findUnique({
-          where: { userId_type: { userId, type: "spend" } },
-        });
-
-        if (!senderWallet) {
-          const error = new Error("Sender spend wallet not found") as any;
-          error.statusCode = 404;
-          throw error;
-        }
-
-        if (senderWallet.balance.toNumber() < amount) {
-          const error = new Error("Insufficient funds") as any;
-          error.statusCode = 400;
-          throw error;
-        }
-
-        // Debit sender
-        const updatedSenderWallet = await tx.wallet.update({
-          where: { id: senderWallet.id },
-          data: { balance: { decrement: amount } },
-        });
-
-        // Fetch receiver split config or fall back to default
-        const receiverSplitConfig = await tx.walletSplitConfig.findUnique({
-          where: { userId: receiverUserId },
-        });
-
-        const config = receiverSplitConfig ?? {
-          spendPercent: new Prisma.Decimal(
-            DEFAULT_WALLET_SPLIT_CONFIG.spendPercent,
-          ),
-          savingsPercent: new Prisma.Decimal(
-            DEFAULT_WALLET_SPLIT_CONFIG.savingsPercent,
-          ),
-          emergencyPercent: new Prisma.Decimal(
-            DEFAULT_WALLET_SPLIT_CONFIG.emergencyPercent,
-          ),
-          flexPercent: new Prisma.Decimal(
-            DEFAULT_WALLET_SPLIT_CONFIG.flexPercent,
-          ),
-        };
-
-        // Calculate allocations
-        const allocations = calculateWalletSplits(
-          new Prisma.Decimal(amount),
-          config,
-        );
-
-        // Fetch all receiver wallets and map by type
-        const receiverWallets = await tx.wallet.findMany({
-          where: { userId: receiverUserId },
-        });
-
-        const receiverWalletMap = new Map(
-          receiverWallets.map((w) => [w.type, w]),
-        );
-
-        // Credit each receiver wallet and create credit records
-        for (const allocation of allocations) {
-          const receiverWallet = receiverWalletMap.get(allocation.walletType);
-
-          if (!receiverWallet) {
-            throw new Error(
-              `Receiver ${allocation.walletType} wallet not found`,
-            );
-          }
-
-          await tx.wallet.update({
-            where: { id: receiverWallet.id },
-            data: { balance: { increment: allocation.amount } },
-          });
-
-          await tx.transaction.create({
-            data: {
-              userId: receiverUserId,
-              walletId: receiverWallet.id,
-              type: "split_credit",
-              amount: allocation.amount,
-              status: "success",
-              reference: `${transferReference}-${allocation.walletType}`,
-              senderWalletId: senderWallet.id,
-              receiverWalletId: receiverWallet.id,
-            },
-          });
-        }
-
-        // Create single debit record for sender
-        await tx.transaction.create({
-          data: {
-            userId,
-            walletId: senderWallet.id,
-            type: "transfer",
-            amount: -amount,
-            reason: reason || null,
-            status: "success",
-            reference: transferReference,
-            senderWalletId: senderWallet.id,
-            receiverWalletId: null,
-          },
-        });
-
-        return {
-          reference: transferReference,
-          senderBalance: updatedSenderWallet.balance,
-          allocations,
-        };
-      },
-      { timeout: 15000 },
-    );
-
-    notificationService
-      .notifyTransferReceived(receiverUserId, amount, "A PocketWise user")
-      .catch(() => {});
-    notificationService
-      .notifyWalletSplit(receiverUserId, amount, result.allocations)
-      .catch(() => {});
-
-    cache.del(CACHE_KEYS.userWallets(userId)).catch(() => {});
-    cache.del(CACHE_KEYS.userWallets(receiverUserId)).catch(() => {});
-
-    p2pRecipientService
-      .upsertRecipient({
-        userId,
-        recipientUserId: receiverUserId,
-        recipientFirstName: receiverCheck.firstName,
-        recipientLastName: receiverCheck.lastName,
-        recipientUserName: receiverCheck.userName,
-      })
-      .catch(() => {});
-
-    return result;
+    return bookTransferService.sendToUser({
+      userId,
+      receiverUserId,
+      amount,
+      reason,
+    });
   },
 };
 
@@ -463,6 +350,230 @@ const internalWalletTransferService = {
     cache.del(CACHE_KEYS.userWallets(userId));
 
     return result;
+  },
+};
+
+export const bookTransferService = {
+  async sendToUser(data: BookTransferInterface) {
+    const { userId, receiverUserId, amount, reason } = data;
+
+    if (!amount || Number.isNaN(amount) || amount <= 0) {
+      throw Object.assign(new Error("Enter a valid amount"), {
+        statusCode: 400,
+      });
+    }
+
+    if (!reason || !reason.trim()) {
+      throw Object.assign(
+        new Error("Please provide a reason for this transfer"),
+        { statusCode: 400 },
+      );
+    }
+
+    if (!receiverUserId) {
+      throw Object.assign(new Error("Receiver not provided"), {
+        statusCode: 400,
+      });
+    }
+
+    if (userId === receiverUserId) {
+      throw Object.assign(new Error("Self transfer not supported"), {
+        statusCode: 400,
+      });
+    }
+
+    const [sender, receiver] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          baasAccountId: true,
+          firstName: true,
+          lastName: true,
+          userName: true,
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: receiverUserId },
+        select: {
+          id: true,
+          baasAccountId: true,
+          firstName: true,
+          lastName: true,
+          userName: true,
+        },
+      }),
+    ]);
+
+    if (!sender) {
+      throw Object.assign(new Error("User not found"), { statusCode: 404 });
+    }
+    if (!receiver) {
+      throw Object.assign(new Error("Receiver not found"), {
+        statusCode: 404,
+      });
+    }
+    if (!sender.baasAccountId || !receiver.baasAccountId) {
+      throw Object.assign(
+        new Error(
+          "Real-money transfers require both users to have completed account setup.",
+        ),
+        { statusCode: 400 },
+      );
+    }
+
+    // Book transfers are free, so the full amount is the deduction.
+    const totalDeduction = amount;
+    const reference = crypto.randomUUID();
+    const anchorReference = reference.replace(/-/g, "");
+    const amountInKobo = Math.round(amount * 100);
+    const transferReason = reason ?? "";
+
+    // 1. Single DB transaction: lock the sender's Spend wallet, verify balance,
+    // deduct, and record a PENDING transaction. The receiver gets credited when
+    // the book.transfer.successful webhook lands.
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRawUnsafe(
+        `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
+        userId,
+      );
+
+      const spendWallet = await tx.wallet.findUnique({
+        where: { userId_type: { userId, type: "spend" } },
+      });
+
+      if (!spendWallet) {
+        throw Object.assign(new Error("Sender spend wallet not found"), {
+          statusCode: 404,
+        });
+      }
+
+      if (spendWallet.balance.toNumber() < totalDeduction) {
+        throw Object.assign(new Error("Insufficient funds"), {
+          statusCode: 400,
+        });
+      }
+
+      // Persist the receiver's spend wallet id on the debit record so the
+      // webhook knows exactly where to credit when the book transfer settles.
+      const receiverSpendWallet = await tx.wallet.findUnique({
+        where: { userId_type: { userId: receiverUserId, type: "spend" } },
+        select: { id: true },
+      });
+
+      if (!receiverSpendWallet) {
+        throw Object.assign(new Error("Receiver spend wallet not found"), {
+          statusCode: 404,
+        });
+      }
+
+      const deductedWallet = await tx.wallet.update({
+        where: { id: spendWallet.id },
+        data: { balance: { decrement: totalDeduction } },
+      });
+
+      const transaction = await tx.transaction.create({
+        data: {
+          userId,
+          walletId: spendWallet.id,
+          type: "transfer",
+          amount: -totalDeduction,
+          status: "pending",
+          reason: reason || null,
+          reference,
+          senderWalletId: spendWallet.id,
+          receiverWalletId: receiverSpendWallet.id,
+        },
+      });
+
+      return {
+        transaction,
+        newBalance: deductedWallet.balance,
+      };
+    });
+
+    // 2. After commit, move the real money at Anchor.
+    let transferId: string | undefined;
+    try {
+      transferId = await initiateBookTransfer(
+        sender.baasAccountId,
+        receiver.baasAccountId,
+        amountInKobo,
+        transferReason,
+        anchorReference,
+      );
+    } catch (error) {
+      // The Anchor call itself failed → re-credit and mark the transaction failed.
+      await prisma.$transaction(async (tx) => {
+        await tx.$queryRawUnsafe(
+          `SELECT id FROM wallets WHERE user_id = $1::uuid AND type = 'spend' FOR UPDATE`,
+          userId,
+        );
+
+        await tx.wallet.updateMany({
+          where: { userId, type: "spend" },
+          data: { balance: { increment: totalDeduction } },
+        });
+
+        await tx.transaction.update({
+          where: { id: result.transaction.id },
+          data: { status: "failed" },
+        });
+      });
+
+      notificationService
+        .notifyTransferFailed(
+          userId,
+          amount,
+          `${receiver.firstName} ${receiver.lastName}`,
+        )
+        .catch(() => {});
+
+      cache.del(CACHE_KEYS.userWallets(userId));
+
+      throw Object.assign(
+        new Error(
+          "We couldn't complete this transfer. Your money has been returned to your Spend wallet. Please try again.",
+        ),
+        { statusCode: (error as any)?.statusCode || 502 },
+      );
+    }
+
+    // 3. Anchor accepted it — persist the reference. Deliberately outside the
+    // refund path: if this write fails, money has still moved and the transfer
+    // webhook will reconcile by baasRef.
+    await prisma.transaction
+      .update({
+        where: { id: result.transaction.id },
+        data: { baasRef: transferId },
+      })
+      .catch((error) => {
+        console.error(
+          "[sendToUser] Transfer initiated but failed to persist baasRef:",
+          error,
+        );
+      });
+
+    // 4. Upsert the P2P recipient + invalidate caches.
+    p2pRecipientService
+      .upsertRecipient({
+        userId,
+        recipientUserId: receiverUserId,
+        recipientFirstName: receiver.firstName,
+        recipientLastName: receiver.lastName,
+        recipientUserName: receiver.userName,
+      })
+      .catch(() => {});
+
+    cache.del(CACHE_KEYS.userWallets(userId));
+
+    return {
+      reference,
+      amount,
+      status: "pending",
+      receiverUserId,
+      newBalance: result.newBalance,
+    };
   },
 };
 

@@ -10,7 +10,8 @@
     "check-types": "tsc --noEmit",
     "test:jobs": "tsx scripts/test-jobs.ts",
     "test:anchor-customer": "tsx scripts/test-anchor-customer.ts",
-    "test:anchor-transfer": "tsx scripts/test-anchor-transfer.ts"
+    "test:anchor-transfer": "tsx scripts/test-anchor-transfer.ts",
+    "test:sweep": "tsx scripts/test-sweep.ts"
   },
   "keywords": [],
   "author": "",
