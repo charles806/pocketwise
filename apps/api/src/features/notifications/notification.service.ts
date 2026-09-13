@@ -50,6 +50,12 @@ const transferReceivedTemplate = Handlebars.compile(
   transferReceivedTemplateSource,
 );
 
+const waitlistBonusTemplateSource = fs.readFileSync(
+  path.join(__dirname, "templates", "waitlist-bonus.hbs"),
+  "utf-8",
+);
+const waitlistBonusTemplate = Handlebars.compile(waitlistBonusTemplateSource);
+
 const transferSentTemplateSource = fs.readFileSync(
   path.join(__dirname, "templates", "transfer-sent.hbs"),
   "utf-8",
@@ -303,6 +309,53 @@ export const notificationService = {
     const formattedAmount = amount.toLocaleString("en-NG");
     const title = "📩 You Just Received Money";
     const message = `₦${formattedAmount} from ${senderName} just landed in your account and has been split across your wallets. Check your breakdown inside the app.`;
+
+    const emailHtml = transferReceivedTemplate({
+      formattedAmount,
+      senderName,
+    }).trimEnd();
+
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "TRANSACTION",
+      subject: title,
+      emailHtml,
+    });
+  },
+
+  async notifyWaitlistBonus(userId: string, amount = 1000) {
+    // Only invoked AFTER the reward is confirmed COMPLETED at Anchor (from the
+    // reward-reconciliation job) — never at reward creation time, when the
+    // money is still PENDING and not yet real. Amount stays in sync with
+    // WAITLIST_BONUS_NAIRA in webhook.service.ts — keep the default matching.
+    const formattedAmount = amount.toLocaleString("en-NG");
+    const title = "🎉 Your ₦1,000 Waitlist Bonus is Here!";
+    const message = `Bonus unlocked! ₦${formattedAmount} waitlist bonus has landed in your Spend wallet. It's yours to spend — no strings attached.`;
+
+    const emailHtml = waitlistBonusTemplate({
+      formattedAmount,
+    }).trimEnd();
+
+    return this.sendNotification({
+      userId,
+      title,
+      message,
+      category: "PROMOTION",
+      subject: title,
+      emailHtml,
+    });
+  },
+
+  async notifyBookTransferReceived(
+    userId: string,
+    amount: number,
+    senderName: string,
+  ) {
+    const formattedAmount = amount.toLocaleString("en-NG");
+    const title = "💸 You Just Received Money";
+    const message = `₦${formattedAmount} from ${senderName} just landed in your Spend wallet. You can spend it right away.`;
 
     const emailHtml = transferReceivedTemplate({
       formattedAmount,
