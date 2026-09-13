@@ -39,7 +39,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="wallet"
+        name="wallet/index"
         options={{
           title: "Wallet",
           tabBarIcon: ({ color, focused }) => (
@@ -50,7 +50,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="transactions"
+        name="transactions/index"
         options={{
           title: "Transactions",
           tabBarIcon: ({ color, focused }) => (
@@ -65,7 +65,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="goals"
+        name="goals/index"
         options={{
           title: "Goals",
           tabBarIcon: ({ color, focused }) => (
@@ -76,7 +76,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="notifications"
+        name="notifications/index"
         options={{
           title: "Notifications",
           tabBarIcon: ({ color, focused }) => (
@@ -87,7 +87,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="profile/index"
         options={{
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (

@@ -7,16 +7,12 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ArrowUpRight,
   ArrowDownLeft,
   Wallet as WalletIcon,
   ChevronDown,
   Receipt,
-  Bell,
-  Settings,
 } from "lucide-react-native";
 import { TransactionDetailModal } from "@/components/TransactionDetailModal";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -49,13 +45,6 @@ const filters: { key: FilterTab; label: string }[] = [
   { key: "received", label: "Received" },
   { key: "deposit", label: "Deposits" },
 ];
-
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning,";
-  if (hour < 18) return "Good afternoon,";
-  return "Good evening,";
-};
 
 const formatNaira = (amount: number) =>
   `₦${Math.abs(amount).toLocaleString("en-NG", {
@@ -118,53 +107,6 @@ const getFallbackLabel = (direction: Direction, type: string) => {
   if (direction === "received") return "Transfer In";
   if (direction === "deposit") return "Deposit";
   return type;
-};
-
-const TransactionsHeader = () => {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const greeting = getGreeting();
-  const unreadCount = 0;
-
-  return (
-    <View style={[styles.header, { paddingTop: insets.top * 1.75 }]}>
-      <View style={styles.headerLeft}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>?</Text>
-        </View>
-        <View>
-          <Text style={styles.greetingText}>{greeting}</Text>
-          <Text style={styles.greetingName}>there 👋</Text>
-        </View>
-      </View>
-
-      <View style={styles.headerRight}>
-        <View>
-          <TouchableOpacity
-            onPress={() => router.push("/notifications" as any)}
-            style={styles.headerIconBtn}
-            activeOpacity={0.8}
-          >
-            <Bell size={19} color="#475569" />
-          </TouchableOpacity>
-          {unreadCount > 0 && (
-            <View style={styles.headerBadge}>
-              <Text style={styles.headerBadgeText}>
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </Text>
-            </View>
-          )}
-        </View>
-        <TouchableOpacity
-          onPress={() => router.push("/profile" as any)}
-          style={styles.headerIconBtn}
-          activeOpacity={0.8}
-        >
-          <Settings size={19} color="#475569" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 };
 
 const FilterTabs = ({
@@ -330,8 +272,6 @@ const Page = () => {
 
   return (
     <View style={styles.root}>
-      <TransactionsHeader />
-
       <ScrollView
         style={styles.screen}
         contentContainerStyle={styles.screenContent}
@@ -399,79 +339,32 @@ export default Page;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#f8fafc" },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#4f46e5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: { color: "#fff", fontSize: 15, fontWeight: "700" },
-  greetingText: { fontSize: 12, color: "#6b7280" },
-  greetingName: { fontSize: 15, fontWeight: "700", color: "#111827" },
-  headerRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  headerIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerBadge: {
-    position: "absolute",
-    top: -2,
-    right: -2,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "#ef4444",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 3,
-  },
-  headerBadgeText: { color: "#fff", fontSize: 9, fontWeight: "700" },
-
   screen: { flex: 1 },
-  screenContent: { padding: 20, paddingBottom: 48, gap: 20 },
+  screenContent: { padding: 20, paddingTop: 24, paddingBottom: 48, gap: 18 },
 
-  titleWrap: { alignItems: "center", marginTop: 8 },
-  title: { fontSize: 22, fontWeight: "800", color: "#0f172a" },
-  subtitle: { fontSize: 13, color: "#64748b", marginTop: 4 },
+  titleWrap: { alignItems: "flex-start", marginBottom: 2 },
+  title: { fontSize: 27, fontWeight: "800", color: "#0f172a" },
+  subtitle: { fontSize: 14, color: "#64748b", marginTop: 6 },
 
   filterRow: {
     gap: 8,
     paddingVertical: 2,
     flexGrow: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   filterChip: {
     height: 36,
     paddingHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#e2e8f0",
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
   filterChipActive: {
-    backgroundColor: "#4f46e5",
-    borderColor: "#4f46e5",
+    backgroundColor: "#312e81",
+    borderColor: "#312e81",
   },
   filterChipText: { fontSize: 13, fontWeight: "600", color: "#475569" },
   filterChipTextActive: { color: "#fff" },
@@ -505,9 +398,9 @@ const styles = StyleSheet.create({
 
   monthCard: {
     backgroundColor: "#fff",
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: "#e2e8f0",
     overflow: "hidden",
   },
   monthHeader: {
@@ -515,10 +408,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
   monthHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
-  monthLabel: { fontSize: 14, fontWeight: "700", color: "#334155" },
+  monthLabel: { fontSize: 15, fontWeight: "800", color: "#1e293b" },
   monthTotals: { fontSize: 11, color: "#94a3b8" },
   monthBody: {
     borderTopWidth: 1,
@@ -530,15 +423,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#f8fafc",
+    borderBottomColor: "#f1f5f9",
   },
   txnIconWrap: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
