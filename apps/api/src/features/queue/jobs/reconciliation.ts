@@ -5,33 +5,34 @@ import { getReward } from "../../../lib/baas.js";
 import { Sentry } from "../../../lib/sentry.js";
 import { cache, CACHE_KEYS } from "../../../lib/cache.js";
 import { notificationService } from "../../notifications/notification.service.js";
+import { sweepStalePendingTransfers } from "../../../services/transfer-settlement.service.js";
 import { sendError, sendSuccess } from "../../../utils/response.js";
 import {
   failureCallbackUrl,
+  handleDispatchError,
   jobBaseUrl,
   publishBatch,
 } from "../../queue/queue-utils.js";
 
-const RUN_PATH = "/api/internal/jobs/reward-reconciliation/run";
-
-// Anchor fires NO webhook when a reward's status changes — its event-types
-// list has no reward.* events, so the only way to learn that a reward reached
-// COMPLETED / FAILED is to poll GET /api/v1/rewards/{id}. This job is that
-// poller, modelled on the existing transfer-reconciliation sweep.
+const RUN_PATH = "/api/internal/jobs/reconciliation/run";
 
 /**
- * Dispatcher — called on a schedule (~every 5 min). Enqueues a single
- * "reconcile pending waitlist-bonus rewards" message, deduplicated to the same
- * 5-minute window as transfer-reconciliation so overlapping dispatches are
- * harmless.
+ * Combined reconciliation sweep — merges the former transfer-reconciliation
+ * and reward-reconciliation jobs into ONE 5-minute QStash message so the daily
+ * message quota is cut in half (2 → 1 message per window).
+ *
+ *  - Transfer reconciliation: polls stale pending outbound transfers (NIP +
+ *    book) and settles them via the shared settlement core.
+ *  - Reward reconciliation: Anchor fires NO reward webhook, so we poll
+ *    GET /api/v1/rewards/{id} for pending waitlist-bonus rewards.
  */
-export async function dispatchRewardReconciliation(
+export async function dispatchReconciliation(
   _req: Request,
   res: Response,
 ): Promise<void> {
   try {
     const bucket = Math.floor(Date.now() / 300_000);
-    const deduplicationId = `reward-reconciliation:${bucket}`;
+    const deduplicationId = `reconciliation:${bucket}`;
 
     await publishBatch([
       {
@@ -43,77 +44,90 @@ export async function dispatchRewardReconciliation(
       },
     ]);
 
-    sendSuccess(res, "Reward reconciliation dispatched", { bucket });
+    sendSuccess(res, "Reconciliation dispatched", { bucket });
   } catch (error) {
-    sendError(res, "Failed to dispatch reward reconciliation", 500, error);
+    handleDispatchError(res, error, "Failed to dispatch reconciliation");
   }
 }
 
 /**
- * Handler — polls every pending waitlist-bonus reward via its reward id
- * (Transaction.baasRef) and settles it once Anchor reports a final status.
- * Idempotent: each pending promo_credit row is claimed with a FOR UPDATE lock
- * and re-checked for status="pending" inside the same transaction, so
- * overlapping sweep runs / re-dispatching can never double-credit or
- * double-notify.
+ * Handler — runs both sweeps. Each is internally idempotent (FOR UPDATE row
+ * claims + pending re-checks), so overlapping dispatches / QStash retries can
+ * never double-settle or double-credit.
  */
-export async function runRewardReconciliation(
+export async function runReconciliation(
   _req: Request,
   res: Response,
 ): Promise<void> {
   try {
-    const pendings = await prisma.transaction.findMany({
-      where: {
-        type: "promo_credit",
-        status: "pending",
-        baasRef: { not: null },
-      },
-      orderBy: { createdAt: "asc" },
-    });
+    const [transfers, rewards] = await Promise.all([
+      sweepStalePendingTransfers({ limit: 10 }),
+      sweepPendingRewards(),
+    ]);
 
-    let settled = 0;
-    let failed = 0;
-    let skipped = 0;
+    sendSuccess(res, "Reconciliation complete", { transfers, rewards }, 200);
+  } catch (error) {
+    sendError(res, "Failed to run reconciliation", 500, error);
+  }
+}
 
-    for (const transaction of pendings) {
-      if (!transaction.baasRef) continue;
+/**
+ * Polls every pending waitlist-bonus reward and settles it once Anchor reports
+ * a final status. Idempotent: each pending promo_credit row is claimed with a
+ * FOR UPDATE lock and re-checked for status="pending" inside the same
+ * transaction, so overlapping sweep runs can never double-credit or
+ * double-notify.
+ */
+async function sweepPendingRewards(): Promise<{
+  checked: number;
+  settled: number;
+  failed: number;
+  skipped: number;
+}> {
+  const pendings = await prisma.transaction.findMany({
+    where: {
+      type: "promo_credit",
+      status: "pending",
+      baasRef: { not: null },
+    },
+    orderBy: { createdAt: "asc" },
+  });
 
-      let status: string | undefined;
-      try {
-        const reward = await getReward(transaction.baasRef);
-        status = reward.status;
-      } catch (error) {
-        // Transient Anchor/network error — leave the row for the next pass.
-        skipped += 1;
-        console.error(
-          `[RewardRecon] Failed to poll reward ${transaction.baasRef}:`,
-          error,
-        );
-        continue;
-      }
+  let settled = 0;
+  let failed = 0;
+  let skipped = 0;
 
-      if (status === "COMPLETED") {
-        const outcome = await completePromoCredit(transaction);
-        if (outcome === "settled") settled += 1;
-        else skipped += 1;
-      } else if (status === "FAILED") {
-        await failPromoCredit(transaction);
-        failed += 1;
-      } else {
-        // PENDING (or unknown) — still in flight at Anchor; try again later.
-        skipped += 1;
-      }
+  for (const transaction of pendings) {
+    if (!transaction.baasRef) continue;
+
+    let status: string | undefined;
+    try {
+      const reward = await getReward(transaction.baasRef);
+      status = reward.status;
+    } catch (error) {
+      // Transient Anchor/network error — leave the row for the next pass.
+      skipped += 1;
+      console.error(
+        `[Reconciliation] Failed to poll reward ${transaction.baasRef}:`,
+        error,
+      );
+      continue;
     }
 
-    sendSuccess(res, "Reward reconciliation complete", {
-      checked: pendings.length,
-      settled,
-      failed,
-      skipped,
-    });
-  } catch (error) {
-    sendError(res, "Failed to run reward reconciliation", 500, error);
+    if (status === "COMPLETED") {
+      const outcome = await completePromoCredit(transaction);
+      if (outcome === "settled") settled += 1;
+      else skipped += 1;
+    } else if (status === "FAILED") {
+      await failPromoCredit(transaction);
+      failed += 1;
+    } else {
+      // PENDING (or unknown) — still in flight at Anchor; try again later.
+      skipped += 1;
+    }
   }
+
+  return { checked: pendings.length, settled, failed, skipped };
 }
 
 /**
@@ -186,7 +200,7 @@ async function completePromoCredit(
     .notifyWaitlistBonus(transaction.userId)
     .catch((error) => {
       console.error(
-        `[RewardRecon] notifyWaitlistBonus failed for user ${transaction.userId}:`,
+        `[Reconciliation] notifyWaitlistBonus failed for user ${transaction.userId}:`,
         error,
       );
     });
@@ -218,6 +232,6 @@ async function failPromoCredit(transaction: Transaction): Promise<void> {
     level: "error",
   });
   console.error(
-    `[RewardRecon] Waitlist bonus reward ${transaction.baasRef} FAILED for user ${transaction.userId}`,
+    `[Reconciliation] Waitlist bonus reward ${transaction.baasRef} FAILED for user ${transaction.userId}`,
   );
 }

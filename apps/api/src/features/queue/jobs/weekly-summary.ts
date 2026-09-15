@@ -7,6 +7,7 @@ import { sendError, sendSuccess } from "../../../utils/response.js";
 import {
   failureCallbackUrl,
   getWeekStart,
+  handleDispatchError,
   jobBaseUrl,
   publishBatch,
   toIsoDateStamp,
@@ -14,10 +15,18 @@ import {
 
 const RUN_PATH = "/api/internal/jobs/weekly-summary/run";
 
+// One message per chunk of users instead of one-per-user, so weekly fan-out
+// drops from N messages to ceil(N / BATCH_SIZE) and stays under the QStash
+// daily message cap.
+const USERS_PER_MESSAGE = 50;
+// Bounded in-handler concurrency keeps each runner request well under the
+// serverless timeout while still parallelizing (reuses the Aug-18 fix pattern).
+const RUN_CONCURRENCY = 10;
+
 /**
- * Dispatcher — called on a schedule (QStash schedule or, during cutover,
- * cron-job.org). Enqueues one "send summary" message per user and returns
- * immediately, regardless of user count.
+ * Dispatcher — called on a schedule (weekly). Chunks the user base into
+ * groups and enqueues one "send summary for these users" message per chunk,
+ * then returns immediately regardless of user count.
  */
 export async function dispatchWeeklySummary(
   _req: Request,
@@ -29,11 +38,16 @@ export async function dispatchWeeklySummary(
       select: { id: true },
     });
 
+    const chunks: string[][] = [];
+    for (let i = 0; i < users.length; i += USERS_PER_MESSAGE) {
+      chunks.push(users.slice(i, i + USERS_PER_MESSAGE).map((u) => u.id));
+    }
+
     await publishBatch(
-      users.map((user) => ({
+      chunks.map((userIds, index) => ({
         url: `${jobBaseUrl()}${RUN_PATH}`,
-        body: { userId: user.id },
-        deduplicationId: `weekly-summary:${user.id}:${weekStamp}`,
+        body: { userIds },
+        deduplicationId: `weekly-summary:${index}:${weekStamp}`,
         retries: 3,
         callback: failureCallbackUrl(),
       })),
@@ -42,80 +56,101 @@ export async function dispatchWeeklySummary(
     sendSuccess(res, "Weekly summary jobs dispatched", {
       week: weekStamp,
       dispatched: users.length,
+      messages: chunks.length,
     });
   } catch (error) {
-    sendError(res, "Failed to dispatch weekly summary jobs", 500, error);
+    handleDispatchError(res, error, "Failed to dispatch weekly summary jobs");
   }
 }
 
 /**
- * Handler — invoked by QStash for a single user. Skips users with no weekly
- * activity, so "no news" users never get a notification.
+ * Handler — invoked by QStash for a chunk of users. Skips users with no
+ * weekly activity, so "no news" users never get a notification.
  */
 export async function runWeeklySummary(
   req: Request,
   res: Response,
 ): Promise<void> {
   try {
-    const { userId } = req.body as { userId?: string };
-    if (!userId) {
-      sendError(res, "userId is required", 400);
+    const { userIds, userId } = req.body as {
+      userIds?: string[];
+      userId?: string;
+    };
+    const ids = Array.isArray(userIds) ? userIds : userId ? [userId] : [];
+    if (ids.length === 0) {
+      sendError(res, "userId or userIds is required", 400);
       return;
     }
 
-    const user = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { id: true, email: true, firstName: true, fcmToken: true },
-    });
-    if (!user) {
-      sendSuccess(res, "User not found, skipped", { userId }, 200);
-      return;
-    }
-
-    const summary = await walletHelper.getWeeklySummary(user.id);
-    if (summary.thisWeekSpent === 0 && summary.thisWeekSaved === 0) {
-      sendSuccess(res, "No weekly activity, skipped", { userId }, 200);
-      return;
-    }
-
-    const message = await walletHelper.buildWeeklySummaryMessage(summary);
+    let processed = 0;
     let channelsSent = 0;
 
-    if (user.fcmToken) {
-      try {
-        await fcmMessaging.send({
-          token: user.fcmToken,
-          notification: {
-            title: "Your Weekly PocketWise Summary",
-            body: message,
-          },
-        });
-        channelsSent += 1;
-      } catch (error) {
-        console.error(
-          `[WeeklySummary] FCM failed for user ${user.id}:`,
-          error,
-        );
+    for (let i = 0; i < ids.length; i += RUN_CONCURRENCY) {
+      const batch = ids.slice(i, i + RUN_CONCURRENCY);
+      const results = await Promise.all(batch.map(processOneUser));
+      for (const result of results) {
+        if (result.processed) processed += 1;
+        channelsSent += result.channelsSent;
       }
-    }
-
-    try {
-      await notificationService.notifyWeeklySummary(user.id, summary);
-      channelsSent += 1;
-    } catch (error) {
-      console.error(
-        `[WeeklySummary] Notify failed for user ${user.id}:`,
-        error,
-      );
     }
 
     sendSuccess(
       res,
       "Weekly summary processed",
-      { userId, channelsSent },
+      { processed, channelsSent },
       200,
     );
   } catch (error) {
     sendError(res, "Internal server error", 500, error);
   }
+}
+
+async function processOneUser(
+  userId: string,
+): Promise<{ processed: boolean; channelsSent: number }> {
+  const user = await prisma.user.findFirst({
+    where: { id: userId },
+    select: { id: true, email: true, firstName: true, fcmToken: true },
+  });
+  if (!user) {
+    return { processed: false, channelsSent: 0 };
+  }
+
+  const summary = await walletHelper.getWeeklySummary(user.id);
+  if (summary.thisWeekSpent === 0 && summary.thisWeekSaved === 0) {
+    return { processed: false, channelsSent: 0 };
+  }
+
+  const message = await walletHelper.buildWeeklySummaryMessage(summary);
+  let channelsSent = 0;
+
+  if (user.fcmToken) {
+    try {
+      await fcmMessaging.send({
+        token: user.fcmToken,
+        notification: {
+          title: "Your Weekly PocketWise Summary",
+          body: message,
+        },
+      });
+      channelsSent += 1;
+    } catch (error) {
+      console.error(
+        `[WeeklySummary] FCM failed for user ${user.id}:`,
+        error,
+      );
+    }
+  }
+
+  try {
+    await notificationService.notifyWeeklySummary(user.id, summary);
+    channelsSent += 1;
+  } catch (error) {
+    console.error(
+      `[WeeklySummary] Notify failed for user ${user.id}:`,
+      error,
+    );
+  }
+
+  return { processed: true, channelsSent };
 }

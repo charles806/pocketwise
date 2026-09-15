@@ -7,6 +7,7 @@ import { sendError, sendSuccess } from "../../../utils/response.js";
 import {
   failureCallbackUrl,
   getWeekStart,
+  handleDispatchError,
   jobBaseUrl,
   publishBatch,
   toIsoDateStamp,
@@ -55,7 +56,7 @@ export async function dispatchAutoContribute(
       dispatched: goals.length,
     });
   } catch (error) {
-    sendError(res, "Failed to dispatch auto-contribute jobs", 500, error);
+    handleDispatchError(res, error, "Failed to dispatch auto-contribute jobs");
   }
 }
 
