@@ -32,7 +32,7 @@ export async function dispatchReconciliation(
 ): Promise<void> {
   try {
     const bucket = Math.floor(Date.now() / 300_000);
-    const deduplicationId = `reconciliation:${bucket}`;
+    const deduplicationId = `reconciliation-${bucket}`;
 
     await publishBatch([
       {

@@ -47,7 +47,7 @@ export async function dispatchWeeklySummary(
       chunks.map((userIds, index) => ({
         url: `${jobBaseUrl()}${RUN_PATH}`,
         body: { userIds },
-        deduplicationId: `weekly-summary:${index}:${weekStamp}`,
+        deduplicationId: `weekly-summary-${index}-${weekStamp}`,
         retries: 3,
         callback: failureCallbackUrl(),
       })),
