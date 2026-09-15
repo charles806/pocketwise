@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import {
   calculateWalletSplits,
-  DEFAULT_WALLET_SPLIT_CONFIG,
+  getUserSplitConfig,
 } from "./split.service.js";
 import crypto from "crypto";
 import { cache, CACHE_KEYS } from "../lib/cache.js";
@@ -145,20 +145,10 @@ export const webhookService = {
         return { success: true, message: "Webhook already processed" };
       }
 
-      const split = calculateWalletSplits(new Prisma.Decimal(amountInNaira), {
-        spendPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.spendPercent,
-        ),
-        savingsPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.savingsPercent,
-        ),
-        emergencyPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.emergencyPercent,
-        ),
-        flexPercent: new Prisma.Decimal(
-          DEFAULT_WALLET_SPLIT_CONFIG.flexPercent,
-        ),
-      });
+      const split = calculateWalletSplits(
+        new Prisma.Decimal(amountInNaira),
+        await getUserSplitConfig(user.id),
+      );
 
       // Eligible cohort membership is looked up case-insensitively because the
       // landing page stores emails exactly as typed (see waitlist.service) while
