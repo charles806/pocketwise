@@ -6,6 +6,7 @@ import { Sentry } from "../../../lib/sentry.js";
 import { cache, CACHE_KEYS } from "../../../lib/cache.js";
 import { notificationService } from "../../notifications/notification.service.js";
 import { sweepStalePendingTransfers } from "../../../services/transfer-settlement.service.js";
+import { sweepOrphanDeposits } from "../../../services/deposit-reconciliation.service.js";
 import { sendError, sendSuccess } from "../../../utils/response.js";
 import {
   failureCallbackUrl,
@@ -25,6 +26,9 @@ const RUN_PATH = "/api/internal/jobs/reconciliation/run";
  *    book) and settles them via the shared settlement core.
  *  - Reward reconciliation: Anchor fires NO reward webhook, so we poll
  *    GET /api/v1/rewards/{id} for pending waitlist-bonus rewards.
+ *  - Deposit reconciliation: credits any inbound funds that physically sit in
+ *    a user's Anchor account but were never split into their wallets (lost
+ *    deposit webhooks, orphaned sandbox/seeded funds).
  */
 export async function dispatchReconciliation(
   _req: Request,
@@ -60,12 +64,26 @@ export async function runReconciliation(
   res: Response,
 ): Promise<void> {
   try {
+    // The deposit sweep deliberately references users with a SETTLED book,
+    // so it must run AFTER the transfer/reward sweeps which settle pending
+    // rows. `Promise.all` would race that ordering, so sequence them.
     const [transfers, rewards] = await Promise.all([
       sweepStalePendingTransfers({ limit: 10 }),
       sweepPendingRewards(),
     ]);
+    const orphanDeposits = await sweepOrphanDeposits({ limit: 50 });
 
-    sendSuccess(res, "Reconciliation complete", { transfers, rewards }, 200);
+    sendSuccess(res, "Reconciliation complete", {
+      transfers,
+      rewards,
+      orphanDeposits: {
+        checked: orphanDeposits.checked,
+        credited: orphanDeposits.credited,
+        skipped: orphanDeposits.skipped,
+        short: orphanDeposits.short,
+        failed: orphanDeposits.failed,
+      },
+    }, 200);
   } catch (error) {
     sendError(res, "Failed to run reconciliation", 500, error);
   }
