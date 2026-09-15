@@ -45,7 +45,7 @@ export async function dispatchAutoContribute(
           userId: goal.userId,
           weekStart: weekStamp,
         },
-        deduplicationId: `auto-contribute:${goal.id}:${weekStamp}`,
+        deduplicationId: `auto-contribute-${goal.id}-${weekStamp}`,
         retries: 3,
         callback: failureCallbackUrl(),
       })),
