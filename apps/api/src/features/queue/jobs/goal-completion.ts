@@ -4,6 +4,7 @@ import { savingsGoalService } from "../../../services/saving-goal.service.js";
 import { sendError, sendSuccess } from "../../../utils/response.js";
 import {
   failureCallbackUrl,
+  handleDispatchError,
   jobBaseUrl,
   publishBatch,
 } from "../../queue/queue-utils.js";
@@ -44,7 +45,7 @@ export async function dispatchGoalCompletion(
       dispatched: expiredGoals.length,
     });
   } catch (error) {
-    sendError(res, "Failed to dispatch goal completion jobs", 500, error);
+    handleDispatchError(res, error, "Failed to dispatch goal completion jobs");
   }
 }
 

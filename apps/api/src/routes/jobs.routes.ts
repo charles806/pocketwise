@@ -16,13 +16,9 @@ import {
   runAutoContribute,
 } from "../features/queue/jobs/auto-contribute.js";
 import {
-  dispatchSweep,
-  runSweep,
-} from "../features/queue/jobs/transfer-reconciliation.js";
-import {
-  dispatchRewardReconciliation,
-  runRewardReconciliation,
-} from "../features/queue/jobs/reward-reconciliation.js";
+  dispatchReconciliation,
+  runReconciliation,
+} from "../features/queue/jobs/reconciliation.js";
 import { sendSuccess } from "../utils/response.js";
 
 export const jobsRouter = Router();
@@ -48,16 +44,10 @@ jobsRouter.get(
   dispatchAutoContribute,
 );
 jobsRouter.get(
-  "/transfer-reconciliation/dispatch",
+  "/reconciliation/dispatch",
   keepAliveAuthMiddleware,
   rateLimitMiddleware,
-  dispatchSweep,
-);
-jobsRouter.get(
-  "/reward-reconciliation/dispatch",
-  keepAliveAuthMiddleware,
-  rateLimitMiddleware,
-  dispatchRewardReconciliation,
+  dispatchReconciliation,
 );
 
 // Runners process exactly ONE unit each and only trust QStash-signed
@@ -81,16 +71,10 @@ jobsRouter.post(
   runAutoContribute,
 );
 jobsRouter.post(
-  "/transfer-reconciliation/run",
+  "/reconciliation/run",
   express.raw({ type: "application/json" }),
   qstashAuthMiddleware,
-  runSweep,
-);
-jobsRouter.post(
-  "/reward-reconciliation/run",
-  express.raw({ type: "application/json" }),
-  qstashAuthMiddleware,
-  runRewardReconciliation,
+  runReconciliation,
 );
 
 // QStash calls this when a message exhausts its retries. We log loudly so the
